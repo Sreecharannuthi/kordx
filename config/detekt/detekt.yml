@@ -1,0 +1,173 @@
+# KordX detekt configuration — starts from the default rule set
+# and relaxes rules that are too strict for a Compose/Android project.
+# Baseline (config/detekt/baseline.xml) captures pre-existing findings
+# so the build stays green while new code is held to the rules below.
+
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+style:
+  active: true
+  WildcardImport:
+    active: true
+    excludeImports:
+      - "androidx.compose.runtime.*"
+      - "androidx.compose.ui.*"
+      - "kotlinx.coroutines.*"
+  UnusedImports:
+    active: true
+  MagicNumber:
+    active: false # Compose UI uses many literal dp/sp values
+  UnusedPrivateMember:
+    active: true
+    allowedNames: "(_|ignored|expected|serialVersionUID|Companion|CREATOR)"
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+  FunctionOnlyReturningConstant:
+    active: true
+    ignoreAnnotated:
+      - "androidx.compose.runtime.Composable"
+
+  NoTabs:
+    active: true
+  NewLineAtEndOfFile:
+    active: true
+
+  SpacingBetweenPackageAndImports:
+    active: true
+  UnderscoresInNumericLiterals:
+    active: false
+  UseDataClass:
+    active: true
+    ignoreAnnotated:
+      - "javax.persistence.Entity"
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 80
+    ignoreAnnotated:
+      - "androidx.compose.runtime.Composable"
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 10
+    ignoreDefaultParameters: true
+    ignoreAnnotated:
+      - "androidx.compose.runtime.Composable"
+  LargeClass:
+    active: true
+    threshold: 600
+  ComplexCondition:
+    active: true
+    threshold: 4
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 20
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 10
+    ignoreDeprecated: true
+    ignorePrivate: true
+    ignoreOverridden: true
+    ignoreAnnotated:
+      - "androidx.room.Dao"
+  NestedBlockDepth:
+    active: true
+    threshold: 5
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 16
+    ignoreSingleWhenExpression: false
+    ignoreSimpleWhenEntries: false
+    ignoreNestingFunctions: false
+    nestingFunctions:
+      - "also"
+      - "apply"
+      - "let"
+      - "run"
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: true
+    excludes:
+      - "**/test/**"
+      - "**/Test.kt"
+      - "**/Spec.kt"
+    allowedExceptionNameRegex: "_|ignore|expected"
+  TooGenericExceptionThrown:
+    active: true
+  InstanceOfCheckForException:
+    active: true
+
+potential-bugs:
+  active: true
+  EqualsWithHashCodeExist:
+    active: true
+
+  UnsafeCast:
+    active: true
+  UnreachableCode:
+    active: true
+  ExplicitGarbageCollectionCall:
+    active: true
+  IgnoredReturnValue:
+    active: true
+    restrictToConfig: true
+    returnValueAnnotations:
+      - "*.CheckReturnValue"
+      - "*.CheckResult"
+
+performance:
+  active: true
+  SpreadOperator:
+    active: true
+  ForEachOnRange:
+    active: true
+
+naming:
+  active: true
+  ClassNaming:
+    active: true
+    classPattern: "[A-Z][a-zA-Z0-9]*"
+  FunctionNaming:
+    active: true
+    functionPattern: "([a-z][a-zA-Z0-9]*)|(`.*`)"
+    ignoreAnnotated:
+      - "androidx.compose.runtime.Composable"
+      - "org.junit.jupiter.api.Test"
+      - "org.junit.jupiter.params.ParameterizedTest"
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: "[A-Z][A-Za-z0-9]*"
+    propertyPattern: "[A-Za-z][_A-Za-z0-9]*"
+  PackageNaming:
+    active: true
+    packagePattern: "^[a-z]+(\\.[a-z][a-zA-Z0-9]*)*$"
+  InvalidPackageDeclaration:
+    active: true
+    rootPackage: ""
+
+# Rule sets disabled for now — add when the project is ready
+comments:
+  active: false
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+empty-blocks:
+  active: true

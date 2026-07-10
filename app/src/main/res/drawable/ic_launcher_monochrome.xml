@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200"
+    android:tint="?attr/colorControlNormal">
+  <!--  — Updated KordX "K" logo (monochrome variant).
+       Same geometry as the new ic_launcher_foreground.xml but without
+       hard-coded colors — the system applies the theme color via the
+       `<adaptive-icon>` monochrome layer on Android 13+.
+
+       Mirrors `ic_launcher_foreground.xml` geometry exactly so the
+       two variants are visually identical apart from theming. -->
+  <!-- K shape + accent block — scaled to 70% around viewport center (100,100) -->
+  <group
+      android:pivotX="100"
+      android:pivotY="100"
+      android:scaleX="0.7"
+      android:scaleY="0.7">
+    <!-- K shape — three strokes, vertex at (60, 100) -->
+    <path
+        android:pathData="M60,50L60,150M60,100L140,50L140,150Z"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+    <!-- KordX accent block — 10×30dp rounded rectangle at (85,85) -->
+    <path
+        android:pathData="M90,85L95,85Q100,85 100,90L100,115Q100,120 95,120L85,120Q80,120 80,115L80,90Q80,85 85,85Z"/>
+  </group>
+</vector>

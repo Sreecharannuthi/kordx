@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>MaxLineLength:RecentPlay.kt$RecentPlay$/** Persistent record that the user has played a song. — drives the "Recently played" root tab in Android Auto / AAOS. The primary key is the song id so re-playing a song is a single `OnConflictStrategy.REPLACE` insert that updates the `playedAt` timestamp (no duplicate rows, no need for an explicit "has it been played before?" check). Schema: identical shape to [SongFavorite] (`songId: String`, `playedAt: Long`) but a different table (`recent_plays`) and a different semantics ("this song was just played" vs "this song is favorited"). Both entities live in `:infra` `CacheDatabase` and are capped / queried by separate repositories. The DAO is [com.android.rockages.kordx.infra.database.store.RecentPlaysStore]. Kept in `:core` (alongside the rest of the groove data models) so both `:infra` (Room) and `:app` (RadioSession play-history hook, KordXMediaBrowserService recently-played tab) can depend on it without circular module wiring. */</ID>
+    <ID>MaxLineLength:SongFavorite.kt$SongFavorite$/** Persistent flag for a song the user has favorited. — drives the "Add to favorites" / "Remove from favorites" custom action on the Android Auto Now Playing card. The primary key is the song id so toggling is a single insert or delete and a single `exists` query answers the state. Kept in `:core` (alongside the rest of the groove data models) so both `:infra` (Room) and `:app` (RadioSession custom action) can depend on it without circular module wiring. */</ID>
+    <ID>NewLineAtEndOfFile:DocumentFileX.kt$com.android.rockages.kordx.core.utils.DocumentFileX.kt</ID>
+    <ID>NewLineAtEndOfFile:TimedContent.kt$com.android.rockages.kordx.core.utils.TimedContent.kt</ID>
+    <ID>SpreadOperator:SimplePath.kt$SimplePath$(*subParts)</ID>
+    <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$name' already exists")</ID>
+    <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$x' is not a folder")</ID>
+  </CurrentIssues>
+</SmellBaseline>

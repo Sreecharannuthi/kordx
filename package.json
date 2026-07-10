@@ -1,0 +1,11 @@
+{
+    "name": "@kordx/cli",
+    "version": "0.0.0",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Sreecharannuthi/kordx.git"
+    },
+    "author": "KordX Contributors",
+    "license": "AGPL-3.0"
+}
