@@ -1,6 +1,9 @@
 # KordX CI — runs on every push to main and every PR.
-# Validates: build, JVM unit tests, lint, detekt.
-# Instrumentation tests (androidTest) require an emulator and are deferred
+# Validates: build (debug + release, all 4 modules), JVM unit tests,
+# lint (debug + release), detekt.
+# Instrumentation tests (androidTest) require an emulator and are
+# deferred to a future workflow (see CONTRIBUTING.md "Reporting issues"
+# for how to run them locally).
 
 name: CI
 
@@ -10,13 +13,19 @@ on:
   pull_request:
     branches: [main]
 
+# Least-privilege GITHUB_TOKEN: only read repo contents. No write,
+# no packages, no deployments. (Override per-step if a future job
+# needs to push a release artifact.)
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
@@ -29,6 +38,12 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
@@ -38,16 +53,36 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          # Cache Gradle dependencies between runs. Saves 1-2 min per
+          # build. The cache key is derived from the wrapper + the
+          # version catalog, so a `libs.versions.toml` bump invalidates.
+          cache-read-only: ${{ github.event_name == 'pull_request' && github.head_ref != 'main' }}
 
-      - name: Build
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Generate i18n
+        run: |
+          npm ci
+          npx phrasey build -p ./.phrasey/config.toml -f toml
+
+      - name: Build (debug, all 4 modules)
+        run: ./gradlew :app:assembleDebug :core:assembleDebug :infra:assembleDebug :metaphony:assembleDebug --no-daemon --stacktrace
+
+      - name: Build (release, app)
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
 
       - name: JVM unit tests
         run: ./gradlew :app:testDebugUnitTest :metaphony:testDebugUnitTest --no-daemon --stacktrace
 
-      - name: Static analysis (lint + detekt)
-        run: ./gradlew :app:lintDebug detekt --no-daemon --stacktrace
+      - name: Static analysis (lint debug + release + detekt)
+        run: ./gradlew :app:lintDebug :app:lintRelease detekt --no-daemon --stacktrace
 
-      # Coverage (koverXmlReport + Codecov) skipped — kover 0.8.3 bug #810
-      # reports 0% for classes under com.android.* (our package).
-      # Re-enable after upgrading to kover >= 0.9.x with the fix.
+      # Coverage (koverXmlReport + Codecov) is intentionally NOT run here.
+      # kover 0.8.3's bundled IntelliJ agent hard-codes an exclude of
+      # `com.android.*` (kotlinx-kover issue #810); KordX's production
+      # code lives under `com.android.rockages.kordx.*` and is silently
+      # filtered out, so the report would show 0% for every KordX
+      # class — a misleading signal. Re-enable once we upgrade to a
+      # kover version where the upstream fix is verified. The
+      # `./gradlew koverHtmlReport` task still works locally; the
+      # HTML report renders the class list correctly and just shows
+      # 0% line coverage.

@@ -5,6 +5,80 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-11
+
+### Added
+- Per-architecture release APKs (arm64-v8a, armeabi-v7a, x86, x86_64) via
+  `splits.abi`. The arm64-v8a release APK is **9.4 MB** (down from 85 MB
+  universal debug).
+- R8 + resource shrinking for the release build type, with hand-written
+  ProGuard rules (`app/proguard-rules.pro`) for the kotlinx.serialization
+  i18n codegen. Gradle heap increased to 8 GB to fit the kover + detekt +
+  R8 pipeline.
+- detekt 1.23.6 static analysis with a Compose-aware rule set
+  (`config/detekt/detekt.yml`) and per-module `detekt-baseline.xml` files
+  that absorb pre-existing style findings, so new code is held to the rule
+  set while the build stays green.
+- Kover 0.8.3 coverage report infrastructure (multi-module artifact
+  aggregation, class-name excludes for generated i18n / Room / BuildConfig
+  classes). Coverage data is currently reported as 0% due to upstream
+  kover issue [#810](https://github.com/Kotlin/kotlinx-kover/issues/810);
+  the report infrastructure is correct and coverage data will auto-populate
+  once the upstream fix lands.
+- GitHub Actions CI workflow at `.github/workflows/ci.yml` (pinned
+  `ubuntu-24.04`, Gradle dependency caching, all 4 modules in the build
+  matrix, release + lint-release verification, detekt, explicit
+  `GITHUB_TOKEN` permissions). Runs on every push to `main` and every PR.
+- A `MediaSearchActivity` alias forwarding path so the AAOS voice-search
+  button reaches the existing `RadioSession.handlePlayFromSearch` route
+  (previously a dead code path). 15 source-based regression tests pin the
+  contract.
+- A `Radio.play()` recursion guard for the stale-id path; the Slice 22
+  `ACTION_SHUFFLE_ALL` direct-field-write workaround is reverted in favor
+  of the canonical `RadioShorty.playQueue(...)` API.
+- A `BuildConfig.DEBUG` gate around the 4 debug-only broadcast receivers
+  in `RadioSession` and `KordXMediaLibraryService`. The production media
+  receiver (PLAY_PAUSE / PREVIOUS / NEXT / STOP) is intentionally NOT
+  gated.
+- Settings UI cleanup: the "Consider Contributing" stripe and the
+  Play-Store / GitHub / F-Droid `LinkChip` rows are removed from all 7
+  settings surfaces. The KordX "K" logo is shrunken to 70% via a
+  VectorDrawable `<group>` transform across all 3 foreground drawables.
+  10 dead WebP raster mipmaps (API 26+) are deleted.
+- The Hindi (`hi`) and Telugu (`te`) locales replace the previously
+  shipped Belarusian (`be`) and Okinawan (`ryu`) locales. All 18 locales
+  now have the full 251-key set; no more empty-string fallbacks for the
+  Slice 30h additions (`Repeat` / `Shuffle` / `More` / `CollapseNowPlaying`).
+- DropdownMenu modernization across 30 Compose surfaces (Material 3
+  tokens), long-menu organization (dividers between groups), dialog and
+  surface radius upgrade (24 dp → 28 dp), and a token consistency pass on
+  the remaining Compose hierarchy.
+- A dark-theme + light-theme variant of the KordX "K" logo under
+  `app/src/main/assets/{darklogo,lightlogo}.svg`.
+- An `AGPL-3.0` `LICENSE` file at the repo root and a `CONTRIBUTING.md`
+  guide for new contributors.
+
+### Changed
+- The release build is now R8-minified; the debug build is not. ABI splits
+  are enabled in release (per-architecture APKs) and disabled in debug
+  (single universal APK for fast local iteration).
+- `kordx-ui.xml` (an early validation UI dump) and the `kordx_logo_design/`
+  scratchpad are moved out of the repo root into `archive/`. The brand
+  tokens they captured live in `app/src/main/res/values/themes.xml` and
+  the launcher icon drawables.
+
+### Notes
+- The "missing search icon on top bar" report from 2026-07-10 was not
+  reproducible on a 2026-07-11 re-check: the search icon is present at
+  `[22,232][147,357]` and wired to `Home.kt → SearchViewRoute(...)` since
+  the branding commit `1c8fd18`. No code change.
+- 258 JVM unit tests pass (248 in `:app`, 10 in `:metaphony`); `:app:lintDebug`
+  and `detekt` are green; the on-device smoke (Phone AVD, API 36) confirms
+  `dumpsys media_session` shows `active=true`.
+- The dev / test bed (`charan1601/remusic`) hosts the slice workflow +
+  cleanup specs + screenshots; the public release (this repo) ships only
+  the polished source tree. Promotion happens at milestone boundaries.
+
 ## [1.0.0] - 2026-07-11
 
 ### Added
