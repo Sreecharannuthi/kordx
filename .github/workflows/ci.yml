@@ -4,6 +4,13 @@
 # Instrumentation tests (androidTest) require an emulator and are
 # deferred to a future workflow (see CONTRIBUTING.md "Reporting issues"
 # for how to run them locally).
+#
+# i18n: the translated JSON assets under `app/src/main/assets/i18n/`
+# are committed to this repository and are NOT regenerated on CI.
+# The i18n build toolchain (Phrasey + the .phrasey/ config + npm
+# scripts) lives in the dev test bed (`charan1601/remusic`) and is
+# invoked by the maintainer before each public release. See
+# CONTRIBUTING.md → "Internationalization" for the contribution flow.
 
 name: CI
 
@@ -38,12 +45,6 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
@@ -58,11 +59,6 @@ jobs:
           # build. The cache key is derived from the wrapper + the
           # version catalog, so a `libs.versions.toml` bump invalidates.
           cache-read-only: ${{ github.event_name == 'pull_request' && github.head_ref != 'main' }}
-
-      - name: Generate i18n
-        run: |
-          npm ci
-          npx phrasey build -p ./.phrasey/config.toml -f toml
 
       - name: Build (debug, all 4 modules)
         run: ./gradlew :app:assembleDebug :core:assembleDebug :infra:assembleDebug :metaphony:assembleDebug --no-daemon --stacktrace
