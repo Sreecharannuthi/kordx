@@ -60,6 +60,13 @@ jobs:
           # version catalog, so a `libs.versions.toml` bump invalidates.
           cache-read-only: ${{ github.event_name == 'pull_request' && github.head_ref != 'main' }}
 
+      - name: Ensure gradlew is executable
+        # Workaround for `gradlew: Permission denied` on the CI runner
+        # (the executable bit can be lost when the file is touched by
+        # a Windows host or by git on a non-POSIX clone). Cheap and
+        # idempotent; runs in <10ms.
+        run: chmod +x ./gradlew
+
       - name: Build (debug, all 4 modules)
         run: ./gradlew :app:assembleDebug :core:assembleDebug :infra:assembleDebug :metaphony:assembleDebug --no-daemon --stacktrace
 
