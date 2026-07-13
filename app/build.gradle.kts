@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.app)
     alias(libs.plugins.android.kotlin)
@@ -16,16 +18,48 @@ android {
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
 
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = 2
+        versionName = "1.1.0"
 
         vectorDrawables {
             useSupportLibrary = true
         }
     }
 
+    signingConfigs {
+        create("release") {
+            // Reads from `app/keystore.properties` (gitignored) when present.
+            // The release workflow generates the file from GitHub Secrets
+            // at build time; local release builds can drop in a real
+            // keystore.properties. When the file is absent, all fields
+            // stay null and the release build type falls back to debug
+            // signing (see buildTypes.release below).
+            val keystorePropertiesFile = rootProject.file("app/keystore.properties")
+            if (keystorePropertiesFile.exists()) {
+                val keystoreProperties = Properties().apply {
+                    load(keystorePropertiesFile.inputStream())
+                }
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // Use the release signing config if `app/keystore.properties`
+            // is present (CI release workflow always provides it from
+            // GitHub Secrets; local release builds with a real keystore
+            // also take this branch). Otherwise fall back to debug
+            // signing so the local dev loop can still produce a
+            // runnable (but unsigned-for-prod) release APK.
+            signingConfig = if (rootProject.file("app/keystore.properties").exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -42,7 +76,11 @@ android {
     splits {
         abi {
             isEnable = true
-            isUniversalApk = false
+            // 1 universal APK + 4 ABI splits = 5 release APKs per build.
+            // The universal APK is the right one for F-Droid and manual
+            // sideloads; the ABI splits are the smallest possible
+            // download for a given device.
+            isUniversalApk = true
             reset()
             include("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
         }

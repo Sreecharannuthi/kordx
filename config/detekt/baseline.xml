@@ -1,0 +1,153 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:AppearanceSettingsView.kt$fun PrimaryThemeColor.label(context: ViewContext)</ID>
+    <ID>CyclomaticComplexMethod:Base.kt$private inline fun &lt;reified T : Any&gt; NavGraphBuilder.baseComposable( noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -&gt; Unit), )</ID>
+    <ID>CyclomaticComplexMethod:BottomBar.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun NowPlayingBodyBottomBar( context: ViewContext, data: NowPlayingData, states: NowPlayingStates, )</ID>
+    <ID>CyclomaticComplexMethod:DebugReceiversRegistrationTest.kt$DebugReceiversRegistrationTest$private fun registrationIsDebugGuarded(source: String, needle: String): Boolean</ID>
+    <ID>CyclomaticComplexMethod:FloatInputTile.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun SettingsFloatInputTile( context: ViewContext, icon: @Composable () -&gt; Unit, title: @Composable () -&gt; Unit, value: Float, presets: List&lt;Float&gt; = listOf(), labelText: ((Float) -&gt; String) = { it.toString() }, onReset: (() -&gt; Unit)? = null, onChange: (Float) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:Home.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun HomeView(context: ViewContext)</ID>
+    <ID>CyclomaticComplexMethod:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
+    <ID>CyclomaticComplexMethod:PlaylistTile.kt$@Composable fun PlaylistDropdownMenu( context: ViewContext, playlist: Playlist, expanded: Boolean, onSongsChanged: (() -&gt; Unit) = {}, onRename: (() -&gt; Unit) = {}, onDelete: (() -&gt; Unit) = {}, onDismissRequest: () -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:RadioSession.kt$RadioSession$fun handlePlayFromMediaId(mediaId: String?, autostart: Boolean = true)</ID>
+    <ID>CyclomaticComplexMethod:RadioSession.kt$RadioSession$fun start()</ID>
+    <ID>CyclomaticComplexMethod:RadioSession.kt$RadioSession$private fun playbackErrorCodeName(code: Int): String</ID>
+    <ID>CyclomaticComplexMethod:Search.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SearchView(context: ViewContext, route: SearchViewRoute)</ID>
+    <ID>CyclomaticComplexMethod:SongInformationDialog.kt$@Composable fun SongInformationDialog(context: ViewContext, song: Song, onDismissRequest: () -&gt; Unit)</ID>
+    <ID>ForEachOnRange:ForYou.kt$0..2</ID>
+    <ID>ForEachOnRange:ForYou.kt$3..5</ID>
+    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XChannels(x: String): String</ID>
+    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XKHz(x: String): String</ID>
+    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XKbps(x: String): String</ID>
+    <ID>FunctionOnlyReturningConstant:Media3ItemFactory.kt$Media3ItemFactory$fun descriptionForGenre(genre: Genre): String</ID>
+    <ID>LargeClass:KordXMediaLibraryService.kt$KordXMediaLibraryService$BrowseTreeCallback : Callback</ID>
+    <ID>LongMethod:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
+    <ID>LongMethod:RadioSession.kt$RadioSession$fun start()</ID>
+    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$</ID>
+    <ID>MaxLineLength:ColorSchemeVisibilityTest.kt$ColorSchemeVisibilityTest$</ID>
+    <ID>MaxLineLength:CustomBrowseActionTest.kt$CustomBrowseActionTest$</ID>
+    <ID>MaxLineLength:DebugReceiversRegistrationTest.kt$DebugReceiversRegistrationTest$</ID>
+    <ID>MaxLineLength:ForYou.kt$</ID>
+    <ID>MaxLineLength:ForYouTextLabelsTest.kt$ForYouTextLabelsTest$</ID>
+    <ID>MaxLineLength:GrooveModelExtensions.kt$</ID>
+    <ID>MaxLineLength:IconRefinementTest.kt$IconRefinementTest$</ID>
+    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$</ID>
+    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$</ID>
+    <ID>MaxLineLength:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$</ID>
+    <ID>MaxLineLength:KordXMediaSessionConstants.kt$KordXMediaSessionConstants$</ID>
+    <ID>MaxLineLength:KordXSearch.kt$KordXSearch$</ID>
+    <ID>MaxLineLength:MainActivity.kt$MainActivity$</ID>
+    <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$</ID>
+    <ID>MaxLineLength:Media3ItemFactory.kt$Media3ItemFactory$</ID>
+    <ID>MaxLineLength:Media3ItemFactoryTest.kt$Media3ItemFactoryTest$</ID>
+    <ID>MaxLineLength:MediaExposer.kt$MediaExposer$</ID>
+    <ID>MaxLineLength:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$</ID>
+    <ID>MaxLineLength:PoppinsFontAliasTest.kt$PoppinsFontAliasTest$</ID>
+    <ID>MaxLineLength:Radio.kt$Radio$</ID>
+    <ID>MaxLineLength:RadioAdapterTarget.kt$RadioAdapterTarget$</ID>
+    <ID>MaxLineLength:RadioForwardingPlayer.kt$</ID>
+    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$</ID>
+    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer.Companion$</ID>
+    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioTimeline$</ID>
+    <ID>MaxLineLength:RadioForwardingPlayerTest.kt$RadioForwardingPlayerTest$</ID>
+    <ID>MaxLineLength:RadioPlayRecursionTest.kt$RadioPlayRecursionTest$</ID>
+    <ID>MaxLineLength:RadioQueue.kt$RadioQueue$</ID>
+    <ID>MaxLineLength:RadioQueueLoopShufflePersistenceTest.kt$RadioQueueLoopShufflePersistenceTest$</ID>
+    <ID>MaxLineLength:RadioSession.kt$RadioSession$</ID>
+    <ID>MaxLineLength:RadioSessionState.kt$RadioSessionState$</ID>
+    <ID>MaxLineLength:RadioSessionStateTest.kt$RadioSessionStateTest$</ID>
+    <ID>MaxLineLength:RecentPlaysCache.kt$RecentPlaysCache$</ID>
+    <ID>MaxLineLength:RecentPlaysCacheTest.kt$RecentPlaysCacheTest$</ID>
+    <ID>MaxLineLength:RecentPlaysRepository.kt$RecentPlaysRepository$</ID>
+    <ID>MaxLineLength:SamplingInfoStringTest.kt$SamplingInfoStringTest$</ID>
+    <ID>MaxLineLength:SongFavoritesRepository.kt$SongFavoritesRepository$</ID>
+    <ID>MaxLineLength:SongParser.kt$SongParser$</ID>
+    <ID>MaxLineLength:Songs.kt$</ID>
+    <ID>MaxLineLength:Theme.kt$</ID>
+    <ID>MaxLineLength:Translation.kt$Translation.Companion$</ID>
+    <ID>MaxLineLength:TranslationLoaderTest.kt$TranslationLoaderTest$</ID>
+    <ID>MaxLineLength:Typography.kt$KordXBuiltinFonts$</ID>
+    <ID>NestedBlockDepth:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$private fun findOpeningBrace(source: String, fromIndex: Int): Int</ID>
+    <ID>NewLineAtEndOfFile:Album.kt$com.android.rockages.kordx.ui.view.Album.kt</ID>
+    <ID>NewLineAtEndOfFile:BrandIdentityTest.kt$com.android.rockages.kordx.BrandIdentityTest.kt</ID>
+    <ID>NewLineAtEndOfFile:ConsiderContributingTile.kt$com.android.rockages.kordx.ui.components.settings.ConsiderContributingTile.kt</ID>
+    <ID>NewLineAtEndOfFile:HomePageSettingsView.kt$com.android.rockages.kordx.ui.view.settings.HomePageSettingsView.kt</ID>
+    <ID>NewLineAtEndOfFile:NewPlaylistDialog.kt$com.android.rockages.kordx.ui.components.NewPlaylistDialog.kt</ID>
+    <ID>NewLineAtEndOfFile:Slider.kt$com.android.rockages.kordx.ui.components.Slider.kt</ID>
+    <ID>NewLineAtEndOfFile:Translation.g.kt$com.android.rockages.kordx.services.i18n.Translation.g.kt</ID>
+    <ID>NewLineAtEndOfFile:TranslationLoaderTest.kt$com.android.rockages.kordx.services.i18n.TranslationLoaderTest.kt</ID>
+    <ID>NewLineAtEndOfFile:Translations.g.kt$com.android.rockages.kordx.services.i18n.Translations.g.kt</ID>
+    <ID>SpacingBetweenPackageAndImports:BodyContent.kt$ </ID>
+    <ID>SpacingBetweenPackageAndImports:MediaExposer.kt$ </ID>
+    <ID>SpacingBetweenPackageAndImports:PlaylistRepository.kt$ </ID>
+    <ID>SpacingBetweenPackageAndImports:RadioArtworkCacher.kt$ </ID>
+    <ID>SpacingBetweenPackageAndImports:RadioNotification.kt$ </ID>
+    <ID>SpreadOperator:Home.kt$(*tabs.toTypedArray(), *HomePage.entries.toTypedArray())</ID>
+    <ID>SpreadOperator:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$(methodName, *methodArgTypes(methodName))</ID>
+    <ID>SpreadOperator:MultiTextOptionTile.kt$(*values.toTypedArray())</ID>
+    <ID>SpreadOperator:NewPlaylistDialog.kt$(*initialSongIds.toTypedArray())</ID>
+    <ID>SpreadOperator:SongTreeList.kt$(*pairs.toTypedArray())</ID>
+    <ID>SpreadOperator:Translation.kt$Translation.Companion$(*args)</ID>
+    <ID>TooGenericExceptionCaught:BottomBar.kt$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:MediaExposer.kt$MediaExposer$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:PlaylistRepository.kt$PlaylistRepository$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:PlaylistTile.kt$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:Playlists.kt$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:Radio.kt$Radio$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioNotification.kt$RadioNotification$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioPlayer.kt$RadioPlayer$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioSession.kt$RadioSession$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioSession.kt$RadioSession$skipErr: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioSession.kt$RadioSession$stateErr: Exception</ID>
+    <ID>TooGenericExceptionCaught:SongCard.kt$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:SongParser.kt$SongParser$err: Exception</ID>
+    <ID>TooGenericExceptionCaught:SongRepository.kt$SongRepository$err: Exception</ID>
+    <ID>TooManyFunctions:Media3ItemFactory.kt$Media3ItemFactory</ID>
+    <ID>TooManyFunctions:Media3ItemFactoryTest.kt$Media3ItemFactoryTest</ID>
+    <ID>TooManyFunctions:PlaylistRepository.kt$PlaylistRepository</ID>
+    <ID>TooManyFunctions:RadioForwardingPlayerTest.kt$RadioForwardingPlayerTest</ID>
+    <ID>TooManyFunctions:RadioSessionStateTest.kt$RadioSessionStateTest</ID>
+    <ID>TooManyFunctions:Translation.g.kt$_Translation</ID>
+    <ID>UnusedImports:ColorSchemeVisibilityTest.kt$import androidx.compose.material3.ColorScheme</ID>
+    <ID>UnusedImports:ColorSchemeVisibilityTest.kt$import org.junit.jupiter.api.Assertions.assertNotEquals</ID>
+    <ID>UnusedImports:ForYou.kt$import androidx.compose.material3.Card</ID>
+    <ID>UnusedImports:IconRefinementTest.kt$import org.junit.jupiter.api.Assertions.assertEquals</ID>
+    <ID>UnusedImports:IconRefinementTest.kt$import org.junit.jupiter.api.Assertions.assertNotNull</ID>
+    <ID>UnusedImports:Media3ItemFactoryTest.kt$import androidx.media3.common.MediaItem</ID>
+    <ID>UnusedImports:MediaExposer.kt$import kotlinx.coroutines.withContext</ID>
+    <ID>UnusedImports:PackageConsistencyTest.kt$import org.junit.jupiter.api.Assertions.assertEquals</ID>
+    <ID>UnusedImports:Playlists.kt$import com.android.rockages.kordx.core.groove.Playlist</ID>
+    <ID>UnusedImports:RadioForwardingPlayerTest.kt$import org.junit.jupiter.api.Assertions.assertSame</ID>
+    <ID>UnusedImports:RadioQueueLoopShufflePersistenceTest.kt$import org.junit.jupiter.api.Assertions.assertEquals</ID>
+    <ID>UseDataClass:Typography.kt$KordXFont</ID>
+    <ID>WildcardImport:AddToPlaylistDialog.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:Album.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:AlbumArtist.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:AlbumArtistTile.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:AlbumTile.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:Artist.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:ArtistTile.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:BodyCover.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:ForYou.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:Genre.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:IconTextBody.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:NowPlayingBottomBar.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:Playlist.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:PlaylistTile.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:Search.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:SimpleTile.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:SongCard.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>WildcardImport:SongTreeList.kt$import com.android.rockages.kordx.services.groove.*</ID>
+    <ID>MaxLineLength:RecentPlay.kt$RecentPlay$/** Persistent record that the user has played a song. — drives the "Recently played" root tab in Android Auto / AAOS. The primary key is the song id so re-playing a song is a single `OnConflictStrategy.REPLACE` insert that updates the `playedAt` timestamp (no duplicate rows, no need for an explicit "has it been played before?" check). Schema: identical shape to [SongFavorite] (`songId: String`, `playedAt: Long`) but a different table (`recent_plays`) and a different semantics ("this song was just played" vs "this song is favorited"). Both entities live in `:infra` `CacheDatabase` and are capped / queried by separate repositories. The DAO is [com.android.rockages.kordx.infra.database.store.RecentPlaysStore]. Kept in `:core` (alongside the rest of the groove data models) so both `:infra` (Room) and `:app` (RadioSession play-history hook, KordXMediaBrowserService recently-played tab) can depend on it without circular module wiring. */</ID>
+    <ID>MaxLineLength:SongFavorite.kt$SongFavorite$/** Persistent flag for a song the user has favorited. — drives the "Add to favorites" / "Remove from favorites" custom action on the Android Auto Now Playing card. The primary key is the song id so toggling is a single insert or delete and a single `exists` query answers the state. Kept in `:core` (alongside the rest of the groove data models) so both `:infra` (Room) and `:app` (RadioSession custom action) can depend on it without circular module wiring. */</ID>
+    <ID>NewLineAtEndOfFile:DocumentFileX.kt$com.android.rockages.kordx.core.utils.DocumentFileX.kt</ID>
+    <ID>NewLineAtEndOfFile:TimedContent.kt$com.android.rockages.kordx.core.utils.TimedContent.kt</ID>
+    <ID>SpreadOperator:SimplePath.kt$SimplePath$(*subParts)</ID>
+    <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$name' already exists")</ID>
+    <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$x' is not a folder")</ID>
+    <ID>NewLineAtEndOfFile:SQLiteKeyValueDatabaseAdapter.kt$com.android.rockages.kordx.infra.database.adapters.SQLiteKeyValueDatabaseAdapter.kt</ID>
+    <ID>MaxLineLength:AudioMetadataParserTest.kt$AudioMetadataParserTest$// `ORIGINALDATE` is the originalrelease date (e.g. for; rereleases). Taglib maps the `TDOR` (ID3v2.4) and `TORY`; (ID3v2.3) frames to this key.</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -78,4 +78,19 @@ class UpdateRemovalTest {
         assertTrue(AppMeta.githubRepositoryOwner == "Sreecharannuthi", "githubRepositoryOwner must be correct")
         assertTrue(AppMeta.githubRepositoryName == "kordx", "githubRepositoryName must be correct")
     }
+
+    @Test
+    fun appMetaHasNoStaleSymphonyReferences() {
+        val fields = AppMeta::class.java.declaredFields
+        for (field in fields) {
+            field.isAccessible = true
+            val value = field.get(AppMeta)
+            if (value is String) {
+                assertFalse(
+                    value.lowercase().contains("symphony"),
+                    "AppMeta field ${field.name} must not contain 'symphony': $value"
+                )
+            }
+        }
+    }
 }

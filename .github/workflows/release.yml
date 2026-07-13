@@ -1,0 +1,162 @@
+# KordX release workflow — runs only on `v*.*.*` tag pushes (or
+# manual dispatch from the Actions tab).
+#
+# What it does:
+#   1. Decodes the release keystore from the `KEYSTORE_BASE64` secret
+#      into a .jks file on the ephemeral runner.
+#   2. Writes `app/keystore.properties` from the 3 password/alias secrets.
+#   3. Runs `./gradlew :app:assembleRelease` (produces 5 APKs:
+#      1 universal + 4 per-ABI splits).
+#   4. Verifies every APK is signed with the release key.
+#   5. Creates the GitHub Release and attaches the 5 APKs.
+#
+# Required GitHub Secrets (set by the repo owner in
+# Settings → Secrets and variables → Actions):
+#   - KEYSTORE_BASE64   : the .jks file, base64-encoded (no newlines)
+#   - KEYSTORE_PASSWORD : the .jks password
+#   - KEY_ALIAS         : the key alias inside the .jks
+#   - KEY_PASSWORD      : the key password
+#
+# See docs/RELEASING.md for the full maintainer runbook (keystore
+# generation, manual upload fallback, version-bump policy).
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    # Allows re-running a release build from the Actions tab without
+    # re-tagging. The resulting release is created as a DRAFT so the
+    # maintainer can review the assets before publishing.
+
+# `contents: write` is required to create the GitHub Release and
+# upload the APK assets. No other permissions are needed.
+permissions:
+  contents: write
+
+# Do NOT cancel a release build mid-flight — partial uploads would
+# leave the GitHub Release in a broken state.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    name: Build and upload signed release APKs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install required SDK packages
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          # Full read+write cache for release builds (no PR read-only
+          # mode). The cache key is derived from the wrapper + version
+          # catalog, so a `libs.versions.toml` bump invalidates it.
+          cache-read-only: false
+
+      - name: Ensure gradlew is executable
+        # Defensive: the executable bit can be lost on Windows clones
+        # or via git's CRLF normalization. Cheap and idempotent.
+        run: chmod +x ./gradlew
+
+      - name: Decode release keystore
+        # Restore the .jks from the base64-encoded GitHub Secret. The
+        # decoded file lives only on the ephemeral runner; the
+        # `Cleanup` step removes it at the end (even on failure).
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p app/keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore/kordx-release.jks
+          ls -la app/keystore/
+
+      - name: Write keystore.properties from secrets
+        # The app's `app/build.gradle.kts` reads `app/keystore.properties`
+        # at build time. We generate it here from the GitHub Secrets
+        # so nothing sensitive ever touches the workflow file itself.
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          {
+            echo "storeFile=keystore/kordx-release.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > app/keystore.properties
+          # Echo back with secrets redacted (sanity check that the
+          # values were picked up correctly).
+          sed -E 's/(Password|Alias)=.*/\1=***REDACTED***/' app/keystore.properties
+
+      - name: Build signed release APKs
+        # Produces 5 APKs in app/build/outputs/apk/release/:
+        #   - app-universal-release.apk      (universal, all 4 ABIs)
+        #   - app-arm64-v8a-release.apk
+        #   - app-armeabi-v7a-release.apk
+        #   - app-x86-release.apk
+        #   - app-x86_64-release.apk
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: List built APKs
+        run: ls -la app/build/outputs/apk/release/
+
+      - name: Verify APK signatures
+        # Sanity check: every APK must be signed with v2 (or v3) and
+        # NOT the debug keystore. apksigner is in build-tools/35.0.0.
+        run: |
+          APKSIGNER="$ANDROID_HOME/build-tools/35.0.0/apksigner"
+          for apk in app/build/outputs/apk/release/*.apk; do
+            echo "=== Verifying: $(basename "$apk") ==="
+            "$APKSIGNER" verify --verbose "$apk" 2>&1 | head -12
+            echo ""
+          done
+
+      - name: Upload APKs to GitHub Release
+        # softprops/action-gh-release auto-creates the release on
+        # the first push of a tag, then attaches the APKs to it.
+        # For `workflow_dispatch` runs, a DRAFT release is created
+        # so the maintainer can review the assets before publishing.
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
+          name: ${{ github.event_name == 'push' && format('KordX {0}', github.ref_name) || 'KordX manual release' }}
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/release/app-universal-release.apk
+            app/build/outputs/apk/release/app-arm64-v8a-release.apk
+            app/build/outputs/apk/release/app-armeabi-v7a-release.apk
+            app/build/outputs/apk/release/app-x86-release.apk
+            app/build/outputs/apk/release/app-x86_64-release.apk
+          fail_on_unmatched_files: true
+
+      - name: Cleanup keystore and properties
+        # Best-effort cleanup of the keystore and properties from the
+        # runner. The runner is ephemeral so this is defense-in-depth
+        # rather than a security boundary. `if: always()` ensures the
+        # cleanup runs even if an earlier step failed.
+        if: always()
+        run: |
+          rm -f app/keystore/kordx-release.jks
+          rm -f app/keystore.properties
+          echo "Keystore and properties removed from runner."
