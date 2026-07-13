@@ -131,17 +131,51 @@ jobs:
             echo ""
           done
 
+      - name: Extract release notes from CHANGELOG
+        # For tag pushes (v*.*.*), pull the matching `## [x.y.z]`
+        # section out of CHANGELOG.md so the GitHub Release page
+        # surfaces the rich per-version notes (the generic
+        # `generate_release_notes` output is too sparse for our
+        # 3.5 KB-per-version CHANGELOG entries). For `workflow_dispatch`
+        # runs we skip this step and fall back to the auto-generated
+        # notes — there's no version to match against yet.
+        if: github.ref_type == 'tag'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v ver="$VERSION" '
+            BEGIN { header_seen = 0 }
+            /^## \[/ {
+              if (header_seen) exit
+              if (index($0, "[" ver "]") > 0) { header_seen = 1 }
+            }
+            header_seen { print }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "::warning::No CHANGELOG section matched version ${VERSION}; falling back to auto-generated notes."
+          fi
+          echo "--- release_notes.md (first 5 lines) ---"
+          head -n 5 release_notes.md || true
+
       - name: Upload APKs to GitHub Release
         # softprops/action-gh-release auto-creates the release on
         # the first push of a tag, then attaches the APKs to it.
-        # For `workflow_dispatch` runs, a DRAFT release is created
-        # so the maintainer can review the assets before publishing.
-        uses: softprops/action-gh-release@v2
+        #
+        # Tag handling:
+        #   - On a `v*.*.*` tag push, the release is attached to
+        #     that tag and published immediately.
+        #   - On `workflow_dispatch`, tag_name is left empty so the
+        #     action creates a DRAFT release identified by the commit
+        #     SHA, WITHOUT creating a synthetic "manual-<run_id>" tag
+        #     in the tag list. The maintainer reviews the draft and
+        #     either publishes it as-is or promotes it to a real
+        #     version by tagging and pushing the commit.
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('manual-{0}', github.run_id) }}
-          name: ${{ github.event_name == 'push' && format('KordX {0}', github.ref_name) || 'KordX manual release' }}
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          name: ${{ github.event_name == 'push' && format('KordX {0}', github.ref_name) || 'KordX manual build' }}
           draft: ${{ github.event_name == 'workflow_dispatch' }}
-          generate_release_notes: true
+          generate_release_notes: ${{ github.ref_type != 'tag' }}
+          body_path: ${{ github.ref_type == 'tag' && 'release_notes.md' || '' }}
           files: |
             app/build/outputs/apk/release/app-universal-release.apk
             app/build/outputs/apk/release/app-arm64-v8a-release.apk
