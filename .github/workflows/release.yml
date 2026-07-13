@@ -85,9 +85,9 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          mkdir -p app/keystore
-          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore/kordx-release.jks
-          ls -la app/keystore/
+          mkdir -p keystore
+          echo "$KEYSTORE_BASE64" | base64 --decode > keystore/kordx-release.jks
+          ls -la keystore/
 
       - name: Write keystore.properties from secrets
         # The app's `app/build.gradle.kts` reads `app/keystore.properties`
@@ -157,6 +157,6 @@ jobs:
         # cleanup runs even if an earlier step failed.
         if: always()
         run: |
-          rm -f app/keystore/kordx-release.jks
+          rm -f keystore/kordx-release.jks
           rm -f app/keystore.properties
           echo "Keystore and properties removed from runner."
