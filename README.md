@@ -30,9 +30,9 @@ for playback.
 
 ## Screenshots
 
-> Add real captures from a running build here (e.g. `docs/screenshots/*.png`).
-> Build and run the app (see [BUILDING.md](BUILDING.md)), then drop a few
-> representative shots into this section.
+| Home (For You) | Songs | Albums | Now Playing | Artists |
+|:---:|:---:|:---:|:---:|:---:|
+| ![KordX Home](docs/screenshots/home.png) | ![Songs list](docs/screenshots/songs.png) | ![Albums grid](docs/screenshots/albums.png) | ![Now Playing](docs/screenshots/now-playing.png) | ![Artists](docs/screenshots/artists.png) |
 
 ---
 
