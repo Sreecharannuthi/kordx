@@ -10,7 +10,15 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ### Added
 - Per-architecture release APKs (arm64-v8a, armeabi-v7a, x86, x86_64) via
   `splits.abi`. The arm64-v8a release APK is **9.4 MB** (down from 85 MB
-  universal debug).
+  universal debug). A 5th **universal** release APK is also produced for
+  F-Droid and manual sideloads (5 APKs total per release, all signed).
+- A signed-release CI workflow at `.github/workflows/release.yml` that
+  builds the 5 APKs and attaches them to the GitHub Release on `v*.*.*`
+  tag push. The release keystore lives as 4 GitHub Secrets
+  (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`)
+  set by the repo owner; the workflow decodes them at build time and
+  cleans up the ephemeral runner afterwards. Manual upload fallback
+  documented in [`docs/RELEASING.md`](docs/RELEASING.md).
 - R8 + resource shrinking for the release build type, with hand-written
   ProGuard rules (`app/proguard-rules.pro`) for the kotlinx.serialization
   i18n codegen. Gradle heap increased to 8 GB to fit the kover + detekt +
