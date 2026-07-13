@@ -1,3 +1,17 @@
+# Line endings (Unix for gradlew, CRLF for the Windows launcher)
 gradlew text eol=lf
 gradlew.bat text eol=crlf
 gradle/wrapper/gradle-wrapper.jar binary
+
+# --- Linguist language detection ---
+# KordX is a Kotlin / Jetpack Compose Android app. The vendored taglib
+# C++ library (and the utfcpp 3rd-party helper inside it) under
+# `metaphony/src/main/cpp/` make the C++ count larger than the Kotlin
+# count, which causes the repo card to show "C++" as the primary
+# language. Mark the vendored native code and the generated C++ build
+# directory as vendored so GitHub surfaces Kotlin (the language KordX
+# is actually written in) as primary.
+metaphony/src/main/cpp/**        linguist-vendored
+metaphony/.cxx/**                linguist-generated
+**/.cxx/**                       linguist-generated
+**/build/generated/**            linguist-generated
