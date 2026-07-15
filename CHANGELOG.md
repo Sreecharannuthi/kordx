@@ -5,6 +5,36 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-07-15
+
+### Fixed
+- **App crashes (minimises and won't reopen) immediately after adding a
+  media folder, release builds only** — a third R8/ProGuard bug, this time
+  in the `metaphony` native metadata module. `AudioMetadataParser.cpp` calls
+  back into Java/Kotlin via JNI using literal method names
+  (`FindClass("...AudioMetadataParser")` + `GetMethodID(..., "putTag", ...)`,
+  `"putPicture"`, `"putAudioProperty"`). R8 in non-full mode does NOT follow
+  these call sites, so it obfuscated the three callback method names. At
+  runtime `JNI_OnLoad()` resolves the renamed methods to null, and the first
+  native scan call raises `NoSuchMethodError`. Because the error originates
+  in native code it escapes the Kotlin `try/catch (Exception)` around the
+  scan in `MediaExposer.fetch()`, aborts the runtime (SIGABRT), and kills
+  the process — the user sees the app "minimise and not reopen" the instant
+  they finish adding a folder.
+  - The fix adds `-keep class
+    com.android.rockages.kordx.metaphony.AudioMetadataParser { *; }` to
+    `metaphony/consumer-rules.pro` (auto-merged into the app's R8 config),
+    preserving the class FQN and the three JNI callback method names. The
+    private external `readMetadataNative` is auto-kept by R8 already.
+  - Reproduced on an AVD running the release APK: adding `/sdcard/Music` and
+    tapping Done produced `Fatal signal 6 (SIGABRT) ... (DefaultDispatch)`
+    with `NoSuchMethodError: no non-static method
+    "...AudioMetadataParser.putTag(Ljava/lang/String;Ljava/lang/String;)V"`.
+    The debug APK never showed it because debug builds skip R8.
+  - Companion regression test `MetaphonyProguardRulesTest` (5 tests) pins the
+    rule and the three callback names so the JNI contract can't silently
+    break again.
+
 ## [1.1.2] - 2026-07-15
 
 ### Fixed
