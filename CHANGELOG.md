@@ -5,6 +5,29 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-07-15
+
+### Fixed
+- **App crash on Android 13+ (API 33+) at startup** — `RadioNativeReceiver.start()`
+  was the only production `Context.registerReceiver` call site missed in the
+  v1.1.0 "Debug receiver gating" slice. On API 33+ (Tiramisu), the unflagged
+  `registerReceiver` overload throws `SecurityException` at runtime, which
+  propagated out of the `Radio` constructor → the `KordX` ViewModel
+  constructor → the framework's `ViewModelProvider` factory, surfacing as
+  the red "Cannot create an instance of class com.android.rockages.kordx.KordX"
+  crash screen and a fully black-holed `MainActivity` on every API 33+ device.
+  The fix branches on `Build.VERSION.SDK_INT >= TIRAMISU` and passes
+  `Context.RECEIVER_NOT_EXPORTED` (correct: `ACTION_AUDIO_BECOMING_NOISY` and
+  `ACTION_HEADSET_PLUG` are protected system broadcasts — no external app is
+  the sender). The pre-Tiramisu fallback uses the unflagged overload gated
+  by `@SuppressLint("UnspecifiedRegisterReceiverFlag")` — same pattern as
+  `RadioSession.start()` and `KordXMediaLibraryService.registerDebugReceivers()`.
+  Companion regression test `RadioNativeReceiverRegistrationTest` (5 tests)
+  pins the contract. Issue: #2. PR: #3. AVD-verified on API 36:
+  `topResumedActivity` = `MainActivity`; `dumpsys activity broadcasts`
+  confirms `RadioNativeReceiver` is registered for `HEADSET_PLUG` +
+  `AUDIO_BECOMING_NOISY`; no `FATAL` / `SecurityException` in logcat.
+
 ## [1.1.0] - 2026-07-11
 
 ### Added
