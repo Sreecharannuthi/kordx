@@ -5,6 +5,47 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-07-15
+
+### Fixed
+- **App crash on Android 13+ (API 33+) at startup, release builds only** —
+  the v1.1.0/v1.1.1 release APK had **two R8/ProGuard bugs** in the i18n
+  loader path that only manifested on signed release builds. The AVD
+  validation gate missed both because it runs a DEBUG build (no R8). The
+  v1.1.1 `RadioNativeReceiver` fix unmasked the deeper bug: once the
+  `SecurityException` stopped throwing, the i18n `NoSuchElementException`
+  was exposed on every API 33+ device.
+  - **Bug 1 (silently stripped `_Keys` constructor):** the ProGuard rules
+    used the wrong JVM class names. `_Keys` is nested in `_Translation`
+    (NOT in `Translation`), so the JVM FQN is `_Translation$_Keys`; the
+    previous `-keep class ...Translation$_Keys { *; }` rule never matched
+    anything. R8 stripped the primary 251-parameter constructor of
+    `_Keys`; the `keysConstructor` lazy delegate threw
+    `NoSuchElementException: Array contains no element matching the
+    predicate` on `.first { parameterCount > 0 }`; the exception
+    propagated out of `Translation.<init>` → the `KordX` ViewModel
+    constructor → the framework's `ViewModelProvider` factory, surfacing
+    as the red "Cannot create an instance of class
+    com.android.rockages.kordx.KordX" crash screen.
+  - **Bug 2 (silently produced wrong labels):** even with the correct
+    `-keep` rule, the loader would still produce "nonempty but WRONG
+    labels" (Songs field showing "Add media folders", etc.) because the
+    constructor parameter names are read via `Parameter.getName()`,
+    which requires the JVM `MethodParameters` attribute. R8 strips
+    `MethodParameters` by default in non-full mode even though the
+    kotlinc flag `-java-parameters` (pinned in `app/build.gradle.kts`)
+    emits it. The `-keepattributes` rule now includes `MethodParameters`.
+  - Companion regression test `I18nProguardRulesTest` (9 tests) pins
+    the contract so both bugs can't reappear: the 5 `_Translation$_*`
+    classes are kept, `MethodParameters` is kept, and the typo'd
+    v1.1.0/v1.1.1 `Translation$_*` rules are explicitly forbidden.
+  - AVD-verified on Phone AVD (API 36) with the **release** APK:
+    `topResumedActivity = MainActivity`; the bottom nav renders the
+    standard 5 tabs ("For you / Songs / Albums / Artists / Playlists");
+    the intro dialog "👋 Hello there!" renders the full KordX open-beta
+    message; no FATAL / NoSuchElementException in logcat. Issue: #2.
+    PR: #4.
+
 ## [1.1.1] - 2026-07-15
 
 ### Fixed
