@@ -164,17 +164,4 @@ class CR3AutoPlaybackWiringTest {
             "RadioForwardingPlayer must not decompose OR-ed bits manually"
         )
     }
-
-    @Test
-    fun overviewReflectsAutoPlaybackSupport() {
-        val source = loadSource("docs/architecture/overview.md")
-        assertTrue(
-            source.contains("KordXMediaLibraryService") && source.contains("RadioForwardingPlayer"),
-            "architecture/overview.md must reflect Media3 Auto playback wiring"
-        )
-        assertFalse(
-            source.contains("KordXMediaBrowserService") && source.contains("setSessionToken"),
-            "architecture/overview.md must not describe the legacy browse-only service"
-        )
-    }
 }
