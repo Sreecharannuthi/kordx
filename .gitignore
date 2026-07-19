@@ -28,6 +28,15 @@ secrets
 
 # local test audio (not part of the build)
 /sample
+/kordx-music
+
+# release verification scratch files
+/release_build.log
+/build_release_verify.*
+/dexdump_tmp/
+/error.jpg
+/fix-verified.png
+
 # local env helper
 /.env.sh
 /screen
