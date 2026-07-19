@@ -119,6 +119,12 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  if (!options.autostart) {
  return
  }
+ // CR2: drop the stale id before invoking errorrecovery; otherwise `loopMode == Queue` returns the same; index and recurses synchronously.
+ queue.removeAtSilently(options.index)
+ if (queue.isEmpty()) {
+ queue.currentSongIndex = -1
+ return
+ }
  onSongFinish(SongFinishSource.Exception)
  return
  }

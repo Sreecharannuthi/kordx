@@ -42,6 +42,30 @@ class AudioMetadataParserTest {
  }
 
  @Test
+ fun dateExtractedFromYearOnlyDateTag() {
+ // Regression guard: ID3v2.4 TDRC often stores just a year (e.g. "2021").
+ val metadata = parser(
+ tags = mapOf("DATE" to listOf("2021"))
+ )
+ assertNotNull(metadata.date)
+ assertEquals(2021, metadata.date!!.year)
+ assertEquals(1, metadata.date!!.monthValue)
+ assertEquals(1, metadata.date!!.dayOfMonth)
+ }
+
+ @Test
+ fun dateExtractedFromYearMonthDateTag() {
+ // Regression guard: TDRC can also be "yyyy-MM".
+ val metadata = parser(
+ tags = mapOf("DATE" to listOf("2021-03"))
+ )
+ assertNotNull(metadata.date)
+ assertEquals(2021, metadata.date!!.year)
+ assertEquals(3, metadata.date!!.monthValue)
+ assertEquals(1, metadata.date!!.dayOfMonth)
+ }
+
+ @Test
  fun dateExtractedFromYearTagWhenDateMissing() {
  // Falls back to `YEAR` when `DATE` is missing; uses Jan 1 placeholder.
  val metadata = parser(
