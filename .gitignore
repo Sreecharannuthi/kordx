@@ -41,8 +41,12 @@ secrets
 /.env.sh
 /screen
 
+# docs/ — local working docs, excluded from the committed project (everything under docs/)
+docs/*
+
 # Cleanup-inventory scratch files (created by the spec author, not part of the build)
 __inventory_*.txt
 __inventory_*.csv
 __*.ps1
 __*.txt
+

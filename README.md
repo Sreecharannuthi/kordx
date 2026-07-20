@@ -40,7 +40,7 @@ for playback.
 
 | Home (For You) | Songs | Albums | Now Playing | Artists |
 |:---:|:---:|:---:|:---:|:---:|
-| ![KordX Home](docs/screenshots/home.png) | ![Songs list](docs/screenshots/songs.png) | ![Albums grid](docs/screenshots/albums.png) | ![Now Playing](docs/screenshots/now-playing.png) | ![Artists](docs/screenshots/artists.png) |
+| ![KordX Home](screenshots/home.png) | ![Songs list](screenshots/songs.png) | ![Albums grid](screenshots/albums.png) | ![Now Playing](screenshots/now-playing.png) | ![Artists](screenshots/artists.png) |
 
 ---
 
