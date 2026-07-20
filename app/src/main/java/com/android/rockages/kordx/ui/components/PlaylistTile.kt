@@ -69,7 +69,7 @@ fun PlaylistTile(context: ViewContext, playlist: Playlist) {
  context.navController.navigate(PlaylistViewRoute(playlist.id))
  }
  ) {
- Box(modifier = Modifier.padding(12.dp)) {
+ Box(modifier = Modifier.padding(4.dp)) {
  Column(horizontalAlignment = Alignment.CenterHorizontally) {
  Box {
  AsyncImage(
@@ -110,19 +110,25 @@ fun PlaylistTile(context: ViewContext, playlist: Playlist) {
  .padding(8.dp)
  ) {
  IconButton(
- modifier = Modifier
- .background(
- MaterialTheme.colorScheme.surface,
- RoundedCornerShape(12.dp)
- )
- .then(Modifier.size(36.dp)),
  onClick = {
  context.kordx.radio.shorty.playQueue(
  playlist.getSortedSongIds(context.kordx)
  )
  }
  ) {
- Icon(Icons.Filled.PlayArrow, null)
+ Box(
+ modifier = Modifier
+ .size(28.dp)
+ .clip(RoundedCornerShape(12.dp))
+ .background(MaterialTheme.colorScheme.surface),
+ contentAlignment = Alignment.Center,
+ ) {
+ Icon(
+ Icons.Filled.PlayArrow,
+ null,
+ modifier = Modifier.size(18.dp),
+ )
+ }
  }
  }
  }

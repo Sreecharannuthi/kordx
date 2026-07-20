@@ -51,7 +51,7 @@ fun SquareGrooveTile(
  colors = CardDefaults.cardColors(containerColor = Color.Transparent),
  onClick = onClick
  ) {
- Box(modifier = Modifier.padding(12.dp)) {
+ Box(modifier = Modifier.padding(4.dp)) {
  Column(horizontalAlignment = Alignment.CenterHorizontally) {
  Box {
  AsyncImage(
@@ -83,16 +83,20 @@ fun SquareGrooveTile(
  .align(Alignment.BottomStart)
  .padding(8.dp)
  ) {
- IconButton(
+ IconButton(onClick = onPlay) {
+ Box(
  modifier = Modifier
- .background(
- MaterialTheme.colorScheme.surface,
- RoundedCornerShape(12.dp)
- )
- .then(Modifier.size(36.dp)),
- onClick = onPlay
+ .size(28.dp)
+ .clip(RoundedCornerShape(12.dp))
+ .background(MaterialTheme.colorScheme.surface),
+ contentAlignment = Alignment.Center,
  ) {
- Icon(Icons.Filled.PlayArrow, null)
+ Icon(
+ Icons.Filled.PlayArrow,
+ null,
+ modifier = Modifier.size(18.dp),
+ )
+ }
  }
  }
  }

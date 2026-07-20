@@ -5,6 +5,33 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-07-20
+
+### Added
+- **Android Auto (Media3) playback (CR3)** — `KordXMediaLibraryService`
+  (androidx.media3.session.MediaLibraryService) replaces the legacy
+  `MediaBrowserServiceCompat` service. Adds a browse tree, a Now Playing
+  card with the radio queue + custom actions, voice/assisted search via
+  `MEDIA_PLAY_FROM_SEARCH`, a recently-played root, and root-level
+  SHUFFLE_ALL + SEARCH. minSdk raised to 31 for the Media3
+  `setCustomLayout`/`CommandButton` API.
+- **Home grid polish (UI4)** — tightened the inter-tile gap on the Home
+  grids (Albums / Playlists / Artists / Genres) from ~24 dp to ~16 dp via
+  `ResponsiveGrid` `contentPadding` + `Arrangement.spacedBy`, and shrank the
+  per-tile play FAB to a 28 dp surface chip while keeping the 48 dp Material
+  touch target. Documented the `grid-gap` (8 dp) spacing token.
+
+### Fixed
+- **Native metadata parser hardening (CR1)** — `metaphony`
+  `AudioMetadataParser.cpp` now releases JNI local references, guards every
+  callback with `ExceptionCheck`, and parses year-only / year-month `DATE`
+  tags. A ProGuard keep rule preserves the three JNI callback names so
+  release (R8) builds no longer `SIGABRT` on the first scan.
+- **Radio queue / storage correctness (CR2)** —
+  `SQLiteKeyValueDatabaseAdapter.put` uses `CONFLICT_REPLACE`,
+  `RadioQueue.remove` no longer hits the index-deflection crash, and
+  `Radio.kt` guards stale-id recursion.
+
 ## [1.1.3] - 2026-07-15
 
 ### Fixed
