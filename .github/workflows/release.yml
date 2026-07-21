@@ -17,7 +17,7 @@
 #   - KEY_ALIAS         : the key alias inside the .jks
 #   - KEY_PASSWORD      : the key password
 #
-# See docs/RELEASING.md for the full maintainer runbook (keystore
+# See specs/RELEASING.md for the full maintainer runbook (keystore
 # generation, manual upload fallback, version-bump policy).
 
 name: Release

@@ -139,7 +139,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`)
   set by the repo owner; the workflow decodes them at build time and
   cleans up the ephemeral runner afterwards. Manual upload fallback
-  documented in [`docs/RELEASING.md`](docs/RELEASING.md).
+  documented in [`specs/RELEASING.md`](specs/RELEASING.md).
 - R8 + resource shrinking for the release build type, with hand-written
   ProGuard rules (`app/proguard-rules.pro`) for the kotlinx.serialization
   i18n codegen. Gradle heap increased to 8 GB to fit the kover + detekt +

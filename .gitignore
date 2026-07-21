@@ -41,8 +41,13 @@ secrets
 /.env.sh
 /screen
 
-# docs/ — local working docs, excluded from the committed project (everything under docs/)
-docs/*
+# specs/ — local working docs/planning, excluded from the committed project (everything under specs/)
+specs/*
+
+# root pointer files — local-only (pointing into gitignored specs/)
+AGENTS.md
+CLAUDE.md
+CONVENTIONS.md
 
 # Cleanup-inventory scratch files (created by the spec author, not part of the build)
 __inventory_*.txt

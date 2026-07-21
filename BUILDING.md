@@ -95,6 +95,6 @@ storage permissions are required beyond what SAF provides.
 
 ## 6. Releasing
 
-See [`docs/RELEASING.md`](docs/RELEASING.md) for the maintainer
+See [`specs/RELEASING.md`](specs/RELEASING.md) for the maintainer
 runbook (tag-push release flow, required GitHub Secrets, the 5
 APKs explained, manual upload fallback).

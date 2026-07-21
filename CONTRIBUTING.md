@@ -49,7 +49,7 @@ shipped in this public repo. To update a translation:
 2. Open a PR against this repo with the TOML change.
 3. After the PR is merged, the maintainer regenerates the JSONs from the dev
    test bed and cuts a follow-up commit. (The maintainer workflow is
-   documented in `docs/AGENTS.md` §"Git push rule" → "Promotion workflow".)
+   documented in `specs/AGENTS.md` §"Git push rule" → "Promotion workflow".)
 
 This keeps the public repo dependency-free for contributors while still
 allowing the maintainer to update translations without round-tripping through
