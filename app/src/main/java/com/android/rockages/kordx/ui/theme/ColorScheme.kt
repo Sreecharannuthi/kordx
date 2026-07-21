@@ -22,7 +22,7 @@ object ThemeColorSchemes {
     private const val DarkToBlackBlendRatio = 0.4f
 
     // ──────────────────────────────────────────────────────────────
-    //  Tonal palette derivation  (UI2.1 / UI2.2 / UI2.3)
+    //  Tonal palette derivation
     // ──────────────────────────────────────────────────────────────
 
     /**

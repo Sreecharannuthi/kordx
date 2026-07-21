@@ -522,5 +522,3 @@ private class RadioTimeline(
         radio.queue.currentQueue.getOrNull(periodIndex) ?: "empty-$periodIndex"
 }
 
-
-// The adapter target interfaces ([RadioAdapterTarget],; [RadioQueueAdapterTarget], [RadioShortyAdapterTarget]) live in; a separate file ([RadioAdapterTarget.kt]) so the compilation; order doesn't matter — Kotlin compiles files in; alphabetical order, and `Radio.kt` is compiled before; `RadioForwardingPlayer.kt`.
