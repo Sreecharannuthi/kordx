@@ -107,7 +107,7 @@ fun PlaylistTile(context: ViewContext, playlist: Playlist) {
  Box(
  modifier = Modifier
  .align(Alignment.BottomStart)
- .padding(8.dp)
+ .padding(2.dp)
  ) {
  IconButton(
  onClick = {

@@ -96,9 +96,13 @@ fun KordXTheme(
  // The fix: wrap the [MaterialTheme] content in a; [CompositionLocalProvider] that pins [LocalContentColor]; to the active scheme's `onBackground`. This is the; lowerrisk of the two candidate fixes (the other; being: rewrite [ThemeColorSchemes] to use fixedcolor; tokens for `onBackground` / `onSurface` / `onSurfaceVariant`).; The CompositionLocalProvider is a single point of fix; and doesn't change the color tokens themselves; downstream; composables that *do* override `LocalContentColor` (e.g.; `Surface` / `Card` / `ListItem`) still take effect; because they sit inside this provider and override it.
  CompositionLocalProvider(
  LocalContentColor provides colorScheme.onBackground,
+ // UI2.5 — stop scaling global density so touch targets
+ // remain at 48 dp.  contentScale is folded into the font
+ // scale so only typography grows; layout dimensions stay
+ // fixed in dp.
  LocalDensity provides Density(
- LocalDensity.current.density * contentScale,
- LocalDensity.current.fontScale * fontScale,
+ LocalDensity.current.density,
+ LocalDensity.current.fontScale * fontScale * contentScale,
  )
  ) {
  content()

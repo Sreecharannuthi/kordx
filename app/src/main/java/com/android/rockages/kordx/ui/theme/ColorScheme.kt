@@ -9,158 +9,221 @@ import androidx.core.graphics.ColorUtils
 
 @Suppress("ConstPropertyName")
 object ThemeColorSchemes {
- private val LightBackgroundColor = ThemeColors.Neutral50
- private val LightSurfaceColor = ThemeColors.Neutral100
- private val LightSurfaceVariantColor = ThemeColors.Neutral200
- private val DarkBackgroundColor = ThemeColors.Neutral900
- private val DarkSurfaceColor = ThemeColors.Neutral900
- private val DarkSurfaceVariantColor = ThemeColors.Neutral800
- private val LightContrastColor = Color.White
- private val BlackContrastColor = Color.Black
+    private val BlackContrastColor = Color.Black
 
+    // Fixed visible value for the dark / black theme's text-on-dark tokens.
+    // The default `darkColorScheme()` uses `Color(0xFFE6E1E5)` (off-white)
+    // which is visible on every dark surface.
+    private val LightOnBackgroundForDarkTheme = Color(0xFFE6E1E5)
 
- // fixed visible value for the light theme's textonlight; tokens (`onBackground` / `onSurface` / `onSurfaceVariant`). The; default `lightColorScheme()` uses `Color(0xFF1C1B1F)` (very dark; gray) which is visible on every light surface. We pin to that; same nearblack value (with a slight tint of the primary color; for brand consistency, matching the `onBackground` value the; Material3 default would produce for the default Purple primary).; Critically: this is INDEPENDENT of the user's primary color, so; a light primary (e.g. yellow) doesn't produce a nearinvisible; text color. This is the value that the [LocalContentColor]; CompositionLocalProvider in `KordXTheme` also pins, so both; paths agree.
- private val DarkOnBackgroundForLightTheme = Color(0xFF1C1B1F)
+    // Fixed visible value for the light theme's text-on-light tokens.
+    private val DarkOnBackgroundForLightTheme = Color(0xFF1C1B1F)
 
+    private const val DarkToBlackBlendRatio = 0.4f
 
- // fixed visible value for the dark / black theme's; textondark tokens. The default `darkColorScheme()` uses; `Color(0xFFE6E1E5)` (offwhite) which is visible on every dark; surface. Pinning to that same value makes the surface text; deterministic.
- private val LightOnBackgroundForDarkTheme = Color(0xFFE6E1E5)
+    // ──────────────────────────────────────────────────────────────
+    //  Tonal palette derivation  (UI2.1 / UI2.2 / UI2.3)
+    // ──────────────────────────────────────────────────────────────
 
- private const val BackgroundBlendRatio = 0.03f
- private const val SurfaceBlendRatio = 0.02f
- private const val SurfaceVariantBlendRatio = 0.01f
- private const val BlackSurfaceBlendRatio = 0.05f
- private const val BlackSurfaceVariantBlendRatio = 0.06f
- private const val DarkOnPrimaryLightness = -0.3f
- private const val DarkOnSecondaryLightness = -0.4f
- private const val DarkOnTertiaryLightness = -0.5f
- private const val LightOnBackgroundLightness = -0.5f
- private const val LightOnSurfaceLightness = -0.5f
- private const val LightOnSurfaceVariantLightness = -0.45f
- private const val DarkToBlackBlendRatio = 0.4f
+    /**
+     * Derive a secondary colour from the primary by desaturating and
+     * shifting the hue slightly toward blue (–15°).  This keeps it
+     * harmonious with the primary while giving visible tonal hierarchy.
+     */
+    private fun deriveSecondary(primary: Color): Color {
+        val hsl = colorToHSL(primary)
+        hsl[0] = (hsl[0] - 15f + 360f) % 360f   // slight hue shift
+        hsl[1] = (hsl[1] * 0.55f).coerceIn(0f, 1f) // desaturate ~45 %
+        return hslToColor(hsl)
+    }
 
- fun createLightColorScheme(primaryColor: Color) = lightColorScheme(
- primary = primaryColor,
- onPrimary = LightContrastColor,
- primaryContainer = primaryColor,
- onPrimaryContainer = LightContrastColor,
- secondary = primaryColor,
- onSecondary = LightContrastColor,
- secondaryContainer = primaryColor,
+    /**
+     * Derive a tertiary colour by shifting the hue +60° and
+     * desaturating moderately.  This gives a complementary accent
+     * that's visually distinct from both primary and secondary.
+     */
+    private fun deriveTertiary(primary: Color): Color {
+        val hsl = colorToHSL(primary)
+        hsl[0] = (hsl[0] + 60f) % 360f            // analogous shift
+        hsl[1] = (hsl[1] * 0.70f).coerceIn(0f, 1f) // moderate desaturation
+        return hslToColor(hsl)
+    }
 
- // `onSecondaryContainer` was previously unset, which; meant the framework default (`Color(0xFF4A4458)` for; `lightColorScheme()`) was used. The default is dark, so it; was visible on a light surface — but the AVD walkthrough; showed that `FilterChip` selected labels (which use; `onSecondaryContainer`) were still invisible. Pinning it; to the same fixed dark value (the same one used for; `onBackground` / `onSurface` / `onSurfaceVariant`) makes; the chip labels deterministic regardless of the active; primary color. The `DarkOnBackgroundForLightTheme` constant; is used directly (not via `adjustLightness`) because; `adjustLightness` calls `ColorUtils.colorToHSL`, which is; mocked to return 0 in the JVM unittest classpath (per; `unitTests.isReturnDefaultValues = true` in; `app/build.gradle.kts`).
- onSecondaryContainer = DarkOnBackgroundForLightTheme,
- tertiary = primaryColor,
- onTertiary = LightContrastColor,
- tertiaryContainer = primaryColor,
- onTertiaryContainer = LightContrastColor,
- background = blendColors(LightBackgroundColor, primaryColor, BackgroundBlendRatio),
+    /**
+     * Make the `onPrimary` colour luminance-aware so that light
+     * accents (e.g. Yellow, Lime) do not produce white-on-yellow
+     * buttons.  If the primary's relative luminance is above 0.4
+     * (i.e. it's "light"), we return a dark text; otherwise white.
+     */
+    private fun luminanceAwareOnPrimary(primary: Color): Color {
+        val luminance = ColorUtils.calculateLuminance(primary.toArgb())
+        return if (luminance > 0.4) DarkOnBackgroundForLightTheme else Color.White
+    }
 
- // `onBackground` is the value that the; `LocalContentColor` fallback reads from when no other; component overrides it. The previous `adjustLightness(; primaryColor,0.5f)` derives a verydarkpurple for the; default Purple primary, but the derivation depends on the; primary color: a light primary (e.g. pastel yellow) would; produce a darkyellow `onBackground`, which is OK; a; mediumlightness primary (e.g. cyan) would produce a; nearinvisible `onBackground`. The safer value is a fixed; nearblack that's visible on every surface.
- onBackground = DarkOnBackgroundForLightTheme,
- surface = blendColors(LightSurfaceColor, primaryColor, SurfaceBlendRatio),
+    /**
+     * Lighten [color] toward white by [amount] (0–1).
+     */
+    private fun lighten(color: Color, amount: Float): Color {
+        val hsl = colorToHSL(color)
+        hsl[2] = (hsl[2] + amount * (1f - hsl[2])).coerceIn(0f, 1f)
+        return hslToColor(hsl)
+    }
 
- // same reasoning as `onBackground`: `onSurface` is; the value that Material3 `Surface` propagates into; `LocalContentColor` for any text inside the surface. A; fixed dark value is visible on every light surface.
- onSurface = DarkOnBackgroundForLightTheme,
- surfaceVariant = blendColors(LightSurfaceVariantColor, primaryColor, SurfaceBlendRatio),
+    /**
+     * Darken [color] toward black by [amount] (0–1).
+     */
+    private fun darken(color: Color, amount: Float): Color {
+        val hsl = colorToHSL(color)
+        hsl[2] = (hsl[2] * (1f - amount)).coerceIn(0f, 1f)
+        return hslToColor(hsl)
+    }
 
- // `onSurfaceVariant` is what `FilterChip` (unselected); and `ListItem` (supporting text) read for their text color.; Pinning it to the same dark value (slightly lighter alpha; for mediumemphasis) keeps the chip labels visible.
- onSurfaceVariant = DarkOnBackgroundForLightTheme,
- )
+    // ──────────────────────────────────────────────────────────────
+    //  Light scheme
+    // ──────────────────────────────────────────────────────────────
 
- fun createDarkColorScheme(PrimaryColor: Color) = darkColorScheme(
- primary = PrimaryColor,
- onPrimary = adjustLightness(PrimaryColor, DarkOnPrimaryLightness),
- primaryContainer = PrimaryColor,
- onPrimaryContainer = LightContrastColor,
- secondary = PrimaryColor,
- onSecondary = adjustLightness(PrimaryColor, DarkOnSecondaryLightness),
- secondaryContainer = PrimaryColor,
+    fun createLightColorScheme(primaryColor: Color): ColorScheme {
+        val secondary = deriveSecondary(primaryColor)
+        val tertiary = deriveTertiary(primaryColor)
 
- // `onSecondaryContainer` was previously `LightContrastColor`; (pure white). Pure white is the highestcontrast value on dark; surfaces, but it can be visually jarring for body text. Pin; to the offwhite value that matches the default `darkColorScheme()`; `onSurface` (`Color(0xFFE6E1E5)`) so the visual hierarchy is; consistent. The offwhite value is visible on every dark; surface and matches the `LocalContentColor` fallback value; the KordXTheme CompositionLocalProvider also pins.
- onSecondaryContainer = LightOnBackgroundForDarkTheme,
- tertiary = PrimaryColor,
- onTertiary = adjustLightness(PrimaryColor, DarkOnTertiaryLightness),
- tertiaryContainer = PrimaryColor,
- onTertiaryContainer = LightContrastColor,
- background = blendColors(DarkBackgroundColor, PrimaryColor, BackgroundBlendRatio),
- onBackground = LightOnBackgroundForDarkTheme,
- surface = blendColors(DarkSurfaceColor, PrimaryColor, SurfaceBlendRatio),
- onSurface = LightOnBackgroundForDarkTheme,
- surfaceVariant = blendColors(
- DarkSurfaceVariantColor,
- PrimaryColor,
- SurfaceVariantBlendRatio
- ),
- onSurfaceVariant = LightOnBackgroundForDarkTheme,
- )
+        // Containers: lighter versions of the accent colours
+        val primaryContainer = lighten(primaryColor, 0.80f)
+        val secondaryContainer = lighten(secondary, 0.80f)
+        val tertiaryContainer = lighten(tertiary, 0.80f)
 
- fun createBlackColorScheme(PrimaryColor: Color) = darkColorScheme(
- primary = PrimaryColor,
- onPrimary = adjustLightness(PrimaryColor, DarkOnPrimaryLightness),
- primaryContainer = PrimaryColor,
- onPrimaryContainer = LightContrastColor,
- secondary = PrimaryColor,
- onSecondary = adjustLightness(PrimaryColor, DarkOnSecondaryLightness),
- secondaryContainer = PrimaryColor,
+        // Surface hierarchy: neutrals with a subtle primary tint
+        val surface = Color(0xFFFEF7FF)
+        val surfaceVariant = Color(0xFFE7E0EC)
+        val background = Color(0xFFFDF8FE)
 
- // same as `createDarkColorScheme`. The BLACK theme; uses pure black surfaces (`background = Color.Black`), so the; text color must be light. `LightOnBackgroundForDarkTheme`; (offwhite) is visible on pure black.
- onSecondaryContainer = LightOnBackgroundForDarkTheme,
- tertiary = PrimaryColor,
- onTertiary = adjustLightness(PrimaryColor, DarkOnTertiaryLightness),
- tertiaryContainer = PrimaryColor,
- onTertiaryContainer = LightContrastColor,
- background = BlackContrastColor,
- onBackground = LightOnBackgroundForDarkTheme,
- surface = blendColors(BlackContrastColor, PrimaryColor, BlackSurfaceBlendRatio),
- onSurface = LightOnBackgroundForDarkTheme,
- surfaceVariant = blendColors(
- BlackContrastColor,
- PrimaryColor,
- BlackSurfaceVariantBlendRatio
- ),
- onSurfaceVariant = LightOnBackgroundForDarkTheme,
- )
+        return lightColorScheme(
+            primary = primaryColor,
+            onPrimary = luminanceAwareOnPrimary(primaryColor),
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = darken(primaryContainer, 0.70f),
+            secondary = secondary,
+            onSecondary = luminanceAwareOnPrimary(secondary),
+            secondaryContainer = secondaryContainer,
+            // Pin to fixed dark value so FilterChip labels are
+            // visible regardless of primary colour (pre-30i fix).
+            onSecondaryContainer = DarkOnBackgroundForLightTheme,
+            tertiary = tertiary,
+            onTertiary = luminanceAwareOnPrimary(tertiary),
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = darken(tertiaryContainer, 0.70f),
+            background = background,
+            onBackground = DarkOnBackgroundForLightTheme,
+            surface = surface,
+            onSurface = DarkOnBackgroundForLightTheme,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = DarkOnBackgroundForLightTheme,
+            outline = Color(0xFF79747E),
+            outlineVariant = Color(0xFFCAC4D0),
+            error = Color(0xFFB3261E),
+            onError = Color.White,
+            errorContainer = Color(0xFFF9DEDC),
+            onErrorContainer = Color(0xFF410E0B),
+            inverseSurface = Color(0xFF313033),
+            inverseOnSurface = Color(0xFFF4EFF4),
+            inversePrimary = lighten(primaryColor, 0.40f),
+            surfaceTint = primaryColor,
+        )
+    }
 
- fun toBlackColorScheme(colorScheme: ColorScheme) = colorScheme.copy(
- primaryContainer = convertDarkToBlack(colorScheme.primaryContainer),
- secondaryContainer = convertDarkToBlack(colorScheme.secondaryContainer),
- tertiaryContainer = convertDarkToBlack(colorScheme.tertiaryContainer),
- background = BlackContrastColor,
- surface = convertDarkToBlack(colorScheme.surface),
- surfaceContainerLowest = convertDarkToBlack(colorScheme.surfaceContainerLowest),
- surfaceContainerLow = convertDarkToBlack(colorScheme.surfaceContainerLow),
- surfaceContainer = convertDarkToBlack(colorScheme.surfaceContainer),
- surfaceContainerHigh = convertDarkToBlack(colorScheme.surfaceContainerHigh),
- surfaceContainerHighest = convertDarkToBlack(colorScheme.surfaceContainerHighest),
- surfaceVariant = convertDarkToBlack(colorScheme.surfaceVariant),
- surfaceTint = convertDarkToBlack(colorScheme.surfaceTint),
- )
+    // ──────────────────────────────────────────────────────────────
+    //  Dark scheme
+    // ──────────────────────────────────────────────────────────────
 
- private fun convertDarkToBlack(color: Color): Color {
- val argb = ColorUtils.blendARGB(
- BlackContrastColor.toArgb(),
- color.toArgb(),
- DarkToBlackBlendRatio,
- )
- return Color(argb)
- }
+    fun createDarkColorScheme(primaryColor: Color): ColorScheme {
+        val secondary = deriveSecondary(primaryColor)
+        val tertiary = deriveTertiary(primaryColor)
 
- private fun blendColors(color1: Color, color2: Color, ratio: Float) =
- Color(ColorUtils.blendARGB(color1.toArgb(), color2.toArgb(), ratio))
+        // Containers: darker versions of the accent colours
+        val primaryContainer = darken(primaryColor, 0.55f)
+        val secondaryContainer = darken(secondary, 0.55f)
+        val tertiaryContainer = darken(tertiary, 0.55f)
 
- private fun adjustLightness(color: Color, threshold: Float): Color {
- val hsl = convertColorToHSL(color)
- hsl[2] = hsl[2] + threshold
- return convertHSLToColor(hsl)
- }
+        // Surface hierarchy: dark neutrals with a subtle primary tint
+        val surface = Color(0xFF141218)
+        val surfaceVariant = Color(0xFF49454F)
+        val background = Color(0xFF0E0E11)
 
- private fun convertColorToHSL(color: Color): FloatArray {
- val out = FloatArray(3)
- ColorUtils.colorToHSL(color.toArgb(), out)
- return out
- }
+        return darkColorScheme(
+            primary = lighten(primaryColor, 0.25f),
+            onPrimary = darken(primaryColor, 0.50f),
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = lighten(primaryContainer, 0.70f),
+            secondary = lighten(secondary, 0.25f),
+            onSecondary = darken(secondary, 0.50f),
+            secondaryContainer = secondaryContainer,
+            // Same as light theme: pin to fixed off-white value.
+            onSecondaryContainer = LightOnBackgroundForDarkTheme,
+            tertiary = lighten(tertiary, 0.25f),
+            onTertiary = darken(tertiary, 0.50f),
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = lighten(tertiaryContainer, 0.70f),
+            background = background,
+            onBackground = LightOnBackgroundForDarkTheme,
+            surface = surface,
+            onSurface = LightOnBackgroundForDarkTheme,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = LightOnBackgroundForDarkTheme,
+            outline = Color(0xFF938F99),
+            outlineVariant = Color(0xFF49454F),
+            error = Color(0xFFF2B8B5),
+            onError = Color(0xFF601410),
+            errorContainer = Color(0xFF8C1D18),
+            onErrorContainer = Color(0xFFF9DEDC),
+            inverseSurface = LightOnBackgroundForDarkTheme,
+            inverseOnSurface = Color(0xFF313033),
+            inversePrimary = primaryColor,
+            surfaceTint = lighten(primaryColor, 0.25f),
+        )
+    }
 
- private fun convertHSLToColor(hsl: FloatArray) =
- Color(ColorUtils.HSLToColor(hsl))
+    // ──────────────────────────────────────────────────────────────
+    //  Black (AMOLED) scheme
+    // ──────────────────────────────────────────────────────────────
+
+    fun createBlackColorScheme(primaryColor: Color): ColorScheme {
+        val darkScheme = createDarkColorScheme(primaryColor)
+        return toBlackColorScheme(darkScheme)
+    }
+
+    fun toBlackColorScheme(colorScheme: ColorScheme) = colorScheme.copy(
+        primaryContainer = convertDarkToBlack(colorScheme.primaryContainer),
+        secondaryContainer = convertDarkToBlack(colorScheme.secondaryContainer),
+        tertiaryContainer = convertDarkToBlack(colorScheme.tertiaryContainer),
+        background = BlackContrastColor,
+        surface = convertDarkToBlack(colorScheme.surface),
+        surfaceContainerLowest = convertDarkToBlack(colorScheme.surfaceContainerLowest),
+        surfaceContainerLow = convertDarkToBlack(colorScheme.surfaceContainerLow),
+        surfaceContainer = convertDarkToBlack(colorScheme.surfaceContainer),
+        surfaceContainerHigh = convertDarkToBlack(colorScheme.surfaceContainerHigh),
+        surfaceContainerHighest = convertDarkToBlack(colorScheme.surfaceContainerHighest),
+        surfaceVariant = convertDarkToBlack(colorScheme.surfaceVariant),
+        surfaceTint = convertDarkToBlack(colorScheme.surfaceTint),
+    )
+
+    private fun convertDarkToBlack(color: Color): Color {
+        val argb = ColorUtils.blendARGB(
+            BlackContrastColor.toArgb(),
+            color.toArgb(),
+            DarkToBlackBlendRatio,
+        )
+        return Color(argb)
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  HSL helpers
+    // ──────────────────────────────────────────────────────────────
+
+    private fun colorToHSL(color: Color): FloatArray {
+        val out = FloatArray(3)
+        ColorUtils.colorToHSL(color.toArgb(), out)
+        return out
+    }
+
+    private fun hslToColor(hsl: FloatArray): Color =
+        Color(ColorUtils.HSLToColor(hsl))
 }
