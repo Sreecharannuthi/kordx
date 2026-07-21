@@ -175,7 +175,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  }
  }
  }
- Spacer(modifier = Modifier.height(8.dp))
+ Spacer(modifier = Modifier.height(4.dp))
  when (controlsLayout) {
  NowPlayingControlsLayout.CompactLeft -> NowPlayingCompactControls(
  context,
@@ -193,7 +193,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  data = data,
  )
  }
- Spacer(modifier = Modifier.height(4.dp))
+ Spacer(modifier = Modifier.height(20.dp))
  NowPlayingSeekBar(context)
  }
  }
