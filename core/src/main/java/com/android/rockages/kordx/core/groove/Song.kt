@@ -69,5 +69,16 @@ data class Song(
  }
  return result
  }
+
+ /**
+ * Produces a canonical key for artist identity matching.
+ * Lowercases, trims, and collapses all whitespace runs to a single space.
+ * "A.R.  Rahman" -> "a.r. rahman", "A.R. Rahman" -> "a.r. rahman".
+ * Used by [ArtistRepository] and [AlbumArtistRepository] so that
+ * spelling variants of the same artist merge into one profile.
+ */
+ fun normalizeArtistKey(raw: String): String {
+ return raw.trim().lowercase().replace(Regex("\\s+"), " ")
+ }
  }
 }

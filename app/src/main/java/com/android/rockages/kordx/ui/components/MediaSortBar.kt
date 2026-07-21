@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +52,8 @@ fun <T : Enum<T>> MediaSortBar(
  label: @Composable () -> Unit,
  onShufflePlay: (() -> Unit)? = null,
  onShowModifyLayout: (() -> Unit)? = null,
+ onShowListView: (() -> Unit)? = null,
+ listView: Boolean = false,
 ) {
  var showDropdown by remember { mutableStateOf(false) }
  val currentTextStyle = MaterialTheme.typography.bodySmall.run {
@@ -133,6 +136,15 @@ fun <T : Enum<T>> MediaSortBar(
  onShowModifyLayout?.let {
  IconButton(onClick = it) {
  Icon(Icons.Filled.GridView, null, modifier = iconModifier)
+ }
+ }
+ onShowListView?.let {
+ IconButton(onClick = it) {
+ Icon(
+ if (listView) Icons.Filled.GridView else Icons.AutoMirrored.Filled.ViewList,
+ null,
+ modifier = iconModifier,
+ )
  }
  }
  }

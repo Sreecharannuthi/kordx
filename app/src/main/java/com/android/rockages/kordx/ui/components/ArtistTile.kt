@@ -43,9 +43,26 @@ fun ArtistTile(context: ViewContext, artist: Artist) {
  artist.name,
  style = MaterialTheme.typography.bodyMedium,
  textAlign = TextAlign.Center,
- maxLines = 2,
+ maxLines = 1,
  overflow = TextOverflow.Ellipsis,
  )
+ // Subtitle: album and track counts
+ val parts = mutableListOf<String>()
+ if (artist.numberOfAlbums > 0) {
+ parts.add(context.kordx.t.XAlbums(artist.numberOfAlbums.toString()))
+ }
+ if (artist.numberOfTracks > 0) {
+ parts.add(context.kordx.t.XSongs(artist.numberOfTracks.toString()))
+ }
+ if (parts.isNotEmpty()) {
+ Text(
+ parts.joinToString(" · "),
+ style = MaterialTheme.typography.bodySmall,
+ textAlign = TextAlign.Center,
+ maxLines = 1,
+ overflow = TextOverflow.Ellipsis,
+ )
+ }
  },
  onPlay = {
  context.kordx.radio.shorty.playQueue(artist.getSortedSongIds(context.kordx))

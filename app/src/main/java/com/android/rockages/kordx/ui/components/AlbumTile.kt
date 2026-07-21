@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.android.rockages.kordx.core.groove.Album
+import com.android.rockages.kordx.core.groove.Song
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.ui.view.AlbumViewRoute
 import com.android.rockages.kordx.ui.view.ArtistViewRoute
@@ -77,6 +78,14 @@ fun AlbumDropdownMenu(
  onDismissRequest: () -> Unit,
 ) {
  var showAddToPlaylistDialog by remember { mutableStateOf(false) }
+
+ // Deduplicate artist names using normalization (same as SongDropdownMenu).
+ val uniqueArtists = remember(album.artists) {
+ val seen = linkedSetOf<String>()
+ album.artists.filter { name ->
+ seen.add(Song.normalizeArtistKey(name))
+ }
+ }
 
  DropdownMenu(
  expanded = expanded,
@@ -148,10 +157,12 @@ fun AlbumDropdownMenu(
  showAddToPlaylistDialog = true
  }
  )
- if (album.artists.isNotEmpty()) {
+
+ // Navigation section: plain artist names, no "View Artist:" prefix
+ if (uniqueArtists.isNotEmpty()) {
  HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
  }
- album.artists.forEach { artistName ->
+ uniqueArtists.forEach { artistName ->
  DropdownMenuItem(
  modifier = Modifier.height(48.dp),
  contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -159,7 +170,7 @@ fun AlbumDropdownMenu(
  Icon(Icons.Filled.Person, null)
  },
  text = {
- Text("${context.kordx.t.ViewArtist}: $artistName")
+ Text(artistName)
  },
  onClick = {
  onDismissRequest()

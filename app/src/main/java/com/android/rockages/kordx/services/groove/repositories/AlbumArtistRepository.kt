@@ -23,9 +23,17 @@ class AlbumArtistRepository(private val kordx: KordX) {
  ALBUMS_COUNT,
  }
 
+ // Primary caches keyed by normalized key (Song.normalizeArtistKey).
  private val cache = ConcurrentHashMap<String, AlbumArtist>()
  private val songIdsCache = ConcurrentHashMap<String, ConcurrentSet<String>>()
  private val albumIdsCache = ConcurrentHashMap<String, ConcurrentSet<String>>()
+
+ // Maps normalized key -> canonical display name (the first variant seen).
+ private val canonicalName = ConcurrentHashMap<String, String>()
+
+ // Reverse lookup: raw display name -> normalized key.
+ private val nameToKey = ConcurrentHashMap<String, String>()
+
  private val searcher = FuzzySearcher<String>(
  options = listOf(FuzzySearchOption({ v -> get(v)?.name?.let { compareString(it) } }))
  )
@@ -40,29 +48,56 @@ class AlbumArtistRepository(private val kordx: KordX) {
  cache.size
  }
 
+ /**
+ * Resolves a raw album-artist name to its normalized key.
+ * If the name has never been seen, returns null.
+ */
+ private fun resolveKey(rawName: String): String? {
+ return nameToKey[rawName] ?: Song.normalizeArtistKey(rawName).let { norm ->
+ if (cache.containsKey(norm)) {
+ nameToKey[rawName] = norm
+ norm
+ } else {
+ null
+ }
+ }
+ }
+
+ /**
+ * Resolves or creates a normalized key for [rawName].
+ * On first encounter, registers the canonical display name.
+ */
+ private fun resolveOrCreateKey(rawName: String): String {
+ val norm = Song.normalizeArtistKey(rawName)
+ nameToKey.putIfAbsent(rawName, norm)
+ canonicalName.putIfAbsent(norm, rawName)
+ return norm
+ }
+
  internal fun onSong(song: Song) {
  song.albumArtists.forEach { albumArtist ->
- songIdsCache.compute(albumArtist) { _, value ->
+ val key = resolveOrCreateKey(albumArtist)
+ songIdsCache.compute(key) { _, value ->
  value?.apply { add(song.id) } ?: concurrentSetOf(song.id)
  }
  var nNumberOfAlbums = 0
  kordx.groove.album.getIdFromSong(song)?.let { albumId ->
- albumIdsCache.compute(albumArtist) { _, value ->
+ albumIdsCache.compute(key) { _, value ->
  nNumberOfAlbums = (value?.size ?: 0) + 1
  value?.apply { add(albumId) } ?: concurrentSetOf(albumId)
  }
  }
- cache.compute(albumArtist) { _, value ->
+ cache.compute(key) { _, value ->
  value?.apply {
  numberOfAlbums = nNumberOfAlbums
  numberOfTracks++
  } ?: run {
  _all.update {
- it + albumArtist
+ it + canonicalName.getValue(key)
  }
  emitCount()
  AlbumArtist(
- name = albumArtist,
+ name = canonicalName.getValue(key),
  numberOfAlbums = 1,
  numberOfTracks = 1,
  )
@@ -73,13 +108,16 @@ class AlbumArtistRepository(private val kordx: KordX) {
 
  fun reset() {
  cache.clear()
+ canonicalName.clear()
+ nameToKey.clear()
  _all.update {
  emptyList()
  }
  emitCount()
  }
 
- fun getArtworkUri(albumArtistName: String) = songIdsCache[albumArtistName]?.firstOrNull()
+ fun getArtworkUri(albumArtistName: String) = resolveKey(albumArtistName)
+ ?.let { key -> songIdsCache[key]?.firstOrNull() }
  ?.let { kordx.groove.song.getArtworkUri(it) }
  ?: kordx.groove.song.getDefaultArtworkUri()
 
@@ -98,19 +136,22 @@ class AlbumArtistRepository(private val kordx: KordX) {
  SortBy.CUSTOM -> albumArtistNames
  SortBy.ARTIST_NAME -> albumArtistNames.sortedBy { get(it)?.name?.withCase(sensitive) }
  SortBy.TRACKS_COUNT -> albumArtistNames.sortedBy { get(it)?.numberOfTracks }
- SortBy.ALBUMS_COUNT -> albumArtistNames.sortedBy { get(it)?.numberOfTracks }
+ SortBy.ALBUMS_COUNT -> albumArtistNames.sortedBy { get(it)?.numberOfAlbums }
  }
  return if (reverse) sorted.reversed() else sorted
  }
 
  fun count() = cache.size
- fun ids() = cache.keys.toList()
+ fun ids() = canonicalName.values.toList()
  fun values() = cache.values.toList()
 
- fun get(albumArtistName: String) = cache[albumArtistName]
+ fun get(albumArtistName: String): AlbumArtist? {
+ val key = resolveKey(albumArtistName)
+ return key?.let { cache[it] }
+ }
  fun get(albumArtistNames: List<String>) = albumArtistNames.mapNotNull { get(it) }
- fun getAlbumIds(albumArtistName: String) =
- albumIdsCache[albumArtistName]?.toList() ?: emptyList()
-
- fun getSongIds(albumArtistName: String) = songIdsCache[albumArtistName]?.toList() ?: emptyList()
+ fun getAlbumIds(albumArtistName: String) = resolveKey(albumArtistName)
+ ?.let { albumIdsCache[it]?.toList() } ?: emptyList()
+ fun getSongIds(albumArtistName: String) = resolveKey(albumArtistName)
+ ?.let { songIdsCache[it]?.toList() } ?: emptyList()
 }
