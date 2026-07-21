@@ -175,7 +175,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  }
  }
  }
- Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
+ Spacer(modifier = Modifier.height(defaultHorizontalPadding - 4.dp))
  when (controlsLayout) {
  NowPlayingControlsLayout.CompactLeft -> NowPlayingCompactControls(
  context,
@@ -193,9 +193,9 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  data = data,
  )
  }
- Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
+ Spacer(modifier = Modifier.height(defaultHorizontalPadding - 8.dp))
  NowPlayingSeekBar(context)
- Spacer(modifier = Modifier.height(defaultHorizontalPadding))
+ Spacer(modifier = Modifier.height(defaultHorizontalPadding - 12.dp))
  }
  }
 }

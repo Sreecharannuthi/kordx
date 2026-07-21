@@ -2,6 +2,7 @@ package com.android.rockages.kordx.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -122,7 +123,9 @@ fun ArtistGrid(
  ) { idx ->
  val name = sortedArtistNames[idx]
  context.kordx.groove.artist.get(name)?.let { artist ->
+ Box(modifier = Modifier.animateItem()) {
  ArtistTile(context, artist)
+ }
  }
  }
  }
@@ -190,10 +193,12 @@ private fun ArtistListContent(
  ) { idx ->
  val name = artists[idx]
  context.kordx.groove.artist.get(name)?.let { artist ->
+ Box(modifier = Modifier.animateItem()) {
  ArtistListRow(
  context = context,
  artist = artist,
  )
+ }
  }
  }
  }

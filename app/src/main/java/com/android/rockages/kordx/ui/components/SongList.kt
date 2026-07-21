@@ -1,6 +1,7 @@
 package com.android.rockages.kordx.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -120,6 +121,7 @@ fun SongList(
  contentType = { _, _ -> Groove.Kind.SONG }
  ) { i, songId ->
  context.kordx.groove.song.get(songId)?.let { song ->
+ Box(modifier = Modifier.animateItem()) {
  SongCard(
  context,
  song = song,
@@ -136,6 +138,7 @@ fun SongList(
  sortedSongIds,
  Radio.PlayOptions(index = i)
  )
+ }
  }
  }
  }
