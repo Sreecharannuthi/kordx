@@ -5,32 +5,70 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-07-21
+## [1.3.0] - 2026-07-22
 
 ### Added
-- **Real Material You tonal palette (UI2)** — replaced the flat
-  single-accent color system with secondary/tertiary derived from the
-  primary via HSL hue-shift + desaturation. `onPrimary` is now
-  luminance-aware so light accents (Yellow/Lime) render dark text instead
-  of white-on-yellow. Added Medium/SemiBold font weights to Inter,
-  Poppins, DM Sans, and Roboto; typography now uses real weights per
-  Material 3 role instead of Compose faux-bold synthesis.
+- **Gapless playback via shared ExoPlayer (GP1–GP3)** — replaced per-song
+  `MediaPlayer` with a single shared Media3 `ExoPlayer` instance in
+  `Radio.kt`. `RadioPlayer` becomes a thin delegate; ExoPlayer's internal
+  playlist handles track transitions with zero gap. `RadioForwardingPlayer`
+  wraps the real ExoPlayer for Android Auto controls. Two hotfixes:
+  main-thread dispatch for all ExoPlayer APIs (`runOnMain` pattern with
+  `@Volatile` cached fields) and reduced `DefaultLoadControl` buffers
+  (min 5s / max 15s) to prevent OOM on constrained AVDs.
+- **Auto-resume on launch** — new `autoResumeOnLaunch` setting (default: off)
+  in Player settings. When enabled, the persisted queue auto-starts playback
+  on app launch via `Radio.restorePreviousQueue()`.
+- **Now Playing a11y + metadata (UI3)** — real `contentDescription` on all 6
+  transport controls for TalkBack. M3 Slider replaces hand-rolled 12dp seek
+  bar (48dp touch target, proper ProgressBarRangeInfo semantics). Muxer tag
+  filtering (Lavf/LAME/iTunes/Nero/Xiph/FLAC/Lavc/Helix) in
+  `toSamplingInfoString`. `showLyrics` moved from global mutable
+  `NowPlayingDefaults` to `Settings.BooleanEntry` for persistence.
+- **Home grid polish (UI4)** — tightened card gap from ~24dp to ~16dp via
+  `ResponsiveGrid` contentPadding(8.dp) + Arrangement.spacedBy(8.dp) with
+  reduced inner tile padding (12→4dp). Per-tile play FAB shrunk to 28dp chip
+  (48dp touch target).
+- **README + screenshots (PR1)** — updated with current UI screenshots.
+- **detekt config wiring (PR3)** — wired project-level `detekt.yml` to all
+  modules via `subprojects { plugins.withType<DetektPlugin> }`. Regenerated
+  per-module baselines.
+- Real Material You tonal palette (UI2) — replaced the flat single-accent
+  color system with secondary/tertiary derived from the primary via HSL
+  hue-shift + desaturation. `onPrimary` is luminance-aware so light accents
+  render dark text. Added Medium/SemiBold font weights to Inter, Poppins,
+  DM Sans, and Roboto.
 
 ### Fixed
-- **Search + queue state (UI1)** — `SearchView` now debounces via
-  `snapshotFlow` + `collectLatest` with a 250 ms delay, replacing the
-  manual `Job` routine. Results use `LazyColumn` for virtualization.
-  `QueueView` selection is now id-based (`selectedSongIds`) so queue
-  mutations no longer desync the checked state. `RadioQueue` gained a
-  `removeByIds(List<String>)` helper and the seek-forward preference key
-  was split from the seek-backward key.
+- **Now Playing artwork regression** — UI3.4 replaced fixed-height spacers
+  with `Spacer(Modifier.weight(1f))` in `NowPlayingBodyContent`. Because
+  BodyContent is called inside an unweighted sibling Column in Body.kt,
+  the weight spacers consumed the entire parent height, collapsing the cover
+  Box to 0px. Reverted to fixed heights (28dp + 20dp). Commit c013c49.
+- **Search + queue state (UI1)** — SearchView now debounces via snapshotFlow
+  + collectLatest with 250ms delay. Results use LazyColumn for
+  virtualization. QueueView selection is id-based so queue mutations no
+  longer desync checked state. RadioQueue gained removeByIds helper.
+- **Native parser hardening (CR1)** — AudioMetadataParser.cpp now releases
+  JNI local references, guards every callback with ExceptionCheck, and
+  parses year-only / year-month DATE tags. ProGuard keep rule preserves
+  JNI callback names so release builds no longer SIGABRT on first scan.
+- **Radio queue / storage correctness (CR2)** —
+  SQLiteKeyValueDatabaseAdapter.put uses CONFLICT_REPLACE, RadioQueue.remove
+  no longer hits index-deflection bug, shuffled remove deletes from
+  originalQueue, Radio.play stale-id path has recursion guard.
+- **ExoPlayer memory + AVAILABLE_COMMANDS builder (GP3 hotfix)** — reduced
+  DefaultLoadControl buffers (min 5s / max 15s) prevent OOM on AVD 192MB
+  heap. Replaced deprecated Commands.Builder.add() loop with single
+  addAll(vararg) to avoid repeated FlagSet.Builder allocations.
 
 ### Changed
-- **Agent documentation consolidation** — moved local-only working docs
-  from `docs/` into `specs/` and added root pointer files (`AGENTS.md`,
-  `CLAUDE.md`, `CONVENTIONS.md`) to `.gitignore` so fresh clones do not
-  end up with dangling pointers.
-
+- **Agent documentation consolidation** — moved local-only working docs from
+  docs/ into specs/ and added root pointer files to .gitignore.
+- **Product Sans font removed (PR2)** — deleted proprietary
+  productsans_regular.ttf and productsans_bold.ttf. KordXBuiltinFonts and
+  KordXTypography now reference only open-source fonts (Inter, Roboto,
+  Poppins, DM Sans).
 ## [1.2.0] - 2026-07-20
 
 ### Added
