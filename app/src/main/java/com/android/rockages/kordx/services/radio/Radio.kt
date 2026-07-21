@@ -157,8 +157,8 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  setSpeed(persistedSpeed, true)
  setPitch(persistedPitch, true)
  if (options.autostart) {
- start()
- }
+                start()
+            }
  }
  player!!.setOnPlaybackPositionListener {
  onPlaybackPositionUpdate.dispatch(it)

@@ -6,6 +6,12 @@ import kotlin.random.Random
 class RadioShorty(private val kordx: KordX) : RadioShortyAdapterTarget {
  override fun playPause() {
  if (!kordx.radio.hasPlayer) {
+ // No active player — but if songs are queued, start playback.
+ // This handles the case where playQueue() set up the queue but
+ // the async prepare() hasn't completed yet, or playback was stopped.
+ if (kordx.radio.queue.currentSongIndex >= 0 && !kordx.radio.queue.isEmpty()) {
+ kordx.radio.play(Radio.PlayOptions(index = kordx.radio.queue.currentSongIndex))
+ }
  return
  }
  when {
@@ -41,7 +47,18 @@ class RadioShorty(private val kordx: KordX) : RadioShortyAdapterTarget {
 
  override fun skip(): Boolean {
  return when {
- !kordx.radio.hasPlayer -> false
+ // No active player but queue has songs — start playback from next (or first).
+ !kordx.radio.hasPlayer -> {
+ if (!kordx.radio.queue.isEmpty()) {
+ val nextIndex = (kordx.radio.queue.currentSongIndex + 1)
+ .coerceAtMost(kordx.radio.queue.currentQueue.size - 1)
+ .coerceAtLeast(0)
+ kordx.radio.play(Radio.PlayOptions(index = nextIndex))
+ true
+ } else {
+ false
+ }
+ }
  kordx.radio.canJumpToNext() -> {
  kordx.radio.jumpToNext()
  true

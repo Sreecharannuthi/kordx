@@ -145,16 +145,16 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  }
 
  fun start() {
- runOnMain {
- exoPlayer.playWhenReady = true
- createDurationTimer()
- if (!hasPlayedOnce) {
- hasPlayedOnce = true
- applySpeed(speed)
- applyPitch(pitch)
- }
- _isPlaying = true
- }
+     runOnMain {
+         createDurationTimer()
+         if (!hasPlayedOnce) {
+             hasPlayedOnce = true
+             applySpeed(speed)
+             applyPitch(pitch)
+         }
+         exoPlayer.playWhenReady = true
+         _isPlaying = true
+     }
  }
 
  fun pause() {
