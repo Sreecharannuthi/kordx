@@ -79,7 +79,7 @@ fun AlbumGrid(
  else -> ResponsiveGrid(gridColumns) {
  itemsIndexed(
  sortedAlbumIds,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.ALBUM }
  ) { _, albumId ->
  context.kordx.groove.album.get(albumId)?.let { album ->

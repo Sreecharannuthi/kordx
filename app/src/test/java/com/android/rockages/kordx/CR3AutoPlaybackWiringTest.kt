@@ -167,7 +167,7 @@ class CR3AutoPlaybackWiringTest {
 
     @Test
     fun overviewReflectsAutoPlaybackSupport() {
-        val source = loadSource("docs/architecture/overview.md")
+        val source = loadSource("specs/architecture/overview.md")
         assertTrue(
             source.contains("KordXMediaLibraryService") && source.contains("RadioForwardingPlayer"),
             "architecture/overview.md must reflect Media3 Auto playback wiring"

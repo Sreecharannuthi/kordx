@@ -78,7 +78,7 @@ fun ArtistGrid(
  else -> ResponsiveGrid(gridColumns) {
  itemsIndexed(
  sortedArtistNames,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.ARTIST }
  ) { _, artistName ->
  context.kordx.groove.artist.get(artistName)?.let { artist ->

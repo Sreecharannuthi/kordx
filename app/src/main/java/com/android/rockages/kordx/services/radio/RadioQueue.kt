@@ -129,6 +129,19 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  }
 
  /**
+ * Removes songs by [songIds] (id-based removal). Looks up all
+ * matching indices and delegates to [remove] by index.
+ */
+ fun removeByIds(songIds: List<String>) {
+ val indices = songIds.flatMap { id ->
+ currentQueue.indices.filter { currentQueue[it] == id }
+ }.sortedDescending().distinct()
+ if (indices.isNotEmpty()) {
+ remove(indices)
+ }
+ }
+
+ /**
  * Removes the song at [index] from both queues and adjusts
  * [currentSongIndex], but does NOT trigger playback. Used by
  * [Radio.play] when it discovers a stale song id at the requested

@@ -296,7 +296,7 @@ class Settings(private val kordx: KordX) {
  val nowPlayingAdditionalInfo = BooleanEntry("show_now_playing_additional_info", true)
  val nowPlayingSeekControls = BooleanEntry("enable_seek_controls", false)
  val seekBackDuration = IntEntry("seek_back_duration", 15)
- val seekForwardDuration = IntEntry("seek_back_duration", 30)
+ val seekForwardDuration = IntEntry("seek_forward_duration", 30)
  val miniPlayerTrackControls = BooleanEntry("mini_player_extended_controls", false)
  val miniPlayerSeekControls = BooleanEntry("mini_player_seek_controls", false)
  val fontFamily = NullableStringEntry("font_family")

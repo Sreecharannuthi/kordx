@@ -258,7 +258,7 @@ fun SongExplorerList(
  }
  itemsIndexed(
  sortedEntities.files.entries.toList(),
- key = { i, x -> "$i-${x.key}" },
+ key = { _, x -> x.key },
  contentType = { _, _ -> Groove.Kind.SONG }
  ) { i, entry ->
  context.kordx.groove.song.get(entry.key)?.let { song ->

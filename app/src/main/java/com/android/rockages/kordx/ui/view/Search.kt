@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -49,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -66,8 +66,9 @@ import com.android.rockages.kordx.ui.components.SongCard
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.core.utils.joinToStringIfNotEmpty
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -84,7 +85,8 @@ private data class SearchResult(
 @Serializable
 data class SearchViewRoute(val initialChip: String?)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@Suppress("CyclomaticComplexMethod")
 @Composable
 fun SearchView(context: ViewContext, route: SearchViewRoute) {
  val coroutineScope = rememberCoroutineScope()
@@ -100,14 +102,23 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
 
  fun isChipSelected(kind: Groove.Kind) = selectedChip == null || selectedChip == kind
 
- var currentTermsRoutine: Job? = null
  fun setTerms(nTerms: String) {
  terms = nTerms
+ if (nTerms.isNotEmpty()) {
  isSearching = true
- currentTermsRoutine?.cancel()
- currentTermsRoutine = coroutineScope.launch {
+ }
+ }
+
+ LaunchedEffect(Unit) {
+ snapshotFlow { Pair(terms, selectedChip) }
+ .debounce(250)
+ .collectLatest { (currentTerms, _) ->
+ if (currentTerms.isEmpty()) {
+ results = null
+ isSearching = false
+ return@collectLatest
+ }
  withContext(Dispatchers.Default) {
- delay(250)
  val songIds = mutableListOf<String>()
  val artistNames = mutableListOf<String>()
  val albumIds = mutableListOf<String>()
@@ -115,46 +126,45 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  val genreNames = mutableListOf<String>()
  val playlistIds = mutableListOf<String>()
 
- if (nTerms.isNotEmpty()) {
  if (isChipSelected(Groove.Kind.SONG)) {
  songIds.addAll(
  context.kordx.groove.song
- .search(context.kordx.groove.song.ids(), terms)
+ .search(context.kordx.groove.song.ids(), currentTerms)
  .map { it.entity }
  )
  }
  if (isChipSelected(Groove.Kind.ARTIST)) {
  artistNames.addAll(
  context.kordx.groove.artist
- .search(context.kordx.groove.artist.ids(), terms)
+ .search(context.kordx.groove.artist.ids(), currentTerms)
  .map { it.entity }
  )
  }
  if (isChipSelected(Groove.Kind.ALBUM)) {
  albumIds.addAll(
  context.kordx.groove.album
- .search(context.kordx.groove.album.ids(), terms)
+ .search(context.kordx.groove.album.ids(), currentTerms)
  .map { it.entity }
  )
  }
  if (isChipSelected(Groove.Kind.ALBUM_ARTIST)) {
  albumArtistNames.addAll(
  context.kordx.groove.albumArtist
- .search(context.kordx.groove.albumArtist.ids(), terms)
+ .search(context.kordx.groove.albumArtist.ids(), currentTerms)
  .map { it.entity }
  )
  }
  if (isChipSelected(Groove.Kind.GENRE)) {
  genreNames.addAll(
  context.kordx.groove.genre
- .search(context.kordx.groove.genre.ids(), terms)
+ .search(context.kordx.groove.genre.ids(), currentTerms)
  .map { it.entity }
  )
  }
  if (isChipSelected(Groove.Kind.PLAYLIST)) {
  playlistIds.addAll(
  context.kordx.groove.playlist
- .search(context.kordx.groove.playlist.ids(), terms)
+ .search(context.kordx.groove.playlist.ids(), currentTerms)
  .map { it.entity }
  )
  }
@@ -171,7 +181,6 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  isSearching = false
  }
  }
- }
 
  val configuration = LocalConfiguration.current
  val density = LocalDensity.current
@@ -179,11 +188,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  val chipsScrollState = rememberScrollState()
  var initialScroll = remember { false }
 
- LaunchedEffect(LocalContext.current) {
+ LaunchedEffect(Unit) {
  textFieldFocusRequester.requestFocus()
- snapshotFlow { configuration.orientation }.collect {
- setTerms(terms)
- }
  }
 
  Scaffold(
@@ -242,7 +248,6 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  },
  onClick = {
  selectedChip = null
- setTerms(terms)
  }
  )
  Groove.Kind.entries.map {
@@ -275,7 +280,6 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  },
  onClick = {
  selectedChip = it
- setTerms(terms)
  }
  )
  }
@@ -339,10 +343,10 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
 
  else -> {
- Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+ LazyColumn {
  if (hasSongs) {
- SideHeading(context, Groove.Kind.SONG)
- songIds.forEach { songId ->
+ item { SideHeading(context, Groove.Kind.SONG) }
+ items(songIds, key = { "song-$it" }) { songId ->
  context.kordx.groove.song.get(songId)?.let { song ->
  SongCard(context, song) {
  context.kordx.radio.shorty.playQueue(song.id)
@@ -351,8 +355,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  if (hasArtists) {
- SideHeading(context, Groove.Kind.ARTIST)
- artistNames.forEach { artistName ->
+ item { SideHeading(context, Groove.Kind.ARTIST) }
+ items(artistNames, key = { "artist-$it" }) { artistName ->
  context.kordx.groove.artist.get(artistName)
  ?.let { artist ->
  GenericGrooveCard(
@@ -380,8 +384,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  if (hasAlbums) {
- SideHeading(context, Groove.Kind.ALBUM)
- albumIds.forEach { albumId ->
+ item { SideHeading(context, Groove.Kind.ALBUM) }
+ items(albumIds, key = { "album-$it" }) { albumId ->
  context.kordx.groove.album.get(albumId)
  ?.let { album ->
  GenericGrooveCard(
@@ -412,8 +416,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  if (hasAlbumArtists) {
- SideHeading(context, Groove.Kind.ALBUM_ARTIST)
- albumArtistNames.forEach { albumArtistName ->
+ item { SideHeading(context, Groove.Kind.ALBUM_ARTIST) }
+ items(albumArtistNames, key = { "albumartist-$it" }) { albumArtistName ->
  context.kordx.groove.albumArtist.get(albumArtistName)
  ?.let { albumArtist ->
  GenericGrooveCard(
@@ -441,8 +445,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  if (hasPlaylists) {
- SideHeading(context, Groove.Kind.PLAYLIST)
- playlistIds.forEach { playlistId ->
+ item { SideHeading(context, Groove.Kind.PLAYLIST) }
+ items(playlistIds, key = { "playlist-$it" }) { playlistId ->
  context.kordx.groove.playlist.get(playlistId)
  ?.let { playlist ->
  GenericGrooveCard(
@@ -470,8 +474,8 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  if (hasGenres) {
- SideHeading(context, Groove.Kind.GENRE)
- genreNames.forEach { genreName ->
+ item { SideHeading(context, Groove.Kind.GENRE) }
+ items(genreNames, key = { "genre-$it" }) { genreName ->
  context.kordx.groove.genre.get(genreName)
  ?.let { genre ->
  GenericGrooveCard(
@@ -494,7 +498,7 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  }
- Spacer(modifier = Modifier.height(12.dp))
+ item { Spacer(modifier = Modifier.height(12.dp)) }
  }
  }
  }

@@ -116,7 +116,7 @@ fun SongList(
  leadingContent?.invoke(this)
  itemsIndexed(
  sortedSongIds,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.SONG }
  ) { i, songId ->
  context.kordx.groove.song.get(songId)?.let { song ->
