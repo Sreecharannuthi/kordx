@@ -12,6 +12,10 @@ import java.io.File
  * text because the full Android Auto / Media3 integration requires a
  * real Android runtime (AAOS/DHU). The structural assertions here are
  * the cheapest way to ensure the wiring does not regress.
+ *
+ * Note: the spec-dependent overview assertion was removed because the
+ * `specs/` directory is gitignored and local-only, so it is not present
+ * in CI and would fail every CI run.
  */
 class CR3AutoPlaybackWiringTest {
 
@@ -162,19 +166,6 @@ class CR3AutoPlaybackWiringTest {
         assertFalse(
             source.contains("var remaining = events") && source.contains("remaining and -remaining"),
             "RadioForwardingPlayer must not decompose OR-ed bits manually"
-        )
-    }
-
-    @Test
-    fun overviewReflectsAutoPlaybackSupport() {
-        val source = loadSource("specs/architecture/overview.md")
-        assertTrue(
-            source.contains("KordXMediaLibraryService") && source.contains("RadioForwardingPlayer"),
-            "architecture/overview.md must reflect Media3 Auto playback wiring"
-        )
-        assertFalse(
-            source.contains("KordXMediaBrowserService") && source.contains("setSessionToken"),
-            "architecture/overview.md must not describe the legacy browse-only service"
         )
     }
 }
