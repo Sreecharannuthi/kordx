@@ -5,6 +5,32 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-07-21
+
+### Added
+- **Real Material You tonal palette (UI2)** — replaced the flat
+  single-accent color system with secondary/tertiary derived from the
+  primary via HSL hue-shift + desaturation. `onPrimary` is now
+  luminance-aware so light accents (Yellow/Lime) render dark text instead
+  of white-on-yellow. Added Medium/SemiBold font weights to Inter,
+  Poppins, DM Sans, and Roboto; typography now uses real weights per
+  Material 3 role instead of Compose faux-bold synthesis.
+
+### Fixed
+- **Search + queue state (UI1)** — `SearchView` now debounces via
+  `snapshotFlow` + `collectLatest` with a 250 ms delay, replacing the
+  manual `Job` routine. Results use `LazyColumn` for virtualization.
+  `QueueView` selection is now id-based (`selectedSongIds`) so queue
+  mutations no longer desync the checked state. `RadioQueue` gained a
+  `removeByIds(List<String>)` helper and the seek-forward preference key
+  was split from the seek-backward key.
+
+### Changed
+- **Agent documentation consolidation** — moved local-only working docs
+  from `docs/` into `specs/` and added root pointer files (`AGENTS.md`,
+  `CLAUDE.md`, `CONVENTIONS.md`) to `.gitignore` so fresh clones do not
+  end up with dangling pointers.
+
 ## [1.2.0] - 2026-07-20
 
 ### Added
