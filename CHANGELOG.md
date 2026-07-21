@@ -5,6 +5,44 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-07-23
+
+### Added
+- **Artist identity normalization (AX1)** — `Song.normalizeArtistKey()` in
+  `:core` normalizes artist names (lowercase, trim, collapse whitespace) so
+  spelling/case variants of the same artist merge into one profile in the
+  Artists and Album Artists tabs. First-variant-wins canonical display name.
+  13 pinning JVM tests.
+- **Artists view overhaul (UI9)** — list/grid toggle in the sort bar. List
+  view shows A–Z section headers, circular artist artwork, "N albums · N
+  tracks" subtitle, and a play button. Grid tiles also show album/track
+  counts.
+- **Sort-reorder animations (UI10)** — `Modifier.animateItem()` on all song
+  lists and artist/album grids; items animate smoothly into place when sort
+  order changes.
+
+### Changed
+- **Options menu restructure (UI8)** — deduplicated artist/album-artist
+  entries in song and album dropdown menus (same artist under different
+  spellings appears once); plain artist names instead of "View Artist:"
+  prefixes; album entries show the album name.
+- **Compact detail headers (UI12)** — artist and album detail pages use a
+  compact 56dp-row header instead of a full-width hero banner; the song list
+  is now the primary content. Album tiles show "year · N songs" subtitle.
+- **Search redesign** — rounded 28dp search bar, empty-state prompt with
+  music-note icon, titleSmall section headers, consistent spacing.
+- **Transition consistency (UI10-lite)** — every page now slides in from the
+  left; only Now Playing / Queue / Lyrics keep the modal slide-up.
+- **Now Playing layout compact (UI12)** — tightened gaps across metadata,
+  transport controls, seek bar, and bottom bar (~90dp reclaimed); title sits
+  closer to the artwork with 20dp breathing room above the seek bar; proper
+  top/bottom padding for the system navigation bar.
+
+### Fixed
+- **ALBUMS_COUNT sort bug (AX1.4)** — `SortBy.ALBUMS_COUNT` in both artist
+  repositories was sorting by `numberOfTracks` (copy-paste bug); now sorts by
+  `numberOfAlbums`.
+
 ## [1.3.0] - 2026-07-22
 
 ### Added
