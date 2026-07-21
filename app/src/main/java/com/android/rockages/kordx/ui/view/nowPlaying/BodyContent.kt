@@ -4,9 +4,11 @@ import com.android.rockages.kordx.services.groove.toSamplingInfoString
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -18,8 +20,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Slider as M3Slider
-import androidx.compose.material3.SliderDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
@@ -39,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -348,26 +350,103 @@ private fun NowPlayingSeekBar(
  onSeekEnd: (Float) -> Unit,
  onSeekCancel: () -> Unit,
 ) {
- var dragValue by remember { mutableStateOf<Float?>(null) }
+ val sliderHeight = 12.dp
+ val thumbSize = 12.dp
+ val thumbSizeHalf = thumbSize.div(2)
+ val trackHeight = 4.dp
 
- M3Slider(
- value = dragValue ?: ratio,
- onValueChange = { newValue ->
- if (dragValue == null) onSeekStart()
- dragValue = newValue
- onSeek(newValue)
- },
- onValueChangeFinished = {
- dragValue?.let { onSeekEnd(it) }
- dragValue = null
- },
- modifier = Modifier.fillMaxWidth(),
- colors = SliderDefaults.colors(
- thumbColor = MaterialTheme.colorScheme.primary,
- activeTrackColor = MaterialTheme.colorScheme.primary,
- inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
- ),
+ var dragging by remember { mutableStateOf(false) }
+ var dragRatio by remember { mutableFloatStateOf(0f) }
+
+ BoxWithConstraints(
+ modifier = Modifier
+ .fillMaxWidth()
+ .height(sliderHeight),
+ contentAlignment = Alignment.Center,
+ ) {
+ val sliderWidth = this@BoxWithConstraints.maxWidth
+
+ Box(
+ modifier = Modifier
+ .height(sliderHeight)
+ .fillMaxWidth()
+ .pointerInput(Unit) {
+ detectTapGestures(
+ onTap = { offset ->
+ val tapRatio = (offset.x / sliderWidth.toPx()).coerceIn(0f..1f)
+ onSeekEnd(tapRatio)
+ }
  )
+ }
+ .pointerInput(Unit) {
+ var offsetX = 0f
+ detectHorizontalDragGestures(
+ onDragStart = { offset ->
+ offsetX = offset.x
+ dragging = true
+ onSeekStart()
+ },
+ onDragEnd = {
+ onSeekEnd(dragRatio)
+ offsetX = 0f
+ dragging = false
+ dragRatio = 0f
+ },
+ onDragCancel = {
+ onSeekCancel()
+ offsetX = 0f
+ dragging = false
+ dragRatio = 0f
+ },
+ onHorizontalDrag = { pointer, dragAmount ->
+ pointer.consume()
+ offsetX += dragAmount
+ dragRatio = (offsetX / sliderWidth.toPx()).coerceIn(0f..1f)
+ onSeek(dragRatio)
+ },
+ )
+ }
+ ) {
+ Box(
+ modifier = Modifier
+ .padding(thumbSizeHalf, 0.dp)
+ .height(trackHeight)
+ .fillMaxWidth()
+ .background(
+ MaterialTheme.colorScheme.surfaceVariant,
+ RoundedCornerShape(thumbSizeHalf)
+ )
+ .align(Alignment.Center)
+ ) {
+ Box(
+ modifier = Modifier
+ .height(trackHeight)
+ .fillMaxWidth(if (dragging) dragRatio else ratio)
+ .background(
+ MaterialTheme.colorScheme.primary,
+ RoundedCornerShape(thumbSizeHalf)
+ )
+ )
+ }
+ Box(
+ modifier = Modifier
+ .fillMaxWidth()
+ .align(Alignment.Center)
+ ) {
+ Box(
+ modifier = Modifier
+ .size(thumbSize)
+ .offset(
+ sliderWidth
+ .minus(thumbSizeHalf.times(2))
+ .times(if (dragging) dragRatio else ratio),
+ 0.dp
+ )
+ .background(MaterialTheme.colorScheme.primary, CircleShape)
+ )
+ }
+ }
+ }
 }
 
 @Composable
