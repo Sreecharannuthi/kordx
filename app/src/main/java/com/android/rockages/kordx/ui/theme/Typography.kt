@@ -60,14 +60,6 @@ object KordXBuiltinFonts {
             Font(R.font.roboto_bold, FontWeight.Bold),
         ),
     )
-
-    val ProductSans = KordXFont.fromValue(
-        fontName = "Product Sans",
-        fontFamily = FontFamily(
-            Font(R.font.productsans_regular, FontWeight.Normal),
-            Font(R.font.productsans_bold, FontWeight.Bold)
-        ),
-    )
 }
 
 object KordXTypography {
@@ -77,7 +69,6 @@ object KordXTypography {
         KordXBuiltinFonts.Poppins.fontName to KordXBuiltinFonts.Poppins,
         KordXBuiltinFonts.DMSans.fontName to KordXBuiltinFonts.DMSans,
         KordXBuiltinFonts.Roboto.fontName to KordXBuiltinFonts.Roboto,
-        KordXBuiltinFonts.ProductSans.fontName to KordXBuiltinFonts.ProductSans,
     )
 
     fun resolveFont(name: String?) = all[name] ?: defaultFont
