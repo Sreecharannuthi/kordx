@@ -81,7 +81,7 @@ fun NowPlayingBodyBottomBar(
  .padding(
  start = 8.dp,
  end = 8.dp,
- bottom = 0.dp,
+ bottom = 8.dp,
  ),
  verticalAlignment = Alignment.CenterVertically,
  ) {

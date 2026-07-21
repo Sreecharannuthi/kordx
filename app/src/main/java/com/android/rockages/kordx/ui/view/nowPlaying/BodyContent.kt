@@ -81,7 +81,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  .togetherWith(FadeTransition.exitTransition())
  },
  ) { targetStateSong ->
- Column(modifier = Modifier.padding(defaultHorizontalPadding, 0.dp)) {
+ Column(modifier = Modifier.padding(defaultHorizontalPadding, 12.dp)) {
  Text(
  targetStateSong.title,
  style = MaterialTheme.typography.headlineSmall
