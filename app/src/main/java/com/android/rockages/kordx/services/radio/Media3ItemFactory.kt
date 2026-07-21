@@ -13,7 +13,23 @@ import com.android.rockages.kordx.core.groove.Playlist
 import com.android.rockages.kordx.core.groove.Song
 import com.android.rockages.kordx.core.utils.DurationUtils
 
-/** + 26i — Builders for the AndroidX Media3 browse tree of the new [KordXMediaLibraryService]. The 26i cutover inlines the per-entity display-contract data (the `descriptionForSong` / `songSubtitle` / `songExtras` / `albumSubtitle` / etc. helpers) from the deleted legacy `MediaItemFactory` so the new service has a single self-contained Media3 `MediaItem` factory. The `Extras` data class + the constants + the placeholder helper live in the new shared [KordXMediaSessionConstants] file (also a 26i extraction).  Why one factory (not two) Before 26i the codebase had two parallel factories: `MediaItemFactory` (producing the legacy `MediaBrowserCompat.MediaItem` for the -22 `KordXMediaBrowserService`) and `Media3ItemFactory` (producing the Media3 `MediaItem` for the new service). They shared the same data layer (the per-entity display contract is framework-agnostic). After 26i the legacy service is gone, so the legacy factory is gone too — theer-entity data is inlined here, and the new factory produces Media3 `MediaItem` instances directly.  Media3 MediaItem shape A Media3 `MediaItem` carries its display fields (`title` / `subtitle` / `description` / `iconUri` / `extras` / `isBrowsable` / `isPlayable` / `mediaType`) on the inner `MediaMetadata`, not on the `MediaItem` itself. The factory below always sets both: - `MediaItem.Builder().setMediaId(id).setMediaMetadata(metadata)` — thetem-level mediaId is what the framework routes on. - `MediaMetadata.Builder().setTitle(title).setSubtitle(subtitle)… .setIsBrowsable(b).setIsPlayable(p).setMediaType(t).setExtras(b)` — theetadata-level fields are what the framework renders. The `setUri(...)` builder method is intentionally **not** called — the songs are routed through `KordXMediaSessionConstants.mediaIdToSongId` + the live `KordX.groove.song.get(id)` lookup, not through an `ExoPlayer.setMediaItem(uri)` path.  Unstable API Marked `@UnstableApi` because `MediaItem` and `MediaMetadata` are part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade (1.10.x requires `compileSdk = 36`) will be handled */
+/** Builders for the AndroidX Media3 browse tree of [KordXMediaLibraryService].
+ *
+ * A Media3 `MediaItem` carries its display fields (`title` / `subtitle` / `description` /
+ * `iconUri` / `extras` / `isBrowsable` / `isPlayable` / `mediaType`) on the inner
+ * `MediaMetadata`, not on the `MediaItem` itself. The factory below always sets both:
+ * - `MediaItem.Builder().setMediaId(id).setMediaMetadata(metadata)` — the item-level
+ *   mediaId is what the framework routes on.
+ * - `MediaMetadata.Builder().setTitle(title).setSubtitle(subtitle)… .setIsBrowsable(b).setIsPlayable(p).setMediaType(t).setExtras(b)` —
+ *   the metadata-level fields are what the framework renders.
+ *
+ * The `setUri(...)` builder method is intentionally **not** called — the songs are routed
+ * through [KordXMediaSessionConstants.mediaIdToSongId] + the live `KordX.groove.song.get(id)`
+ * lookup, not through an `ExoPlayer.setMediaItem(uri)` path.
+ *
+ * Marked `@UnstableApi` because `MediaItem` and `MediaMetadata` are part of Media3's unstable
+ * surface.
+ */
 @UnstableApi
 internal object Media3ItemFactory {
 
@@ -40,20 +56,11 @@ internal object Media3ItemFactory {
  }
 
  /**
- * — additive helper for the recently-played tab. Returns
- * a copy of the receiver with [key] -> [value] appended to the
- * `longEntries` map. Used to layer the `PLAYED_AT` timestamp
- * extra on top of the standard [songExtras] (so the
- * recently-played row carries the per-entity display contract
- * *plus* the play-time hint for the "X minutes ago" style label
- * AAOS can render).
- *
- * 26i — was a top-level extension function
- * `internal fun Extras.withLong(...)` in the legacy
- * `MediaItemFactory.kt`; the 26i inlining promoted it to a
- * member function so the JVM tests can call it as a regular
- * method (`base.withLong(...)` works inside the
- * `Media3ItemFactory` companion).
+ * Additive helper for the recently-played tab. Returns a copy of the receiver with
+ * [key] -> [value] appended to the `longEntries` map. Used to layer the `PLAYED_AT`
+ * timestamp extra on top of the standard [songExtras] so the recently-played row carries
+ * the per-entity display contract *plus* the play-time hint for the "X minutes ago" style
+ * label AAOS can render.
  */
  fun withLong(key: String, value: Long): Extras =
  copy(longEntries = longEntries + (key to value))
@@ -239,11 +246,9 @@ internal object Media3ItemFactory {
  "${playlist.numberOfTracks} songs"
 
  /**
- * Convenience wrapper for [Extras.withLong] used by the
- * recently-played tab to layer the `PLAYED_AT` timestamp
- * extra on top of the standard [songExtras]. Mirrors the
- * legacy `MediaItemFactory.songExtrasWithPlayedAt` helper
- * (26i inlined the legacy `MediaItemFactory` here).
+ * Convenience wrapper for [Extras.withLong] used by the recently-played tab to layer the
+ * `PLAYED_AT` timestamp extra on top of the standard [songExtras]. Mirrors the legacy
+ * `MediaItemFactory.songExtrasWithPlayedAt` helper.
  */
  fun songExtrasWithPlayedAt(
  song: Song,

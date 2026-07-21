@@ -105,7 +105,7 @@ object ThemeColorSchemes {
             onSecondary = luminanceAwareOnPrimary(secondary),
             secondaryContainer = secondaryContainer,
             // Pin to fixed dark value so FilterChip labels are
-            // visible regardless of primary colour (pre-30i fix).
+            // visible regardless of primary colour.
             onSecondaryContainer = DarkOnBackgroundForLightTheme,
             tertiary = tertiary,
             onTertiary = luminanceAwareOnPrimary(tertiary),

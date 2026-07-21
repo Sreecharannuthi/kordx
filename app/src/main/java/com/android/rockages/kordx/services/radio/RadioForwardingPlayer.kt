@@ -17,7 +17,34 @@ import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import java.util.concurrent.CopyOnWriteArrayList
 import androidx.media3.common.util.UnstableApi
 
-/** AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine. This is the "heart" of the [androidx.media3.session.MediaLibraryService] migration: every other  a [Player] that the new `MediaLibrarySession` can wrap.  Why this class exists KordX has a custom playback engine ([Radio], [RadioQueue], [RadioShorty], [RadioPlayer]) with a non-Media3 event surface ([Radio.Events.Player.*], [Radio.Events.Queue.*], [Radio.Events.QueueOption.*]). AndroidX Media3's `MediaLibraryService` / `MediaLibrarySession` only know about the [Player] interface and [Player.Listener] events. This adapter translates one surface to the other.  Design The class extends [BasePlayer] rather than implementing [Player] directly because [BasePlayer] provides the `final` default-implementations of the ~50 media-item / navigation methods (e.g. `setMediaItem`, `addMediaItem`, `removeMediaItem`, `clearMediaItems`, `next`, `previous`, `seekToDefaultPosition`, `seekBack`, `seekForward`, `hasPreviousMediaItem`, etc.). Those defaults delegate to a small set of abstract getters (`getCurrentTimeline()`, `getMediaItemCount()`, `getMediaItemAt(i)`, `getCurrentMediaItemIndex()`) and the single protected abstract [seekTo] (which we wire to [Radio.seek]). The remaining ~30 [Player] methods are implemented below to map cleanly to the [Radio] / [RadioShorty] / [RadioQueue] public surface.  Concurrency The adapter does not own playback threads. The [Radio] engine is driven by the `KordXMediaLibraryService`   which calls `addListener` / `removeListener` from the Media3 session's callback thread. The adapter subscribes to [Radio.onUpdate] in [subscribeToRadio] (lazy, on first listener add) and unsubscribes in [unsubscribeFromRadio] (called from [release]); events are dispatched to listeners via [playerListenerHandler] (the main [Looper] by default) so the listener sees the same threading model as a regular Media3 [Player].  Interface-driven testability The constructor takes [RadioAdapterTarget] (and the smaller [RadioQueueAdapterTarget] / [RadioShortyAdapterTarget]) rather than a concrete [Radio] / `KordX`. The concrete [Radio], [RadioQueue], and [RadioShorty] classes explicitly implement these interfaces in their class headers. Tests provide hand-rolled fakes. This keeps the adapter JVM-testable without instantiating an `Application` / `ViewModel` / `Room` database.  Event mapping Each [Radio.Events] subevent is translated to the corresponding [Player] event-flag(s) and a `Player.Events` is built (the `onEvents(player, events)` batched-listener callback is the preferred listener entry point in Media3 1.4+): | [Radio.Events] | [Player] event flags | |---------------------------------------------|---------------------------------------------------------------| | `Player.Staged` / `Started` / `Resumed` | `EVENT_PLAY_WHEN_READY_CHANGED`, `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Paused` | `EVENT_PLAY_WHEN_READY_CHANGED`, `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Stopped` | `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Ended` | `EVENT_PLAYBACK_STATE_CHANGED` (state = `STATE_ENDED`) | | `Player.Seeked` | `EVENT_POSITION_DISCONTINUITY` | | `Queue.Modified` / `Cleared` / `IndexChanged` | `EVENT_TIMELINE_CHANGED`, `EVENT_MEDIA_ITEM_TRANSITION` | | `QueueOption.ShuffleModeChanged` | `EVENT_SHUFFLE_MODE_ENABLED_CHANGED` | | `QueueOption.LoopModeChanged` | `EVENT_REPEAT_MODE_CHANGED` | See [handleRadioEvent] for the actual mapping.  Thread-safety The listener list is a [CopyOnWriteArrayList] (safe to iterate while listeners are being added/removed). The unsubscribe function is stored in [radioUnsubscribe] and called from [release]. The [Radio] engine itself is not thread-safe — all access goes through the Media3 session's main thread callback.  UnstableApi Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade will be handled */
+/**
+ * AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine.
+ *
+ * This is the bridge between KordX's playback engine ([Radio], [RadioQueue],
+ * [RadioShorty], [RadioPlayer]) and Media3's [Player] interface. Media3's
+ * `MediaLibraryService` / `MediaLibrarySession` only understand the [Player] surface, so
+ * this adapter translates KordX's events into Media3 events.
+ *
+ * The class extends [BasePlayer], which provides final default implementations for the
+ * ~50 media-item / navigation methods. Those defaults delegate to a small set of
+ * abstract getters (`getCurrentTimeline()`, `getMediaItemCount()`, `getMediaItemAt(i)`,
+ * `getCurrentMediaItemIndex()`) and the single protected abstract [seekTo] (wired to
+ * [Radio.seek]). The remaining [Player] methods are implemented below to map cleanly to
+ * the [Radio] / [RadioShorty] / [RadioQueue] public surface.
+ *
+ * The constructor takes [RadioAdapterTarget] (and the smaller [RadioQueueAdapterTarget] /
+ * [RadioShortyAdapterTarget]) rather than a concrete [Radio]. The concrete classes
+ * implement these interfaces, so tests can provide hand-rolled fakes without an `Application`
+ * / `ViewModel` / `Room` database.
+ *
+ * The adapter subscribes to [Radio.onUpdate] lazily on the first listener add and
+ * unsubscribes in [release]. Events are dispatched to listeners via [playerListenerHandler]
+ * (the main [Looper] by default) so the listener sees the same threading model as a regular
+ * Media3 [Player]. The listener list is a [CopyOnWriteArrayList] so it is safe to iterate
+ * while listeners are added/removed.
+ *
+ * Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface.
+ */
 @Suppress("MaxLineLength", "SpreadOperator")
 @UnstableApi
 class RadioForwardingPlayer(
@@ -320,7 +347,11 @@ class RadioForwardingPlayer(
         handler.looper
 
 
-    // Player: playlist bulk operations. These are abstract on; BasePlayer (inherited from Player) because BasePlayer's; default `setMediaItem` / `addMediaItem` / `removeMediaItem`; etc. dispatch to `setMediaItems(List, boolean)` /; `setMediaItems(List, int, long)`. We implement them as; noops on the radio (the radio manages its own queue via; `RadioShorty.playQueue` and `RadioQueue`); the Media3; session will use `Radio.onCustomCommand` (in 26c) to; translate AAOS intents into radio operations.
+    // Player: playlist bulk operations. These are abstract on BasePlayer because its
+    // defaults dispatch to `setMediaItems(List, boolean)` / `setMediaItems(List, int, long)`.
+    // We implement them as no-ops on the radio (the radio manages its own queue via
+    // `RadioShorty.playQueue` and `RadioQueue`); the Media3 session uses `Radio.onCustomCommand`
+    // to translate AAOS intents into radio operations.
 
     override fun setMediaItems(
         mediaItems: List<MediaItem>,
