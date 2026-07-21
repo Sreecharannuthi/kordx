@@ -142,6 +142,8 @@ open class _Translation(private val container: _Container) {
         val BitDepth: String,
         val SamplingRate: String,
         val ShowAudioInformation: String,
+        val FastRewind: String,
+        val FastForward: String,
         val FastRewindDuration: String,
         val FastForwardDuration: String,
         val SuggestedAlbumArtists: String,
@@ -400,6 +402,8 @@ open class _Translation(private val container: _Container) {
     val BitDepth: String get() = container.keys.BitDepth
     val SamplingRate: String get() = container.keys.SamplingRate
     val ShowAudioInformation: String get() = container.keys.ShowAudioInformation
+    val FastRewind: String get() = container.keys.FastRewind
+    val FastForward: String get() = container.keys.FastForward
     val FastRewindDuration: String get() = container.keys.FastRewindDuration
     val FastForwardDuration: String get() = container.keys.FastForwardDuration
     val SuggestedAlbumArtists: String get() = container.keys.SuggestedAlbumArtists

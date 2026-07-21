@@ -50,7 +50,6 @@ import com.android.rockages.kordx.services.radio.RadioQueue
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.ui.view.LyricsViewRoute
 import com.android.rockages.kordx.ui.view.NowPlayingData
-import com.android.rockages.kordx.ui.view.NowPlayingDefaults
 import com.android.rockages.kordx.ui.view.NowPlayingLyricsLayout
 import com.android.rockages.kordx.ui.view.NowPlayingStates
 import com.android.rockages.kordx.ui.view.QueueViewRoute
@@ -115,7 +114,7 @@ fun NowPlayingBodyBottomBar(
  NowPlayingLyricsLayout.ReplaceArtwork -> {
  val nShowLyrics = !showLyricsState.value
  showLyricsState.value = nShowLyrics
- NowPlayingDefaults.showLyrics = nShowLyrics
+ context.kordx.settings.showLyrics.setValue(nShowLyrics)
  }
 
  NowPlayingLyricsLayout.SeparatePage -> {

@@ -61,16 +61,30 @@ fun Genre.getSortedSongIds(kordx: KordX) = kordx.groove.song.sort(
 fun Song.createArtworkImageRequest(kordx: KordX) =
  kordx.groove.song.createArtworkImageRequest(id)
 
+private val MUXER_TAG_PATTERNS = listOf(
+    Regex("^Lavf", RegexOption.IGNORE_CASE),
+    Regex("^LAME", RegexOption.IGNORE_CASE),
+    Regex("^iTunes", RegexOption.IGNORE_CASE),
+    Regex("^Nero", RegexOption.IGNORE_CASE),
+    Regex("^Xiph", RegexOption.IGNORE_CASE),
+    Regex("^FLAC", RegexOption.IGNORE_CASE),
+    Regex("^Lavc", RegexOption.IGNORE_CASE),
+    Regex("^Helix", RegexOption.IGNORE_CASE),
+)
+
+private fun isMuxerTag(value: String): Boolean =
+    MUXER_TAG_PATTERNS.any { it.containsMatchIn(value) }
+
 fun Song.toSamplingInfoString(kordx: KordX): String? {
 
- // + 30k — there30e version used; val values = mutableListOf<String>(); encoder?.let { values.add(it) }; channels?.let { values.add(kordx.t.XChannels(it.toString())) }; bitrateK?.let { values.add(buildString { append(kordx.t.XKbps(it.toString())) }) }; samplingRateK?.let { values.add(kordx.t.XKHz(it.toString())) }; return values.takeIf { it.isNotEmpty() }?.joinToString(", ")
+    // + 30k — there30e version used; val values = mutableListOf<String>(); encoder?.let { values.add(it) }; channels?.let { values.add(kordx.t.XChannels(it.toString())) }; bitrateK?.let { values.add(buildString { append(kordx.t.XKbps(it.toString())) }) }; samplingRateK?.let { values.add(kordx.t.XKHz(it.toString())) }; return values.takeIf { it.isNotEmpty() }?.joinToString(", ")
  //
 
  //
 
  // The fix uses `listOfNotNull(...)` (declarative, no mutable; accumulator) AND wraps each `?.let { ... }` in `.takeIf {; it.isNotBlank() }` so any empty / blank formatted string is; also filtered out. The result is a stable `Lavf57.82.101`only; string for the FLAC case (instead of `Lavf57.82.101, , ,`).
  val parts = listOfNotNull(
- encoder?.takeIf { it.isNotBlank() },
+ encoder?.takeIf { it.isNotBlank() && !isMuxerTag(it) },
  channels?.let { kordx.t.XChannels(it.toString()) }
  ?.takeIf { it.isNotBlank() },
  bitrateK?.let { kordx.t.XKbps(it.toString()) }

@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.android.rockages.kordx.ui.helpers.ScreenOrientation
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.ui.view.NowPlayingData
-import com.android.rockages.kordx.ui.view.NowPlayingDefaults
 import com.android.rockages.kordx.ui.view.NowPlayingLyricsLayout
 import com.android.rockages.kordx.ui.view.NowPlayingStates
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +29,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
  val states = remember {
  NowPlayingStates(
  showLyrics = MutableStateFlow(
- data.lyricsLayout == NowPlayingLyricsLayout.ReplaceArtwork && NowPlayingDefaults.showLyrics
+ data.lyricsLayout == NowPlayingLyricsLayout.ReplaceArtwork && context.kordx.settings.showLyrics.value
  ),
  )
  }

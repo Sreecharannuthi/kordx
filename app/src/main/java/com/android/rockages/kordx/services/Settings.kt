@@ -336,6 +336,7 @@ class Settings(private val kordx: KordX) {
  val gaplessPlayback = BooleanEntry("gapless_playback", true)
  val caseSensitiveSorting = BooleanEntry("case_sensitive_sorting", false)
  val lyricsKeepScreenAwake = BooleanEntry("lyrics_keep_screen_awake", true)
+ val showLyrics = BooleanEntry("show_lyrics", false)
 
  private fun getSharedPreferences() = kordx.applicationContext
  .getSharedPreferences("settings", Context.MODE_PRIVATE)
