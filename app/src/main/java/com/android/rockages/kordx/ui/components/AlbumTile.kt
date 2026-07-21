@@ -48,15 +48,22 @@ fun AlbumTile(context: ViewContext, album: Album) {
  album.name,
  style = MaterialTheme.typography.bodyMedium,
  textAlign = TextAlign.Center,
- maxLines = 2,
+ maxLines = 1,
  overflow = TextOverflow.Ellipsis,
  )
- if (album.artists.isNotEmpty()) {
+ // Subtitle: year · N tracks
+ val parts = mutableListOf<String>()
+ album.startYear?.let { parts.add(it.toString()) }
+ if (album.numberOfTracks > 0) {
+ parts.add(context.kordx.t.XSongs(album.numberOfTracks.toString()))
+ }
+ if (parts.isNotEmpty()) {
  Text(
- album.artists.joinToString(),
+ parts.joinToString(" · "),
  style = MaterialTheme.typography.bodySmall,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
  textAlign = TextAlign.Center,
- maxLines = 2,
+ maxLines = 1,
  overflow = TextOverflow.Ellipsis,
  )
  }

@@ -115,7 +115,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  composable<T>(
  popEnterTransition = {
  when {
- isInitialRoute<SearchViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<NowPlayingViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<QueueViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<LyricsViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
@@ -124,7 +123,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  popExitTransition = {
  when {
- isInitialRoute<SearchViewRoute>() -> SlideTransition.slideUp.exitTransition()
  isInitialRoute<NowPlayingViewRoute>() -> SlideTransition.slideDown.exitTransition()
  isInitialRoute<QueueViewRoute>() -> SlideTransition.slideDown.exitTransition()
  isInitialRoute<LyricsViewRoute>() -> SlideTransition.slideDown.exitTransition()
@@ -133,7 +131,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  enterTransition = {
  when {
- isTargetRoute<SearchViewRoute>() -> SlideTransition.slideDown.enterTransition()
  isTargetRoute<NowPlayingViewRoute>() -> SlideTransition.slideUp.enterTransition()
  isTargetRoute<QueueViewRoute>() -> SlideTransition.slideUp.enterTransition()
  isTargetRoute<LyricsViewRoute>() -> SlideTransition.slideUp.enterTransition()
@@ -142,7 +139,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  exitTransition = {
  when {
- isTargetRoute<SearchViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<NowPlayingViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<QueueViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<LyricsViewRoute>() -> ScaleTransition.scaleDown.exitTransition()

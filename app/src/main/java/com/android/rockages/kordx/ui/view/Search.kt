@@ -11,15 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -53,6 +57,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.android.rockages.kordx.services.groove.Groove
 import com.android.rockages.kordx.ui.components.AlbumArtistDropdownMenu
@@ -199,6 +204,14 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  .windowInsetsPadding(TopAppBarDefaults.windowInsets)
  .clipToBounds()
  ) {
+ // Search bar with surface background
+ Box(
+ modifier = Modifier
+ .fillMaxWidth()
+ .padding(horizontal = 12.dp, vertical = 8.dp)
+ .clip(RoundedCornerShape(28.dp))
+ .padding(horizontal = 4.dp)
+ ) {
  TextField(
  modifier = Modifier
  .fillMaxWidth()
@@ -209,12 +222,18 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  colors = TextFieldDefaults.colors(
  focusedContainerColor = Color.Transparent,
  unfocusedContainerColor = Color.Transparent,
+ focusedIndicatorColor = Color.Transparent,
+ unfocusedIndicatorColor = Color.Transparent,
  ),
  singleLine = true,
  value = terms,
  onValueChange = { setTerms(it) },
  placeholder = {
- Text(context.kordx.t.SearchYourMusic)
+ Text(
+ context.kordx.t.SearchYourMusic,
+ style = MaterialTheme.typography.bodyLarge,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
+ )
  },
  leadingIcon = {
  IconButton(
@@ -235,10 +254,13 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
  )
- Spacer(modifier = Modifier.height(4.dp))
+ }
+ // Filter chips
  Row(
  horizontalArrangement = Arrangement.spacedBy(8.dp),
- modifier = Modifier.horizontalScroll(chipsScrollState)
+ modifier = Modifier
+ .horizontalScroll(chipsScrollState)
+ .padding(bottom = 8.dp)
  ) {
  Spacer(modifier = Modifier.width(4.dp))
  FilterChip(
@@ -285,29 +307,40 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  Spacer(modifier = Modifier.width(4.dp))
  }
- Spacer(modifier = Modifier.height(4.dp))
  }
  },
  content = { contentPadding ->
- results?.run {
- val hasSongs = isChipSelected(Groove.Kind.SONG) && songIds.isNotEmpty()
- val hasArtists = isChipSelected(Groove.Kind.ARTIST) && artistNames.isNotEmpty()
- val hasAlbums = isChipSelected(Groove.Kind.ALBUM) && albumIds.isNotEmpty()
- val hasAlbumArtists =
- isChipSelected(Groove.Kind.ALBUM_ARTIST) && albumArtistNames.isNotEmpty()
- val hasPlaylists =
- isChipSelected(Groove.Kind.PLAYLIST) && playlistIds.isNotEmpty()
- val hasGenres = isChipSelected(Groove.Kind.GENRE) && genreNames.isNotEmpty()
- val hasNoResults =
- !hasSongs && !hasArtists && !hasAlbums && !hasAlbumArtists && !hasPlaylists && !hasGenres
-
  Box(
  modifier = Modifier
  .padding(contentPadding)
  .fillMaxSize(),
  ) {
- if (terms.isNotEmpty()) {
  when {
+ // Empty state: no query typed yet
+ terms.isEmpty() -> {
+ Box(
+ modifier = Modifier.align(Alignment.Center),
+ contentAlignment = Alignment.Center,
+ ) {
+ Column(horizontalAlignment = Alignment.CenterHorizontally) {
+ Icon(
+ Icons.Filled.MusicNote,
+ null,
+ modifier = Modifier.size(64.dp),
+ tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+ )
+ Spacer(modifier = Modifier.height(16.dp))
+ Text(
+ context.kordx.t.SearchYourMusic,
+ style = MaterialTheme.typography.bodyLarge,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
+ textAlign = TextAlign.Center,
+ )
+ }
+ }
+ }
+
+ // Searching indicator
  isSearching -> {
  Box(modifier = Modifier.align(Alignment.Center)) {
  IconTextBody(
@@ -325,14 +358,30 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  }
 
- hasNoResults -> {
+ else -> {
+ results?.run {
+ val hasSongs = isChipSelected(Groove.Kind.SONG) && songIds.isNotEmpty()
+ val hasArtists =
+ isChipSelected(Groove.Kind.ARTIST) && artistNames.isNotEmpty()
+ val hasAlbums =
+ isChipSelected(Groove.Kind.ALBUM) && albumIds.isNotEmpty()
+ val hasAlbumArtists =
+ isChipSelected(Groove.Kind.ALBUM_ARTIST) && albumArtistNames.isNotEmpty()
+ val hasPlaylists =
+ isChipSelected(Groove.Kind.PLAYLIST) && playlistIds.isNotEmpty()
+ val hasGenres =
+ isChipSelected(Groove.Kind.GENRE) && genreNames.isNotEmpty()
+ val hasNoResults =
+ !hasSongs && !hasArtists && !hasAlbums && !hasAlbumArtists && !hasPlaylists && !hasGenres
+
+ if (hasNoResults) {
  Box(modifier = Modifier.align(Alignment.Center)) {
  IconTextBody(
  icon = { modifier ->
  Icon(
  Icons.Filled.PriorityHigh,
  null,
- modifier = modifier
+ modifier = modifier,
  )
  },
  content = {
@@ -340,9 +389,7 @@ fun SearchView(context: ViewContext, route: SearchViewRoute) {
  }
  )
  }
- }
-
- else -> {
+ } else {
  LazyColumn {
  if (hasSongs) {
  item { SideHeading(context, Groove.Kind.SONG) }
@@ -521,8 +568,9 @@ private fun SideHeading(context: ViewContext, kind: Groove.Kind) {
 private fun SideHeading(text: String) {
  Text(
  text,
- style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
- modifier = Modifier.padding(12.dp, 12.dp, 12.dp, 4.dp)
+ style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+ color = MaterialTheme.colorScheme.primary,
+ modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
  )
 }
 
