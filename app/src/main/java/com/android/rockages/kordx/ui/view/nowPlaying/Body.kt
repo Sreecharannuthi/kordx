@@ -53,7 +53,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
  modifier = Modifier
  .weight(1f)
  .fillMaxWidth()
- .padding(bottom = 8.dp),
+ .padding(bottom = 4.dp),
  contentAlignment = Alignment.Center,
  ) {
  NowPlayingBodyCover(context, data, states, orientation)
