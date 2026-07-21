@@ -17,6 +17,17 @@ detekt {
     baseline = file("$rootDir/config/detekt/baseline.xml")
 }
 
+subprojects {
+    plugins.withType<io.gitlab.arturbosch.detekt.DetektPlugin> {
+        detekt {
+            buildUponDefaultConfig = true
+            allRules = false
+            config.setFrom(file("$rootDir/config/detekt/detekt.yml"))
+            baseline = file("$projectDir/detekt-baseline.xml")
+        }
+    }
+}
+
 kover {
     // bundled IntelliJ agent hard-codes an exclude of `com.android.*`
     // to avoid instrumenting Android SDK stubs. KordX's production

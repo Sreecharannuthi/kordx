@@ -2,6 +2,260 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val About: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddFolder: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddItem: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddMediaFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddSongs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddToPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AddToQueue: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Album: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AlbumArtist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AlbumArtists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AlbumCount: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Albums: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val All: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AlwaysVisible: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Amber: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AppBuiltIn: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Appearance: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AreYouSureThatYouWantToDeleteThisPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Artist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ArtistTagValueSeparators: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Artists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ArtworkQuality: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AudioChannels: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val AutoResumePlayback: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val BitDepth: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Bitrate: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Black: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val BlacklistFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Blue: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val BottomBarLabelVisibility: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Browser: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Cancel: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CaseSensitiveSorting: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CheckForUpdates: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ClearSongCache: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Codec: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CollapseNowPlaying: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CompactLeft: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CompactRight: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Composer: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ConsiderContributing: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ContentScale: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ControlsLayout: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val CopiedXToClipboard: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Custom: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Cyan: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val DamnThisIsSoEmpty: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Dark: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Date: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val DateAdded: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Delete: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val DeletePlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Details: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Disabled: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val DiscNumber: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val DiscTotal: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Discord: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Done: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Duration: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Emerald: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Enabled: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Encoder: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Equalizer: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Export: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ExportFailedX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ExportedX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FDroid: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FadePlaybackInOut: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FastForward: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FastForwardDuration: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FastRewind: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FastRewindDuration: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Favorite: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Filename: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FilteringResults: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Folders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Font: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val FontScale: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ForYou: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Fuchsia: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val GaplessPlayback: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Genre: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val GenreTagValueSeparators: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Genres: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Github: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Green: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val GridColumns: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Groove: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val HelloThere: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Help: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val High: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val HintAddMediaFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Home: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val HomeTabs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Hours: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Id: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val IgnoreAudioFocusLoss: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ImportPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Indigo: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Interface: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val IntroductoryMessage: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val InvalidM3UFile: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Invisible: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val IsLocalPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val IzzyOnDroid: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val KeepScreenAwakeOnLyrics: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Language_: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val LastModified: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val LaunchingEqualizerFailedX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Length: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Light: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Lime: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Loading: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val LocalStorage: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Loseless: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Low: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Lyrics: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val LyricsLayout: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MadeByX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ManageSongs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MaterialYou: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MaximumBitrate: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MediaFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Medium: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MinSongDurationFilter: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MiniPlayer: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MiniPlayerTextMarquee: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val MinimumBitrate: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Minutes: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val More: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Name: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NewPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NewVersionAvailableX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Next: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val No: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoFoldersFound: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoInAppPlaylistsFound: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoLocalPlaylistsFound: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoLyrics: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoMusicYet: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NoResultsFound: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NothingIsBeingPlayedRightNow: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NothingPlayedYet: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NothingPlayedYetSubtitle: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val NowPlaying: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Orange: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Path: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Pause: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PauseOnCurrentSongEnd: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PauseOnHeadphonesDisconnect: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PersistUntilQueueEnd: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PickFolder: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Pink: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Pitch: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Play: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlayAll: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlayNext: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlayOnHeadphonesConnect: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlayStore: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Player: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlayingXofY: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Playlist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PlaylistStoreLocation: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Playlists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Previous: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val PrimaryColor: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Purple: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Queue: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val QuitAppOnEnd: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val RecentlyAddedSongs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val RecentlyPlayed: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Red: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Reddit: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val RemoveFromPlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Rename: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val RenamePlaylist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Repeat: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ReplaceArtwork: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ReportAnIssue: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val RequireAudioFocus: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Rescan: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Reset: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Rose: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SamplingRate: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Scanning: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SearchYourMusic: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SelectAtleast2orAtmost5Tabs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SeparatePage: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Settings: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShareFailedX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShareSong: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShowAudioInformation: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShowSeekControls: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShowTrackControls: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShowUpdateToast: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Shuffle: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ShufflePlay: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Size: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Sky: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SleepTimer: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SongCacheCleared: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Songs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SongsFilterPattern: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Speed: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Stop: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SuggestedAlbumArtists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SuggestedAlbums: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SuggestedArtists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val System: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SystemLightBlack: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val SystemLightDark: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Teal: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Theme: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Title: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val TotalSamples: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val TrackCount: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val TrackName: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val TrackNumber: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Traditional: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Tree: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Unfavorite: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UnknownAlbumX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UnknownArtistX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UnknownGenreX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UnknownPlaylistX: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UnknownSymbol: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Updates: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val UseMetaphonyMetadataDecoder: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val VBR: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Variable: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Version: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ViewAlbum: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ViewAlbumArtist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ViewArtist: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val ViewGenre: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Violet: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val VisibleWhenActive: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val WhitelistFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XAlbums: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XArtists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XBit: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XChannels: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XFolders: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XFoldersYFiles: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XGenres: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XItems: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XKHz: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XKbps: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XPlaylists: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XSecs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val XSongs: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Year: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Yellow: String</ID>
+    <ID>ConstructorParameterNaming:Translation.g.kt$_Translation._Keys$val Yes: String</ID>
     <ID>CyclomaticComplexMethod:AppearanceSettingsView.kt$fun PrimaryThemeColor.label(context: ViewContext)</ID>
     <ID>CyclomaticComplexMethod:Base.kt$private inline fun &lt;reified T : Any&gt; NavGraphBuilder.baseComposable( noinline content: @Composable (AnimatedContentScope.(NavBackStackEntry) -&gt; Unit), )</ID>
     <ID>CyclomaticComplexMethod:BottomBar.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun NowPlayingBodyBottomBar( context: ViewContext, data: NowPlayingData, states: NowPlayingStates, )</ID>
@@ -11,25 +265,47 @@
     <ID>CyclomaticComplexMethod:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
     <ID>CyclomaticComplexMethod:RadioSession.kt$RadioSession$fun handlePlayFromMediaId(mediaId: String?, autostart: Boolean = true)</ID>
     <ID>CyclomaticComplexMethod:RadioSession.kt$RadioSession$fun start()</ID>
-    <ID>CyclomaticComplexMethod:Search.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun SearchView(context: ViewContext, route: SearchViewRoute)</ID>
     <ID>CyclomaticComplexMethod:SongInformationDialog.kt$@Composable fun SongInformationDialog(context: ViewContext, song: Song, onDismissRequest: () -&gt; Unit)</ID>
+    <ID>EmptyFunctionBlock:RadioForwardingPlayer.kt$RadioForwardingPlayer${}</ID>
+    <ID>EmptyFunctionBlock:RadioSession.kt$RadioSession.&lt;no name provided&gt;${ }</ID>
+    <ID>ExplicitItLambdaParameter:Album.kt${ i, it -&gt; Text( it, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.pointerInput(Unit) { detectTapGestures { _ -&gt; context.navController.navigate(ArtistViewRoute(it)) } }, ) if (i != album.artists.size - 1) { Text(", ") } }</ID>
+    <ID>ExplicitItLambdaParameter:BodyContent.kt${ i, it -&gt; Text( it, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.pointerInput(Unit) { detectTapGestures { _ -&gt; context.navController.navigate(ArtistViewRoute(it)) } }, ) if (i != targetStateSong.artists.size - 1) { Text(", ") } }</ID>
+    <ID>ExplicitItLambdaParameter:GenericGrooveCard.kt${ it -&gt; Box( modifier = Modifier .offset(y = 8.dp) .align(Alignment.BottomCenter) ) { Box( modifier = Modifier .background( MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp) ) .padding(3.dp, 0.dp) ) { ProvideTextStyle( MaterialTheme.typography.labelSmall.copy( color = MaterialTheme.colorScheme.primary ) ) { it() } } } }</ID>
+    <ID>ExplicitItLambdaParameter:SongCard.kt${ it -&gt; val backgroundColor = thumbnailLabelStyle.backgroundColor(MaterialTheme.colorScheme) val contentColor = thumbnailLabelStyle.contentColor(MaterialTheme.colorScheme) Box( modifier = Modifier .offset(y = 8.dp) .align(Alignment.BottomCenter) ) { Box( modifier = Modifier .background( backgroundColor, RoundedCornerShape(4.dp) ) .padding(3.dp, 0.dp) ) { ProvideTextStyle( MaterialTheme.typography.labelSmall.copy( color = contentColor ) ) { it() } } } }</ID>
+    <ID>ExplicitItLambdaParameter:SongInformationDialog.kt${ i, it -&gt; Text( it, style = textStyle, modifier = Modifier.pointerInput(Unit) { detectTapGestures( onLongPress = { _ -&gt; ActivityUtils.copyToClipboardAndNotify( context.kordx.applicationContext, it, context.kordx.t.CopiedXToClipboard(it), ) }, onTap = { _ -&gt; onTap(it) }, ) }, ) if (i != values.size - 1) { Text(", ") } }</ID>
     <ID>ForEachOnRange:ForYou.kt$0..2</ID>
     <ID>ForEachOnRange:ForYou.kt$3..5</ID>
-    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XChannels(x: String): String</ID>
-    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XKHz(x: String): String</ID>
-    <ID>FunctionNaming:SamplingInfoStringTest.kt$SamplingInfoStringTest.&lt;no name provided&gt;$fun XKbps(x: String): String</ID>
+    <ID>ForbiddenComment:MultiGrooveFolderTile.kt$// TODO: workaround for dialog resize bug; https://issuetracker.google.com/issues/221643630</ID>
+    <ID>ForbiddenComment:MultiSystemFolderTile.kt$// TODO: workaround for dialog resize bug; https://issuetracker.google.com/issues/221643630</ID>
+    <ID>ForbiddenComment:PlaylistTile.kt$// TODO: remove this hack after moving to reactive objects</ID>
     <ID>FunctionOnlyReturningConstant:Media3ItemFactory.kt$Media3ItemFactory$fun descriptionForGenre(genre: Genre): String</ID>
     <ID>LargeClass:KordXMediaLibraryService.kt$KordXMediaLibraryService$BrowseTreeCallback : Callback</ID>
     <ID>LongMethod:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
     <ID>LongMethod:RadioSession.kt$RadioSession$fun start()</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// `onBackground` is the value that the; `LocalContentColor` fallback reads from when no other; component overrides it. The previous `adjustLightness(; primaryColor,0.5f)` derives a verydarkpurple for the; default Purple primary, but the derivation depends on the; primary color: a light primary (e.g. pastel yellow) would; produce a darkyellow `onBackground`, which is OK; a; mediumlightness primary (e.g. cyan) would produce a; nearinvisible `onBackground`. The safer value is a fixed; nearblack that's visible on every surface.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// `onSecondaryContainer` was previously `LightContrastColor`; (pure white). Pure white is the highestcontrast value on dark; surfaces, but it can be visually jarring for body text. Pin; to the offwhite value that matches the default `darkColorScheme()`; `onSurface` (`Color(0xFFE6E1E5)`) so the visual hierarchy is; consistent. The offwhite value is visible on every dark; surface and matches the `LocalContentColor` fallback value; the KordXTheme CompositionLocalProvider also pins.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// `onSecondaryContainer` was previously unset, which; meant the framework default (`Color(0xFF4A4458)` for; `lightColorScheme()`) was used. The default is dark, so it; was visible on a light surface — but the AVD walkthrough; showed that `FilterChip` selected labels (which use; `onSecondaryContainer`) were still invisible. Pinning it; to the same fixed dark value (the same one used for; `onBackground` / `onSurface` / `onSurfaceVariant`) makes; the chip labels deterministic regardless of the active; primary color. The `DarkOnBackgroundForLightTheme` constant; is used directly (not via `adjustLightness`) because; `adjustLightness` calls `ColorUtils.colorToHSL`, which is; mocked to return 0 in the JVM unittest classpath (per; `unitTests.isReturnDefaultValues = true` in; `app/build.gradle.kts`).</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// `onSurfaceVariant` is what `FilterChip` (unselected); and `ListItem` (supporting text) read for their text color.; Pinning it to the same dark value (slightly lighter alpha; for mediumemphasis) keeps the chip labels visible.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// fixed visible value for the dark / black theme's; textondark tokens. The default `darkColorScheme()` uses; `Color(0xFFE6E1E5)` (offwhite) which is visible on every dark; surface. Pinning to that same value makes the surface text; deterministic.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// fixed visible value for the light theme's textonlight; tokens (`onBackground` / `onSurface` / `onSurfaceVariant`). The; default `lightColorScheme()` uses `Color(0xFF1C1B1F)` (very dark; gray) which is visible on every light surface. We pin to that; same nearblack value (with a slight tint of the primary color; for brand consistency, matching the `onBackground` value the; Material3 default would produce for the default Purple primary).; Critically: this is INDEPENDENT of the user's primary color, so; a light primary (e.g. yellow) doesn't produce a nearinvisible; text color. This is the value that the [LocalContentColor]; CompositionLocalProvider in `KordXTheme` also pins, so both; paths agree.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// same as `createDarkColorScheme`. The BLACK theme; uses pure black surfaces (`background = Color.Black`), so the; text color must be light. `LightOnBackgroundForDarkTheme`; (offwhite) is visible on pure black.</ID>
-    <ID>MaxLineLength:ColorScheme.kt$ThemeColorSchemes$// same reasoning as `onBackground`: `onSurface` is; the value that Material3 `Surface` propagates into; `LocalContentColor` for any text inside the surface. A; fixed dark value is visible on every light surface.</ID>
+    <ID>LoopWithTooManyJumpStatements:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$for</ID>
+    <ID>MatchingDeclarationName:Album.kt$AlbumViewRoute</ID>
+    <ID>MatchingDeclarationName:AlbumArtist.kt$AlbumArtistViewRoute</ID>
+    <ID>MatchingDeclarationName:Artist.kt$ArtistViewRoute</ID>
+    <ID>MatchingDeclarationName:ColorScheme.kt$ThemeColorSchemes</ID>
+    <ID>MatchingDeclarationName:ContentDrawScopeScrollBar.kt$ContentDrawScopeScrollBarDefaults</ID>
+    <ID>MatchingDeclarationName:Context.kt$ViewContext</ID>
+    <ID>MatchingDeclarationName:Genre.kt$GenreViewRoute</ID>
+    <ID>MatchingDeclarationName:GrooveSettingsView.kt$GrooveSettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:HomePageSettingsView.kt$HomePageSettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:Lyrics.kt$LyricsViewRoute</ID>
+    <ID>MatchingDeclarationName:MiniPlayerSettingsView.kt$MiniPlayerSettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:NowPlayingSettingsView.kt$NowPlayingSettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:PlayerSettingsView.kt$PlayerSettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:Playlist.kt$PlaylistViewRoute</ID>
+    <ID>MatchingDeclarationName:Queue.kt$QueueViewRoute</ID>
+    <ID>MatchingDeclarationName:ScaffoldDialog.kt$ScaffoldDialogDefaults</ID>
+    <ID>MatchingDeclarationName:Settings.kt$SettingsViewRoute</ID>
+    <ID>MatchingDeclarationName:SongList.kt$SongListType</ID>
+    <ID>MatchingDeclarationName:Tile.kt$SettingsTileDefaults</ID>
+    <ID>MatchingDeclarationName:TimedContentText.kt$TimedContentTextStyle</ID>
+    <ID>MatchingDeclarationName:Translation.g.kt$_Translation</ID>
+    <ID>MatchingDeclarationName:Translations.g.kt$_Translations</ID>
+    <ID>MatchingDeclarationName:UserInterface.kt$ScreenOrientation</ID>
     <ID>MaxLineLength:ColorSchemeVisibilityTest.kt$ColorSchemeVisibilityTest$/** JVM unit tests that pin the visibility of the critical text-on-surface ColorScheme tokens for all 3 KordX themes (light / dark / black). **Important context:** the KordX test classpath sets `unitTests.isReturnDefaultValues = true` (see `app/build.gradle.kts`). This makes unmocked framework methods (e.g. `ColorUtils.blendARGB`) return their default values (0) instead of executing the real implementation. The light theme's `onBackground` was derived from the primary color via the `blendColors` helper (which itself uses `ColorUtils.blendARGB`); on the test classpath this returns 0 (transparent black), which is exactly the same bug the production code exhibited (an invisible text color in the `lightColorScheme()` default). The fix replaces the `blendColors`-derived `onBackground` with a fixed `Color(0xFF1C1B1F)` (Material3 default dark text), which is INDEPENDENT of `ColorUtils.blendARGB` and therefore works correctly on the test classpath. The test asserts: 1. The `onBackground` token for the LIGHT theme is the fixed near-black value `Color(0xFF1C1B1F)` (NOT the derived value from the primary color). 2. The `onBackground` value is the same regardless of the primary color (a light primary no longer produces a near-invisible text color). 3. The `onBackground` token has non-zero alpha (not transparent). 4. The `onSurface` token for the LIGHT theme is the same fixed near-black value. 5. The `onSurfaceVariant` token for the LIGHT theme is the same fixed near-black value. 6. The `onSecondaryContainer` token for the LIGHT theme is the same fixed near-black value. 7. The DARK / BLACK themes' `onBackground` is the fixed off-white value `Color(0xFFE6E1E5)`. 8. The DARK / BLACK themes' `onSurface` / `onSurfaceVariant` / `onSecondaryContainer` are the same fixed off-white value. (The pre-30i values: `onBackground` was `adjustLightness( primaryColor, -0.5f)` which derives a near-black dark color from the primary; `onSurface` was the same; `onSurfaceVariant` was `adjustLightness(primaryColor, -0.45f)` which derives a slightly lighter dark color from the primary; `onSecondaryContainer` was unset, so it fell through to the Material3 default `Color(0xFF4A4458)`. The fix pins all 4 to the same fixed `Color(0xFF1C1B1F)` for the light theme so the text is visible regardless of the user's primary color.) */</ID>
     <ID>MaxLineLength:ColorSchemeVisibilityTest.kt$ColorSchemeVisibilityTest$// The text color is the same regardless of the primary color; (the whole point of the fix: a light primary no longer; produces a nearinvisible text color).</ID>
     <ID>MaxLineLength:CustomBrowseActionTest.kt$CustomBrowseActionTest$/** JVM unit tests for the root-level custom browse actions built by [RadioSessionState.shuffleAllAction], [RadioSessionState.searchAction], and [RadioSessionState.rootCustomActions]. The builders are pure data — no `KordX`, no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat` — so the whole surface is testable on the JVM without an emulator. The tests pin: - The 2 `ACTION_*` constants match the namespaced values. - The `shuffleAllAction()` builder returns the right `action` / icon / label. - The `searchAction()` builder returns the right `action` / icon / label. - The `rootCustomActions()` list is exactly `[shuffleAll, search]` in that order, and is deterministic (same input → same output). - The hide/show audit: no `KordXMediaLibraryService` source-file path contains the banned terms (Settings, About, Equalizer, Sleep timer, Crossfade, Discord, Reddit, GitHub issue, Update check, Onboarding, Theme picker, Language picker, Cast, Bluetooth picker). The test greps the source file for each banned term and asserts zero matches. */</ID>
@@ -56,31 +332,12 @@
     <ID>MaxLineLength:IconRefinementTest.kt$IconRefinementTest$// refinement: the monochrome variant is intended; for Android 13+ themed icons, so the path colors are; removed (the system applies the theme color via the; `&lt;adaptiveicon&gt;` background/foreground layer).</ID>
     <ID>MaxLineLength:IconRefinementTest.kt$IconRefinementTest$// the filled heart uses Material Design's standard; pink #FFE91E63 (matches the Material 3 "error" color; family) instead of the brand cyan. This is the standard; Material Design convention for "favorited" — theser; expects a pink filled heart universally.</ID>
     <ID>MaxLineLength:IconRefinementTest.kt$IconRefinementTest$// the offstate icons (shuffle off, repeat off,; favorite border, search) use white #FFFFFFFF as the; intrinsic fillColor, which the `?attr/colorControlNormal`; tint multiplies to the theme color.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// 26g — publish the 3 Now Playing card custom actions; (shuffle / repeat / favorite) via `setMediaButtonPreferences`.; The buttons are rebuilt on every relevant `Player.Listener`; event (see [refreshNowPlayingButtons]); the initial publish; here surfaces the buttons on AAOS / Auto from the moment; the framework binds to the service. State defaults to; "no shuffle / no loop / not favorite" because the 26c26h; parallelrun phase uses [NoOpRadioAdapterTarget] (no live; playback); the legacy `RadioSession` continues to drive; playback during this phase and the 26i cutover will switch; to the real `KordX.radio` state lookup.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// 26h — publish the 2 rootlevel custom browse actions; (SHUFFLE_ALL + SEARCH) via `setCustomLayout`. AAOS; surfaces these buttons at the root of the browse tree; (vs. the Now Playing card, which uses; `setMediaButtonPreferences`). This is the; 26 deliverable — the 2 root actions are now exposed at; the root of the AAOS browse tree, not on the Now Playing; card. The button list is static (no live state — both; "Shuffle all" and "Search" are always available),; so a single `setCustomLayout` call at session creation; is sufficient (the legacy `MediaSession.setCustomLayout`; accepted a `List&lt;PlaybackStateCompat.CustomAction&gt;` — the; Media3 equivalent accepts a `List&lt;CommandButton&gt;`; the; migration is APIshapeonly, the dispatch back to; `RadioSession.handleCustomAction` is unchanged).</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// 26i — register the 2 debug receivers (DEBUG_ACTION_SCAN +; DEBUG_ACTION_SONG_LIST) so the AVD validation gate can; exercise the 26f placeholders under the new service. The; remaining 8 `DEBUG_ACTION_*` receivers (the 1822 batch); land in 26k.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// 26i: the 2 debug receivers (DEBUG_ACTION_SCAN +; DEBUG_ACTION_SONG_LIST) ported from the legacy; `KordXMediaBrowserService`. The receivers are registered; in [onCreate] and unregistered in [onDestroy]. They; drive the AVD validation gate for the 26f placeholders; (the "scanning" + "no_songs" + "nothing_recent" rows; exercise the receiverdriven librarystate changes).; The plan calls out reregistration in 26k; the; 26i cutover does it here so the legacy service can be; deleted without losing the AVD validation path.; The 2 receivers (scan + songlist) cover the 26f; placeholder shortcircuits. The 8 other `DEBUG_ACTION_*`; receivers (shuffle / repeat / favorite / shuffle_all /; search / recent_play / playback_error / root_search); land in 26k (they drive the 1822 AVD validation; gates; the new service's handlers are wired in 26i for; shuffle / repeat / favorite / shuffle_all / search via; [BrowseTreeCallback.onCustomCommand], and 26k adds the; broadcastdriven debug entry points).</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// ====================================================================; BrowseTreeCallback — theeal 26d MediaLibrarySession.Callback; implementation. Owns the 4 browsetree callbacks (real) + 2; stubs (onSearch for 26e, onCustomCommand for 26h) + the; 6 tab builders + 5 drilldown builders + the mediaItemForId; lookup.; ====================================================================</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// ====================================================================; ErrorOnlyCallback — defensive fallback for the (theoretical) case; where KordX.instance is null at onCreate time. The 26d browse tree; builder depends on KordX state; this callback returns errors for; every method so the framework can still bind to the service (it; just sees "not supported" responses for everything).; ====================================================================</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// ====================================================================; NoOpRadioAdapterTarget + NoOpRadioQueueAdapterTarget +; NoOpRadioShortyAdapterTarget — unchanged from 26c. Kept as private; inner classes (the 26c KordXMediaLibraryService nested them; under SkeletonCallback; for 26d they're lifted out so the; toplevel createPlayer() can reference them without going; through SkeletonCallback — SkeletonCallback is removed in 26d).; ====================================================================</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService$// `Builder(this, ...)` is the MediaLibraryServicenested builder; constructor that takes the owning service (instead of a bare; Context). It wires the session into the service's lifecycle so; `onGetSession` will be called by the framework on bind.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26e: store the most recent search query per; controller so the framework's later; `onGetSearchResult` calls can look up which query to; execute. AAOS issues one `onSearch` per "search; initiated by the user" gesture, then any number of; `onGetSearchResult` calls (for paging, refresh,; etc.). One inflight search per controller is the; Media3 contract.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26f — also shortcircuit to a single; `nonPlayableItem("Nothing played yet", ...)` when the; recentlyplayed cache is empty (no plays yet, or; post `pm clear`). Mirrors the legacy; [KordXMediaBrowserService.buildRecentPlaysTab] behavior.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26f — shortcircuit to a single; `nonPlayableItem(EMPTY_REASON_NO_SONGS, ...)` when the; library has zero songs. Mirrors the legacy; [KordXMediaBrowserService.buildRootTabs] behavior.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26f — shortcircuit to a single; `nonPlayableItem(EMPTY_REASON_SCANNING, ...)` when a; scan is in progress (`app.groove.song.isUpdating.value`; is true). AAOS shows the live count via the; `EXTRA_KEY_SCAN_COUNT` int on the placeholder's; extras. Mirrors the legacy; [KordXMediaBrowserService.buildSongsTab] behavior.</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26h/26i: onCustomCommand — theeal SHUFFLE_ALL + SEARCH; customcommand dispatch (plus SHUFFLE / REPEAT / FAVORITE; dispatched from the Now Playing card actions wired in; 26g). The action strings are the same `RadioSessionState.ACTION_*`; constants the legacy `RadioSession.handleCustomAction`; uses; the dispatch logic mirrors the legacy handler; 1:1, with the radio state mutation delegated to the; real `KordX.radio` instance (26i cutover — the 26h; version had stub handlers; the 26i cutover wires; the live `app.radio` / `app.groove` state).</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// 26i: the 3 Now Playing card action handlers (mirror; the legacy `RadioSession.handleCustomAction` contract; for the 3 `RadioSessionState.ACTION_SHUFFLE` /; `ACTION_REPEAT` / `ACTION_FAVORITE` actions). Each; handler delegates to the live `app.radio` /; `app.groove` state and republishes the Now Playing; card buttons via `refreshNowPlayingButtons` so the; AAOS surface reflects the new state immediately.</ID>
     <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// ====================================================================; Browse tree builders — ported from KordXMediaBrowserService.; ====================================================================</ID>
-    <ID>MaxLineLength:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$// The 3 Now Playing card actions (26g) are also; routed here in the Media3 model — the; `setMediaButtonPreferences` buttons dispatch through; the same `onCustomCommand` path. The handlers; match the legacy `RadioSession.handleCustomAction`; contract 1:1.</ID>
     <ID>MaxLineLength:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$// 3. The 7 expected override methods exist on the interface; (a regression guard for accidental signature drift in a; future Media3 bump — if a method is renamed or its; signature changes, the production build fails, but having; an explicit assertion makes the failure mode obvious in; the test report). The 7th method (onGetSearchResult) is; the actual searchresults callback introduced in 26e.</ID>
     <ID>MaxLineLength:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$// 3. The onCreate + onDestroy overrides exist (proves the; lifecycle is wired up — theest seam + reflection on the; field would otherwise leave us with an undocumented service; that never builds or releases a session).</ID>
     <ID>MaxLineLength:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$// LOG_TAG is a `const val` in the companion object — in the; JVM bytecode it gets inlined into the call sites and a; private static field remains on the class for the; companion's own use. We can read it via reflection.</ID>
     <ID>MaxLineLength:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$// The `internal` modifier in Kotlin mangles the JVM method; name with the module suffix. Use the standard Kotlin; "is there a method with this mangled name" check via; `methods` rather than `getDeclaredMethod` (which throws; on miss).</ID>
-    <ID>MaxLineLength:KordXMediaSessionConstants.kt$KordXMediaSessionConstants$/** shared media-id and debug-action constants + the placeholder-reason constants + bundle-key constants used by the active [KordXMediaLibraryService] (the AndroidX Media3 `MediaLibraryService` introduced in 26c, the active service as of 26i). Before 26i the constants lived across two places: the media-id constants lived as a `companion object` on `KordXMediaBrowserService` and the placeholder-reason constants + bundle-key constants lived on the legacy `MediaItemFactory` companion. After 26i both `KordXMediaBrowserService` and `MediaItemFactory` are deleted, so the constants are lifted into this top-level file so the new service can use them without the legacy classes. The `DEBUG_ACTION_*` constants are also lifted (the new service registers the 2 scan + song-list debug receivers in 26i; the remaining 8 `DEBUG_ACTION_*` receivers land in 26k). The constants are `const val`s so they inline at the call site — no runtime cost, no `KordXMediaSessionConstants.` prefix needed if the caller is in the same package (the new service is). Media-id convention (unchanged from ): - [ID_ROOT] root - [ID_TAB_SONGS] all songs (playable leaves) - [ID_TAB_ALBUMS] / [ID_TAB_ARTISTS] / [ID_TAB_GENRES] / [ID_TAB_PLAYLISTS] / [ID_TAB_RECENT] - [PREFIX_ALBUM] + id songs in an album - [PREFIX_ARTIST] + name songs by an artist (alias of albumArtist) - [PREFIX_ALBUM_ARTIST] + name songs by an album artist - [PREFIX_GENRE] + name songs in a genre - [PREFIX_PLAYLIST] + id songs in a playlist - [PREFIX_SONG] + id a single playable song (used by onPlayFromMediaId) */</ID>
-    <ID>MaxLineLength:KordXMediaSessionConstants.kt$KordXMediaSessionConstants$// Debug actions (used by the `KordXMediaLibraryService` debug; receivers registered in `onCreate`). The 2 receivers; (scan + songlist) are registered in 26i; the remaining; 8 `DEBUG_ACTION_*` receivers (shuffle / repeat / favorite /; shuffle_all / search / recent_play / playback_error /; root_search) land in 26k.</ID>
-    <ID>MaxLineLength:KordXMediaSessionConstants.kt$KordXMediaSessionConstants$// Placeholder reason + bundlekey constants (,; frameworkagnostic — used by both the new Media3 service; and the JVM unit tests for `Media3ItemFactory.placeholderExtras`).; The 3 `EMPTY_REASON_*` constants are referenced by the AVD; validation gate's `adb logcatd | grep; "KordXMediaLibraryService.*placeholder:no_songs"` style; filters. Pinning the values in this shared file means a; typo surfaces as a test failure rather than a silent; logcatgrep miss.</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$// Typedsearch path: a Bundle with the artist / album /; title / genre / playlist fields AAOS resolved from a; "play the album X" voice command. Compose a single; search query from the populated fields; the fuzzy; search in `KordXSearch` ranks by combined text.</ID>
-    <ID>MaxLineLength:MainActivity.kt$MainActivity$// forward the `MediaSearchActivity` activityalias; extras (the alias targets this activity; its intentfilter; declares `android.media.action.MEDIA_PLAY_FROM_SEARCH`). The; alias is the production entry point for AAOS's voicesearch; button; without this forwarding the framework delivers the; intent to this activity, the activity opens the Compose UI,; and the query is dropped on the floor (the search runs; through `RadioSession.handlePlayFromSearch`, which is only; wired from `MediaSessionCompat.Callback.onPlayFromSearch` in; the Auto path).</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$// setIntent so any subsequent getIntent() call (e.g. from; a composable that inspects the launch intent) sees the new; intent, not the original coldstart one.</ID>
     <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$// Regression guard: the forwarding is an *additional* routing; surface for the alias, not a replacement for the; MediaSession `onPlayFromSearch` callback that; `RadioSession.start()` wires. The MediaSession callback; is the path AAOS uses when the user is actively in the; Auto UI and presses the voice button there; the alias is; the path used when Auto routes the voice search through; the system media search intent. Both must remain.</ID>
     <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$// The MainActivity forwarding must NOT introduce a duplicate; `handlePlayFromSearch` definition in MainActivity.kt; (the routing must stay in RadioSession, not in MainActivity).</ID>
@@ -98,7 +355,6 @@
     <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$// The manifest's `MediaSearchActivity` activityalias is the; trigger for the forwarding — verify the alias still targets; `MainActivity` and still declares the; `android.media.action.MEDIA_PLAY_FROM_SEARCH` intent filter.; ( doesn't change the manifest; this is a regression; guard so manifest edit doesn't accidentally; remove the trigger and silently disable the forwarding.)</ID>
     <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$// The nullinstance path must log (so the AVD validation gate; can confirm the defensive return fired if KordX is ever; null at the right time).</ID>
     <ID>MaxLineLength:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$// Whitespacetolerant: a regex that matches `Logger.warn(`; followed by any whitespace, then `"MainActivity"`. A future; refactor that reindents the call site must not break this; assertion.</ID>
-    <ID>MaxLineLength:Media3ItemFactory.kt$Media3ItemFactory$/** + 26i — Builders for the AndroidX Media3 browse tree of the new [KordXMediaLibraryService]. The 26i cutover inlines the per-entity display-contract data (the `descriptionForSong` / `songSubtitle` / `songExtras` / `albumSubtitle` / etc. helpers) from the deleted legacy `MediaItemFactory` so the new service has a single self-contained Media3 `MediaItem` factory. The `Extras` data class + the constants + the placeholder helper live in the new shared [KordXMediaSessionConstants] file (also a 26i extraction). Why one factory (not two) Before 26i the codebase had two parallel factories: `MediaItemFactory` (producing the legacy `MediaBrowserCompat.MediaItem` for the -22 `KordXMediaBrowserService`) and `Media3ItemFactory` (producing the Media3 `MediaItem` for the new service). They shared the same data layer (the per-entity display contract is framework-agnostic). After 26i the legacy service is gone, so the legacy factory is gone too — theer-entity data is inlined here, and the new factory produces Media3 `MediaItem` instances directly. Media3 MediaItem shape A Media3 `MediaItem` carries its display fields (`title` / `subtitle` / `description` / `iconUri` / `extras` / `isBrowsable` / `isPlayable` / `mediaType`) on the inner `MediaMetadata`, not on the `MediaItem` itself. The factory below always sets both: - `MediaItem.Builder().setMediaId(id).setMediaMetadata(metadata)` — thetem-level mediaId is what the framework routes on. - `MediaMetadata.Builder().setTitle(title).setSubtitle(subtitle)… .setIsBrowsable(b).setIsPlayable(p).setMediaType(t).setExtras(b)` — theetadata-level fields are what the framework renders. The `setUri(...)` builder method is intentionally **not** called — the songs are routed through `KordXMediaSessionConstants.mediaIdToSongId` + the live `KordX.groove.song.get(id)` lookup, not through an `ExoPlayer.setMediaItem(uri)` path. Unstable API Marked `@UnstableApi` because `MediaItem` and `MediaMetadata` are part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade (1.10.x requires `compileSdk = 36`) will be handled */</ID>
     <ID>MaxLineLength:Media3ItemFactory.kt$Media3ItemFactory$// Perentity adapters: take a live Song/Album/etc. and produce; the corresponding Media3 MediaItem with the full display; contract. These are the entry points the new; KordXMediaLibraryService.MediaLibrarySession.Callback uses; to build the browse tree.</ID>
     <ID>MaxLineLength:Media3ItemFactoryTest.kt$Media3ItemFactoryTest$/** JVM unit tests for the Media3-flavored [Media3ItemFactory]. The factory is parallel to the legacy [MediaItemFactory] (which produces the support-library `MediaBrowserCompat.MediaItem` for the -22 `KordXMediaBrowserService`); the new factory produces Media3 `MediaItem` instances for the new `KordXMediaLibraryService`. What this test exercises The Media3 `MediaItem` + `MediaMetadata` builders are pure (no Android `Uri`, no `KordX`, no `Context`), so the bulk of the factory is JVM-testable on the Android stub classpath: 1. **Media3-specific builder sanity** (`browsable` / `playable` / `nonPlayable` set `isBrowsable` / `isPlayable` / `mediaType` / `mediaId` / `title` / `subtitle` / `description` round-trip through the `MediaMetadata` builder). The Bundle round-trip for `extras` is verified at the data class level by the legacy `MediaItemFactoryTest` (the data flows through `Media3ItemFactory.Extras.toBundle()` unchanged — see the / 21 bundle-shape note in that file's KDoc). 2. **Per-entity display contract** (delegated to [MediaItemFactory] — theescriptions / subtitles / extras data is the same as the legacy service's, and the JVM tests for that data already live in [MediaItemFactoryTest]). The new tests in this file focus on the Media3 wiring of that data: a `browsableAlbum(...)` carries the right `MEDIA_TYPE_FOLDER_ALBUMS`, the `albumExtras` data is the right shape, etc. 3. **Tab-level extras** (the `*TabExtras` helpers — `songsTabExtras`, `albumsTabExtras`, etc. — produce the same `Media3ItemFactory.Extras` data the legacy factory produces, mirrored verbatim in [MediaItemFactoryTest]). What this test does NOT cover The per-Song adapter ([Media3ItemFactory.playableSongItem]) is NOT tested here. `Song`'s constructor requires a non-null `android.net.Uri`, and the Android stub jar used in JVM unit tests returns `null` from `Uri.parse` / `Uri.EMPTY` and throws "Method ... not mocked" from any Uri method call. The `MediaItemFactoryTest` file has the same Song-construction constraint documented in its kdoc, and the per-Song display contract is covered by inspection of the `KordXMediaBrowserService` `buildSongsTab` / `songIdsToPlayableItems` code paths plus the legacy tests for the `descriptionForSong` / `songSubtitle` / `songExtras` pure-helper data. The Media3 wiring of the `playableSongItem` builder is the same as `playable(...)` plus the per-entity factories — both halves are tested here, so the integration is structurally sound. The `MediaMetadata.extras` Bundle is NOT inspected here because the Android stub jar used in JVM unit tests throws `RuntimeException("Method ... in android.os.Bundle not mocked")` from any `Bundle.getString` / `getInt` / `getLong` call. The underlying `Media3ItemFactory.Extras` data class (the source of every key/value that goes into the Bundle) is fully tested by the parallel `MediaItemFactoryTest` — so the data is correct end-to-end; we just skip the Bundle round-trip in this file. */</ID>
     <ID>MaxLineLength:Media3ItemFactoryTest.kt$Media3ItemFactoryTest$// 26f — the 3rd placeholder reason (the playbackerror; path). The plan: "EMPTY_REASON_ERROR: the playback; error path. The RadioSession error handler surfaces this; when handlePlayFromMediaId / handlePlayFromSearch catches; an exception from RadioShorty.playQueue. The count; argument is ignored for this reason." So the extras; carry the reason string under `EXTRA_KEY_EMPTY_REASON`; and have no `EXTRA_KEY_SCAN_COUNT` (the error placeholder; doesn't track a count).</ID>
@@ -134,22 +390,6 @@
     <ID>MaxLineLength:Radio.kt$Radio$// The override uses the concrete [RadioQueue] / [RadioShorty]; types (which implement [RadioQueueAdapterTarget] /; [RadioShortyAdapterTarget]) so existing call sites that; depend on the concrete types — `radio.queue.add(...)`,; `radio.shorty.previous()` — keep compiling. Kotlin permits; covariant override of `val` getters.</ID>
     <ID>MaxLineLength:Radio.kt$Radio$// recursion guard. When the requested index; does not resolve to a song AND the caller is not; autoplaying (e.g. "set up the queue, the user will; press play"), we earlyreturn here. The previous; behavior unconditionally called; `onSongFinish(SongFinishSource.Exception)`, which; reenters `play(nextIndex)`. If the queue contains; only stale song ids (e.g. after a library rescan; removed them, but the queue's `currentQueue` still; references the dead ids), this loop recurses; forever → `StackOverflowError` in the radio; service. With this guard, the userdriven "skip to; a nonexistent song" / "playQueue with autostart =; false" paths return cleanly. The `autostart == true`; path (the errorrecovery autoadvance) is preserved; so the existing exceptionflow still works.</ID>
     <ID>MaxLineLength:RadioAdapterTarget.kt$RadioAdapterTarget$/** Narrow adapter surface for [Radio]. Lets the [RadioForwardingPlayer] be JVM-testable with a hand-rolled fake (no `KordX`, no `Application`, no `Room`). The real [Radio] class implements this interface in its class header. Tests provide hand-rolled fakes. Kept in a separate file from [Radio] and [RadioForwardingPlayer] so the compilation order doesn't matter (Kotlin compiles file-by-file; if [RadioAdapterTarget] is in the same file as the consumer, the compiler may not see the interface declaration before the consumer's `override` modifiers). */</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$// The adapter target interfaces ([RadioAdapterTarget],; [RadioQueueAdapterTarget], [RadioShortyAdapterTarget]) live in; a separate file ([RadioAdapterTarget.kt]) so the compilation; order doesn't matter — Kotlin compiles files in; alphabetical order, and `Radio.kt` is compiled before; `RadioForwardingPlayer.kt`.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$/** AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine. This is the "heart" of the [androidx.media3.session.MediaLibraryService] migration: every other a [Player] that the new `MediaLibrarySession` can wrap. Why this class exists KordX has a custom playback engine ([Radio], [RadioQueue], [RadioShorty], [RadioPlayer]) with a non-Media3 event surface ([Radio.Events.Player.*], [Radio.Events.Queue.*], [Radio.Events.QueueOption.*]). AndroidX Media3's `MediaLibraryService` / `MediaLibrarySession` only know about the [Player] interface and [Player.Listener] events. This adapter translates one surface to the other. Design The class extends [BasePlayer] rather than implementing [Player] directly because [BasePlayer] provides the `final` default-implementations of the ~50 media-item / navigation methods (e.g. `setMediaItem`, `addMediaItem`, `removeMediaItem`, `clearMediaItems`, `next`, `previous`, `seekToDefaultPosition`, `seekBack`, `seekForward`, `hasPreviousMediaItem`, etc.). Those defaults delegate to a small set of abstract getters (`getCurrentTimeline()`, `getMediaItemCount()`, `getMediaItemAt(i)`, `getCurrentMediaItemIndex()`) and the single protected abstract [seekTo] (which we wire to [Radio.seek]). The remaining ~30 [Player] methods are implemented below to map cleanly to the [Radio] / [RadioShorty] / [RadioQueue] public surface. Concurrency The adapter does not own playback threads. The [Radio] engine is driven by the `KordXMediaLibraryService` which calls `addListener` / `removeListener` from the Media3 session's callback thread. The adapter subscribes to [Radio.onUpdate] in [subscribeToRadio] (lazy, on first listener add) and unsubscribes in [unsubscribeFromRadio] (called from [release]); events are dispatched to listeners via [playerListenerHandler] (the main [Looper] by default) so the listener sees the same threading model as a regular Media3 [Player]. Interface-driven testability The constructor takes [RadioAdapterTarget] (and the smaller [RadioQueueAdapterTarget] / [RadioShortyAdapterTarget]) rather than a concrete [Radio] / `KordX`. The concrete [Radio], [RadioQueue], and [RadioShorty] classes explicitly implement these interfaces in their class headers. Tests provide hand-rolled fakes. This keeps the adapter JVM-testable without instantiating an `Application` / `ViewModel` / `Room` database. Event mapping Each [Radio.Events] subevent is translated to the corresponding [Player] event-flag(s) and a `Player.Events` is built (the `onEvents(player, events)` batched-listener callback is the preferred listener entry point in Media3 1.4+): | [Radio.Events] | [Player] event flags | |---------------------------------------------|---------------------------------------------------------------| | `Player.Staged` / `Started` / `Resumed` | `EVENT_PLAY_WHEN_READY_CHANGED \| EVENT_IS_PLAYING_CHANGED` | | `Player.Paused` | `EVENT_PLAY_WHEN_READY_CHANGED \| EVENT_IS_PLAYING_CHANGED` | | `Player.Stopped` | `EVENT_PLAYBACK_STATE_CHANGED \| EVENT_IS_PLAYING_CHANGED` | | `Player.Ended` | `EVENT_PLAYBACK_STATE_CHANGED` (state = `STATE_ENDED`) | | `Player.Seeked` | `EVENT_POSITION_DISCONTINUITY` | | `Queue.Modified` / `Cleared` / `IndexChanged` | `EVENT_TIMELINE_CHANGED` | | `QueueOption.ShuffleModeChanged` | `EVENT_SHUFFLE_MODE_ENABLED_CHANGED` | | `QueueOption.LoopModeChanged` | `EVENT_REPEAT_MODE_CHANGED` | See [handleRadioEvent] for the actual mapping. Thread-safety The listener list is a [CopyOnWriteArrayList] (safe to iterate while listeners are being added/removed). The unsubscribe function is stored in [radioUnsubscribe] and called from [release]. The [Radio] engine itself is not thread-safe — all access goes through the Media3 session's main thread callback. UnstableApi Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade will be handled */</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Build a Player.Events from the individual flag bits. The; Player.Events constructor takes a FlagSet, so we use; FlagSet.Builder to construct one. The Int values are the; Player.EVENT_* constants.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Fallback: surface the live duration even when the; resolver returns null. AAOS uses this to render the; progress bar on the Now Playing card.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Noop: Radio has no separate prepare phase.; RadioPlayer.prepare() is internal; the player is staged; by `Radio.play(PlayOptions)`. Auto will issue `play()`; once a queue exists.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Player: application looper (used by Media3 session to; dispatch listener events). Returns the looper of the; handler we use to dispatch events, so all listener; callbacks land on the same thread.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Player: playlist bulk operations. These are abstract on; BasePlayer (inherited from Player) because BasePlayer's; default `setMediaItem` / `addMediaItem` / `removeMediaItem`; etc. dispatch to `setMediaItems(List, boolean)` /; `setMediaItems(List, int, long)`. We implement them as; noops on the radio (the radio manages its own queue via; `RadioShorty.playQueue` and `RadioQueue`); the Media3; session will use `Radio.onCustomCommand` (in 26c) to; translate AAOS intents into radio operations.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Player: transport controls. Note: `play()` and `pause()`; are `final` on BasePlayer and dispatch to; `setPlayWhenReady(true)` / `setPlayWhenReady(false)`.; We implement [setPlayWhenReady] below; the `play` /; `pause` dispatch chain handles the rest.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// Resolved handler used to dispatch `Player.Listener.onEvents`; calls. Defaults to the main `Looper` for production; (where the [KordXMediaLibraryService] ( ); creates the adapter from the main thread); tests pass; a handler on a nonmain looper to avoid the; `Looper.getMainLooper` "not mocked" runtime error on the; JVM unittest classpath.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// The Media3 seekParameters + forcePosition arguments; don't map onto the Radio's seek (which is an exact; `MediaPlayer.seekTo(position)` under the hood). We just; forward the position.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// The Player interface declares `stop()` (no args); the; [RadioAdapterTarget] interface declares `stop()` (no args,; defaults to `ended = true` at the radio side). The noarg; override is the Media3 contract; the radio's; `stop(ended: Boolean)` is a separate method on the; concrete class, not on the interface.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// The Radio's fade / ducking logic is internal to; RadioPlayer. The Media3 setVolume contract is that 1.0; = full and 0.0 = muted. We do not propagate to the; player because the radio manages its own volume; envelope.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// [RadioQueue.currentSongIndex] is exposed through; [RadioQueueAdapterTarget.currentSongIndex]. The interface; declaration lives in the same file as the adapter.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// [setPlayWhenReady] is abstract on BasePlayer. BasePlayer's; `play()` calls this with `true`; its `pause()` calls it with; `false`. We delegate to the radio's playPause() in both; cases — theadio is the source of truth for play state.</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer$// `isPlaying()` is `final` on BasePlayer; it returns; `getPlaybackState() == STATE_READY &amp;&amp; getPlayWhenReady()`. So; we don't override it directly — we just implement; `getPlaybackState()` (returns STATE_READY when there's a; player) and `getPlayWhenReady()` (returns `radio.isPlaying`).</ID>
-    <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioForwardingPlayer.Companion$// The Media3 Player contract: the maximum position for; which `seekToPrevious` will seek back within the current; item rather than skipping to the previous one. Matches; `RadioShorty.previous()` which uses 3000ms as the; "rewind from the start of the current song" threshold.</ID>
     <ID>MaxLineLength:RadioForwardingPlayer.kt$RadioTimeline$/** Internal [Timeline] implementation for [RadioForwardingPlayer]. One window per entry in `RadioQueue.currentQueue` (so the `Player.seekToNext*` / `seekToPrevious*` defaults work as expected), with each window's [Timeline.Window.mediaItem] resolved through the [songMediaItemResolver] callback. Implementing [Timeline] inline avoids the cost of a `Bundle` round-trip and keeps the adapter self-contained. */</ID>
     <ID>MaxLineLength:RadioForwardingPlayerTest.kt$RadioForwardingPlayerTest$// 2. pause() delegates to RadioShorty.playPause(); (BasePlayer.pause is final and calls setPlayWhenReady(false); setPlayWhenReady delegates to playPause() when isPlaying; is true; we exercise the isPlaying=true path here).</ID>
     <ID>MaxLineLength:RadioForwardingPlayerTest.kt$RadioForwardingPlayerTest$// After the last listener is removed, the unsubscribe; function should be invoked (radio.lastSubscriber is; reset to null by the FakeRadio's unsubscribe).</ID>
@@ -210,7 +450,6 @@
     <ID>MaxLineLength:TranslationLoaderTest.kt$TranslationLoaderTest$// Inspect the actual `buildKeys` function body (bracematched); so explanatory comments naming `declaredFields` don't fool the; ordering check. Within that body the `when` must list the; constructorname branch (`allCtorNamesPresent`) BEFORE the; fieldname fallback branch (`keysFieldNames.size`).</ID>
     <ID>MaxLineLength:TranslationLoaderTest.kt$TranslationLoaderTest$// Primary fix: parameter names read from the constructor via; `Parameter.getName()`, gated on `isNamePresent()` so the real; (postflag) names are used. ctor.parameters is iterated in; constructor order — the CORRECT order for newInstance(*args).</ID>
     <ID>MaxLineLength:TranslationLoaderTest.kt$TranslationLoaderTest$// Regression guard against the Mode B bug: an earlier draft; used `_Keys::class.java.declaredFields()` as the PRIMARY name; source, but getDeclaredFields() returns alphabeticallysorted; fields (not declaration / constructor order), which shuffled; every value into the wrong field. The fieldname list may; remain only as an emergency FALLBACK, never the primary.</ID>
-    <ID>MaxLineLength:Typography.kt$KordXBuiltinFonts$// was `R.font.roboto_regular` / `R.font.roboto_bold`; (a copypaste bug from when the Poppins ttf files; were added under `app/src/main/res/font/poppins_*.ttf` but; this FontFamily reference was never updated). Verified; 20260708: both `poppins_regular.ttf` and `poppins_bold.ttf`; exist on disk.</ID>
     <ID>NestedBlockDepth:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$private fun findOpeningBrace(source: String, fromIndex: Int): Int</ID>
     <ID>NewLineAtEndOfFile:Album.kt$com.android.rockages.kordx.ui.view.Album.kt</ID>
     <ID>NewLineAtEndOfFile:ConsiderContributingTile.kt$com.android.rockages.kordx.ui.components.settings.ConsiderContributingTile.kt</ID>
@@ -220,17 +459,34 @@
     <ID>NewLineAtEndOfFile:Translation.g.kt$com.android.rockages.kordx.services.i18n.Translation.g.kt</ID>
     <ID>NewLineAtEndOfFile:TranslationLoaderTest.kt$com.android.rockages.kordx.services.i18n.TranslationLoaderTest.kt</ID>
     <ID>NewLineAtEndOfFile:Translations.g.kt$com.android.rockages.kordx.services.i18n.Translations.g.kt</ID>
+    <ID>ReturnCount:CR3AutoPlaybackWiringTest.kt$CR3AutoPlaybackWiringTest$private fun extractMethodBody(source: String, methodName: String): String</ID>
+    <ID>ReturnCount:DebugReceiversRegistrationTest.kt$DebugReceiversRegistrationTest$private fun registrationIsDebugGuarded(source: String, needle: String): Boolean</ID>
+    <ID>ReturnCount:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$override fun onCustomCommand( session: MediaSession, controllerInfo: MediaSession.ControllerInfo, customCommand: SessionCommand, args: android.os.Bundle, ): ListenableFuture&lt;SessionResult&gt;</ID>
+    <ID>ReturnCount:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun buildRecentPlaysTab(): List&lt;MediaItem&gt;</ID>
+    <ID>ReturnCount:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
+    <ID>ReturnCount:KordXSearch.kt$KordXSearch$fun search( query: String?, songIds: List&lt;String&gt;, lookup: (String) -&gt; String, limit: Int = DEFAULT_LIMIT, randomSampleSize: Int = DEFAULT_RANDOM_SAMPLE_SIZE, ): List&lt;String&gt;</ID>
+    <ID>ReturnCount:MainActivity.kt$MainActivity$private fun forwardMediaSearchIntent(intent: Intent?)</ID>
+    <ID>ReturnCount:MediaExposer.kt$MediaExposer.MediaFilter$fun isWhitelisted(path: String): Boolean</ID>
+    <ID>ReturnCount:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$private fun findOpeningBrace(source: String, fromIndex: Int): Int</ID>
+    <ID>ReturnCount:Radio.kt$Radio$fun play(options: PlayOptions)</ID>
+    <ID>ReturnCount:Radio.kt$Radio$private fun prepareNextPlayer()</ID>
+    <ID>ReturnCount:RadioSession.kt$RadioSession$fun handlePlayFromMediaId(mediaId: String?, autostart: Boolean = true)</ID>
+    <ID>ReturnCount:RadioSession.kt$RadioSession$fun handlePlayFromSearch(query: String?)</ID>
+    <ID>ReturnCount:RadioSession.kt$RadioSession$private suspend fun currentUpdateRequest(): UpdateRequest?</ID>
+    <ID>ReturnCount:SongRepository.kt$SongRepository$suspend fun getLyrics(song: Song): String?</ID>
+    <ID>ReturnCount:TranslationLoaderTest.kt$TranslationLoaderTest$private fun extractFunctionBody(source: String, signatureFragment: String): String</ID>
     <ID>SpacingBetweenPackageAndImports:BodyContent.kt$ </ID>
     <ID>SpacingBetweenPackageAndImports:MediaExposer.kt$ </ID>
     <ID>SpacingBetweenPackageAndImports:PlaylistRepository.kt$ </ID>
     <ID>SpacingBetweenPackageAndImports:RadioArtworkCacher.kt$ </ID>
     <ID>SpacingBetweenPackageAndImports:RadioNotification.kt$ </ID>
     <ID>SpreadOperator:Home.kt$(*tabs.toTypedArray(), *HomePage.entries.toTypedArray())</ID>
-    <ID>SpreadOperator:KordXMediaLibraryServiceTest.kt$KordXMediaLibraryServiceTest$(methodName, *methodArgTypes(methodName))</ID>
     <ID>SpreadOperator:MultiTextOptionTile.kt$(*values.toTypedArray())</ID>
     <ID>SpreadOperator:NewPlaylistDialog.kt$(*initialSongIds.toTypedArray())</ID>
     <ID>SpreadOperator:SongTreeList.kt$(*pairs.toTypedArray())</ID>
     <ID>SpreadOperator:Translation.kt$Translation.Companion$(*args)</ID>
+    <ID>SwallowedException:CustomBrowseActionTest.kt$CustomBrowseActionTest$err: Exception</ID>
+    <ID>SwallowedException:RadioSession.kt$RadioSession$err: Exception</ID>
     <ID>TooGenericExceptionCaught:BottomBar.kt$err: Exception</ID>
     <ID>TooGenericExceptionCaught:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$err: Exception</ID>
     <ID>TooGenericExceptionCaught:MediaExposer.kt$MediaExposer$err: Exception</ID>
@@ -247,22 +503,264 @@
     <ID>TooGenericExceptionCaught:SongParser.kt$SongParser$err: Exception</ID>
     <ID>TooGenericExceptionCaught:SongRepository.kt$SongRepository$err: Exception</ID>
     <ID>TooManyFunctions:Media3ItemFactory.kt$Media3ItemFactory</ID>
-    <ID>TooManyFunctions:Media3ItemFactoryTest.kt$Media3ItemFactoryTest</ID>
     <ID>TooManyFunctions:PlaylistRepository.kt$PlaylistRepository</ID>
-    <ID>TooManyFunctions:RadioForwardingPlayerTest.kt$RadioForwardingPlayerTest</ID>
-    <ID>TooManyFunctions:RadioSessionStateTest.kt$RadioSessionStateTest</ID>
     <ID>TooManyFunctions:Translation.g.kt$_Translation</ID>
-    <ID>UnusedImports:ColorSchemeVisibilityTest.kt$import androidx.compose.material3.ColorScheme</ID>
-    <ID>UnusedImports:ColorSchemeVisibilityTest.kt$import org.junit.jupiter.api.Assertions.assertNotEquals</ID>
-    <ID>UnusedImports:ForYou.kt$import androidx.compose.material3.Card</ID>
-    <ID>UnusedImports:IconRefinementTest.kt$import org.junit.jupiter.api.Assertions.assertEquals</ID>
-    <ID>UnusedImports:IconRefinementTest.kt$import org.junit.jupiter.api.Assertions.assertNotNull</ID>
-    <ID>UnusedImports:Media3ItemFactoryTest.kt$import androidx.media3.common.MediaItem</ID>
-    <ID>UnusedImports:MediaExposer.kt$import kotlinx.coroutines.withContext</ID>
-    <ID>UnusedImports:Playlists.kt$import com.android.rockages.kordx.core.groove.Playlist</ID>
-    <ID>UnusedImports:RadioForwardingPlayerTest.kt$import org.junit.jupiter.api.Assertions.assertSame</ID>
-    <ID>UnusedImports:RadioQueueLoopShufflePersistenceTest.kt$import org.junit.jupiter.api.Assertions.assertEquals</ID>
+    <ID>UnusedParameter:BodyContent.kt$onSeekCancel: () -&gt; Unit</ID>
+    <ID>UnusedParameter:Media3ItemFactory.kt$Media3ItemFactory$genre: Genre</ID>
+    <ID>UnusedParameter:Media3ItemFactory.kt$Media3ItemFactory$playlist: Playlist</ID>
+    <ID>UnusedParameter:MediaExposer.kt$MediaExposer$@Suppress("Unused") cycle: ScanCycle</ID>
+    <ID>UnusedPrivateProperty:Home.kt$val coroutineScope = rememberCoroutineScope()</ID>
+    <ID>UnusedPrivateProperty:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$val startIndex = match.range.first</ID>
+    <ID>UnusedPrivateProperty:Permissions.kt$Permissions$private val kordx: KordX</ID>
+    <ID>UnusedPrivateProperty:RadioPlayRecursionTest.kt$RadioPlayRecursionTest$val occurrences = source.windowed(directWritePattern.length, 1, false) .count { it == directWritePattern }</ID>
+    <ID>UseCheckOrError:CR3AutoPlaybackWiringTest.kt$CR3AutoPlaybackWiringTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:DebugReceiversRegistrationTest.kt$DebugReceiversRegistrationTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:I18nProguardRulesTest.kt$I18nProguardRulesTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:IconRefinementTest.kt$IconRefinementTest$throw IllegalStateException( "Could not locate drawable $name.xml in app/src/main/res/drawable/" )</ID>
+    <ID>UseCheckOrError:MainActivityMediaSearchForwardingTest.kt$MainActivityMediaSearchForwardingTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:MetaphonyProguardRulesTest.kt$MetaphonyProguardRulesTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:RadioNativeReceiverRegistrationTest.kt$RadioNativeReceiverRegistrationTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:RadioNativeReceiverRegistrationTest.kt$RadioNativeReceiverRegistrationTest$throw IllegalStateException("Unmatched brace at index $openIdx")</ID>
+    <ID>UseCheckOrError:RadioPlayRecursionTest.kt$RadioPlayRecursionTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:RadioQueueLoopShufflePersistenceTest.kt$RadioQueueLoopShufflePersistenceTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:RadioQueueRemoveTest.kt$RadioQueueRemoveTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
+    <ID>UseCheckOrError:SQLiteKeyValueDatabaseAdapterTest.kt$SQLiteKeyValueDatabaseAdapterTest$throw IllegalStateException( "Could not locate source file $relativePath in ${System.getProperty("user.dir")}" )</ID>
     <ID>UseDataClass:Typography.kt$KordXFont</ID>
+    <ID>VariableNaming:IconRefinementTest.kt$IconRefinementTest$private val ACTION_ICONS = listOf( "ic_shuffle", "ic_shuffle_active", "ic_repeat", "ic_repeat_active", "ic_repeat_one", "ic_favorite_border", "ic_favorite_filled", "ic_search", )</ID>
+    <ID>VariableNaming:IconRefinementTest.kt$IconRefinementTest$private val LAUNCHER_ICONS = listOf( "ic_launcher_foreground", "ic_launcher_foreground_light", "ic_launcher_monochrome", )</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val About: String get() = container.keys.About</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddFolder: String get() = container.keys.AddFolder</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddItem: String get() = container.keys.AddItem</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddMediaFolders: String get() = container.keys.AddMediaFolders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddSongs: String get() = container.keys.AddSongs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddToPlaylist: String get() = container.keys.AddToPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AddToQueue: String get() = container.keys.AddToQueue</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Album: String get() = container.keys.Album</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AlbumArtist: String get() = container.keys.AlbumArtist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AlbumArtists: String get() = container.keys.AlbumArtists</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AlbumCount: String get() = container.keys.AlbumCount</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Albums: String get() = container.keys.Albums</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val All: String get() = container.keys.All</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AlwaysVisible: String get() = container.keys.AlwaysVisible</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Amber: String get() = container.keys.Amber</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AppBuiltIn: String get() = container.keys.AppBuiltIn</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Appearance: String get() = container.keys.Appearance</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AreYouSureThatYouWantToDeleteThisPlaylist: String get() = container.keys.AreYouSureThatYouWantToDeleteThisPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Artist: String get() = container.keys.Artist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ArtistTagValueSeparators: String get() = container.keys.ArtistTagValueSeparators</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Artists: String get() = container.keys.Artists</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ArtworkQuality: String get() = container.keys.ArtworkQuality</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AudioChannels: String get() = container.keys.AudioChannels</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val AutoResumePlayback: String get() = container.keys.AutoResumePlayback</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val BitDepth: String get() = container.keys.BitDepth</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Bitrate: String get() = container.keys.Bitrate</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Black: String get() = container.keys.Black</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val BlacklistFolders: String get() = container.keys.BlacklistFolders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Blue: String get() = container.keys.Blue</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val BottomBarLabelVisibility: String get() = container.keys.BottomBarLabelVisibility</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Browser: String get() = container.keys.Browser</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Cancel: String get() = container.keys.Cancel</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val CaseSensitiveSorting: String get() = container.keys.CaseSensitiveSorting</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val CheckForUpdates: String get() = container.keys.CheckForUpdates</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ClearSongCache: String get() = container.keys.ClearSongCache</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Codec: String get() = container.keys.Codec</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val CollapseNowPlaying: String get() = container.keys.CollapseNowPlaying</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val CompactLeft: String get() = container.keys.CompactLeft</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val CompactRight: String get() = container.keys.CompactRight</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Composer: String get() = container.keys.Composer</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ConsiderContributing: String get() = container.keys.ConsiderContributing</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ContentScale: String get() = container.keys.ContentScale</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ControlsLayout: String get() = container.keys.ControlsLayout</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Custom: String get() = container.keys.Custom</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Cyan: String get() = container.keys.Cyan</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val DamnThisIsSoEmpty: String get() = container.keys.DamnThisIsSoEmpty</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Dark: String get() = container.keys.Dark</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Date: String get() = container.keys.Date</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val DateAdded: String get() = container.keys.DateAdded</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Delete: String get() = container.keys.Delete</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val DeletePlaylist: String get() = container.keys.DeletePlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Details: String get() = container.keys.Details</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Disabled: String get() = container.keys.Disabled</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val DiscNumber: String get() = container.keys.DiscNumber</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val DiscTotal: String get() = container.keys.DiscTotal</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Discord: String get() = container.keys.Discord</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Done: String get() = container.keys.Done</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Duration: String get() = container.keys.Duration</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Emerald: String get() = container.keys.Emerald</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Enabled: String get() = container.keys.Enabled</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Encoder: String get() = container.keys.Encoder</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Equalizer: String get() = container.keys.Equalizer</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Export: String get() = container.keys.Export</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FDroid: String get() = container.keys.FDroid</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FadePlaybackInOut: String get() = container.keys.FadePlaybackInOut</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FastForward: String get() = container.keys.FastForward</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FastForwardDuration: String get() = container.keys.FastForwardDuration</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FastRewind: String get() = container.keys.FastRewind</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FastRewindDuration: String get() = container.keys.FastRewindDuration</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Favorite: String get() = container.keys.Favorite</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Filename: String get() = container.keys.Filename</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FilteringResults: String get() = container.keys.FilteringResults</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Folders: String get() = container.keys.Folders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Font: String get() = container.keys.Font</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val FontScale: String get() = container.keys.FontScale</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ForYou: String get() = container.keys.ForYou</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Fuchsia: String get() = container.keys.Fuchsia</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val GaplessPlayback: String get() = container.keys.GaplessPlayback</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Genre: String get() = container.keys.Genre</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val GenreTagValueSeparators: String get() = container.keys.GenreTagValueSeparators</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Genres: String get() = container.keys.Genres</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Github: String get() = container.keys.Github</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Green: String get() = container.keys.Green</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val GridColumns: String get() = container.keys.GridColumns</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Groove: String get() = container.keys.Groove</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val HelloThere: String get() = container.keys.HelloThere</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Help: String get() = container.keys.Help</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val High: String get() = container.keys.High</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val HintAddMediaFolders: String get() = container.keys.HintAddMediaFolders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Home: String get() = container.keys.Home</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val HomeTabs: String get() = container.keys.HomeTabs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Hours: String get() = container.keys.Hours</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Id: String get() = container.keys.Id</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val IgnoreAudioFocusLoss: String get() = container.keys.IgnoreAudioFocusLoss</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ImportPlaylist: String get() = container.keys.ImportPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Indigo: String get() = container.keys.Indigo</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Interface: String get() = container.keys.Interface</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val IntroductoryMessage: String get() = container.keys.IntroductoryMessage</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val InvalidM3UFile: String get() = container.keys.InvalidM3UFile</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Invisible: String get() = container.keys.Invisible</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val IsLocalPlaylist: String get() = container.keys.IsLocalPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val IzzyOnDroid: String get() = container.keys.IzzyOnDroid</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val KeepScreenAwakeOnLyrics: String get() = container.keys.KeepScreenAwakeOnLyrics</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Language_: String get() = container.keys.Language_</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LastModified: String get() = container.keys.LastModified</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Length: String get() = container.keys.Length</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Light: String get() = container.keys.Light</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Lime: String get() = container.keys.Lime</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Loading: String get() = container.keys.Loading</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LocalStorage: String get() = container.keys.LocalStorage</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LocaleCode: String get() = container.locale.code</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LocaleDirection: String get() = container.locale.direction</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LocaleDisplayName: String get() = container.locale.display</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LocaleNativeName: String get() = container.locale.native</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Loseless: String get() = container.keys.Loseless</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Low: String get() = container.keys.Low</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Lyrics: String get() = container.keys.Lyrics</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val LyricsLayout: String get() = container.keys.LyricsLayout</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ManageSongs: String get() = container.keys.ManageSongs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MaterialYou: String get() = container.keys.MaterialYou</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MaximumBitrate: String get() = container.keys.MaximumBitrate</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MediaFolders: String get() = container.keys.MediaFolders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Medium: String get() = container.keys.Medium</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MinSongDurationFilter: String get() = container.keys.MinSongDurationFilter</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MiniPlayer: String get() = container.keys.MiniPlayer</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MiniPlayerTextMarquee: String get() = container.keys.MiniPlayerTextMarquee</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val MinimumBitrate: String get() = container.keys.MinimumBitrate</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Minutes: String get() = container.keys.Minutes</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val More: String get() = container.keys.More</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Name: String get() = container.keys.Name</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NewPlaylist: String get() = container.keys.NewPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Next: String get() = container.keys.Next</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val No: String get() = container.keys.No</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoFoldersFound: String get() = container.keys.NoFoldersFound</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoInAppPlaylistsFound: String get() = container.keys.NoInAppPlaylistsFound</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoLocalPlaylistsFound: String get() = container.keys.NoLocalPlaylistsFound</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoLyrics: String get() = container.keys.NoLyrics</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoMusicYet: String get() = container.keys.NoMusicYet</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NoResultsFound: String get() = container.keys.NoResultsFound</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NothingIsBeingPlayedRightNow: String get() = container.keys.NothingIsBeingPlayedRightNow</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NothingPlayedYet: String get() = container.keys.NothingPlayedYet</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NothingPlayedYetSubtitle: String get() = container.keys.NothingPlayedYetSubtitle</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val NowPlaying: String get() = container.keys.NowPlaying</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Orange: String get() = container.keys.Orange</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Path: String get() = container.keys.Path</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Pause: String get() = container.keys.Pause</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PauseOnCurrentSongEnd: String get() = container.keys.PauseOnCurrentSongEnd</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PauseOnHeadphonesDisconnect: String get() = container.keys.PauseOnHeadphonesDisconnect</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PersistUntilQueueEnd: String get() = container.keys.PersistUntilQueueEnd</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PickFolder: String get() = container.keys.PickFolder</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Pink: String get() = container.keys.Pink</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Pitch: String get() = container.keys.Pitch</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Play: String get() = container.keys.Play</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PlayAll: String get() = container.keys.PlayAll</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PlayNext: String get() = container.keys.PlayNext</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PlayOnHeadphonesConnect: String get() = container.keys.PlayOnHeadphonesConnect</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PlayStore: String get() = container.keys.PlayStore</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Player: String get() = container.keys.Player</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Playlist: String get() = container.keys.Playlist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PlaylistStoreLocation: String get() = container.keys.PlaylistStoreLocation</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Playlists: String get() = container.keys.Playlists</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Previous: String get() = container.keys.Previous</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val PrimaryColor: String get() = container.keys.PrimaryColor</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Purple: String get() = container.keys.Purple</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Queue: String get() = container.keys.Queue</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val QuitAppOnEnd: String get() = container.keys.QuitAppOnEnd</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val RecentlyAddedSongs: String get() = container.keys.RecentlyAddedSongs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val RecentlyPlayed: String get() = container.keys.RecentlyPlayed</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Red: String get() = container.keys.Red</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Reddit: String get() = container.keys.Reddit</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val RemoveFromPlaylist: String get() = container.keys.RemoveFromPlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Rename: String get() = container.keys.Rename</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val RenamePlaylist: String get() = container.keys.RenamePlaylist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Repeat: String get() = container.keys.Repeat</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ReplaceArtwork: String get() = container.keys.ReplaceArtwork</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ReportAnIssue: String get() = container.keys.ReportAnIssue</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val RequireAudioFocus: String get() = container.keys.RequireAudioFocus</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Rescan: String get() = container.keys.Rescan</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Reset: String get() = container.keys.Reset</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Rose: String get() = container.keys.Rose</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SamplingRate: String get() = container.keys.SamplingRate</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Scanning: String get() = container.keys.Scanning</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SearchYourMusic: String get() = container.keys.SearchYourMusic</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SelectAtleast2orAtmost5Tabs: String get() = container.keys.SelectAtleast2orAtmost5Tabs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SeparatePage: String get() = container.keys.SeparatePage</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Settings: String get() = container.keys.Settings</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShareSong: String get() = container.keys.ShareSong</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShowAudioInformation: String get() = container.keys.ShowAudioInformation</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShowSeekControls: String get() = container.keys.ShowSeekControls</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShowTrackControls: String get() = container.keys.ShowTrackControls</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShowUpdateToast: String get() = container.keys.ShowUpdateToast</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Shuffle: String get() = container.keys.Shuffle</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ShufflePlay: String get() = container.keys.ShufflePlay</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Size: String get() = container.keys.Size</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Sky: String get() = container.keys.Sky</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SleepTimer: String get() = container.keys.SleepTimer</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SongCacheCleared: String get() = container.keys.SongCacheCleared</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Songs: String get() = container.keys.Songs</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SongsFilterPattern: String get() = container.keys.SongsFilterPattern</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Speed: String get() = container.keys.Speed</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Stop: String get() = container.keys.Stop</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SuggestedAlbumArtists: String get() = container.keys.SuggestedAlbumArtists</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SuggestedAlbums: String get() = container.keys.SuggestedAlbums</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SuggestedArtists: String get() = container.keys.SuggestedArtists</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val System: String get() = container.keys.System</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SystemLightBlack: String get() = container.keys.SystemLightBlack</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val SystemLightDark: String get() = container.keys.SystemLightDark</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Teal: String get() = container.keys.Teal</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Theme: String get() = container.keys.Theme</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Title: String get() = container.keys.Title</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val TotalSamples: String get() = container.keys.TotalSamples</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val TrackCount: String get() = container.keys.TrackCount</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val TrackName: String get() = container.keys.TrackName</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val TrackNumber: String get() = container.keys.TrackNumber</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Traditional: String get() = container.keys.Traditional</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Tree: String get() = container.keys.Tree</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Unfavorite: String get() = container.keys.Unfavorite</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val UnknownSymbol: String get() = container.keys.UnknownSymbol</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Updates: String get() = container.keys.Updates</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val UseMetaphonyMetadataDecoder: String get() = container.keys.UseMetaphonyMetadataDecoder</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val VBR: String get() = container.keys.VBR</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Variable: String get() = container.keys.Variable</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Version: String get() = container.keys.Version</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ViewAlbum: String get() = container.keys.ViewAlbum</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ViewAlbumArtist: String get() = container.keys.ViewAlbumArtist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ViewArtist: String get() = container.keys.ViewArtist</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val ViewGenre: String get() = container.keys.ViewGenre</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Violet: String get() = container.keys.Violet</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val VisibleWhenActive: String get() = container.keys.VisibleWhenActive</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val WhitelistFolders: String get() = container.keys.WhitelistFolders</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Year: String get() = container.keys.Year</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Yellow: String get() = container.keys.Yellow</ID>
+    <ID>VariableNaming:Translation.g.kt$_Translation$val Yes: String get() = container.keys.Yes</ID>
     <ID>WildcardImport:AddToPlaylistDialog.kt$import com.android.rockages.kordx.services.groove.*</ID>
     <ID>WildcardImport:Album.kt$import com.android.rockages.kordx.services.groove.*</ID>
     <ID>WildcardImport:AlbumArtist.kt$import com.android.rockages.kordx.services.groove.*</ID>
