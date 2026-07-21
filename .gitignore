@@ -55,3 +55,10 @@ __inventory_*.csv
 __*.ps1
 __*.txt
 
+# Debug screenshots, uiautomator dumps, temp databases
+avd-*.png
+ui*.xml
+*.db
+cover-test.jpg
+error-screenshot.png
+
