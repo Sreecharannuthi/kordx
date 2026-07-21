@@ -10,6 +10,7 @@ import java.time.Instant
 import java.util.Date
 import java.util.Timer
 
+@Suppress("UnsafeOptInUsageError")
 class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  sealed class Events {
  sealed class Player : Events() {
@@ -69,7 +70,6 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  private val focus = RadioFocus(kordx)
  private val nativeReceiver = RadioNativeReceiver(kordx)
  private var player: RadioPlayer? = null
- private var nextPlayer: RadioPlayer? = null
 
  override val hasPlayer get() = player?.usable == true
  override val isPlaying get() = player?.isPlaying == true
@@ -135,16 +135,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  }
  try {
  queue.currentSongIndex = options.index
- player = nextPlayer?.takeIf {
- when {
- it.id == song.id -> true
- else -> {
- it.destroy()
- false
- }
- }
- } ?: RadioPlayer(kordx, song.id, song.uri)
- nextPlayer = null
+ player = RadioPlayer(kordx, song.id, song.uri, exoPlayer)
  player!!.setOnPreparedListener {
  options.startPosition?.let {
  if (it > 0L) {
@@ -178,7 +169,6 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  }
  }
  player!!.prepare()
- prepareNextPlayer()
  onUpdate.dispatch(Events.Player.Staged)
  } catch (err: Exception) {
  Logger.warn(
@@ -187,29 +177,6 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  err,
  )
  queue.remove(queue.currentSongIndex)
- }
- }
-
- private fun prepareNextPlayer() {
- if (!kordx.settings.gaplessPlayback.value) {
- return
- }
- val (nextSongIndex) = getNextSong(SongFinishSource.Finish)
- val song = queue.getSongIdAt(nextSongIndex)?.let { kordx.groove.song.get(it) } ?: return
- if (song.id == nextPlayer?.id) {
- return
- }
- try {
- nextPlayer?.destroy()
- nextPlayer = RadioPlayer(kordx, song.id, song.uri).also {
- it.prepare()
- }
- } catch (err: Exception) {
- Logger.warn(
- "Radio",
- "unable to prepare next player ${song.id} (${nextSongIndex})",
- err,
- )
  }
  }
 
@@ -376,10 +343,9 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  player?.let {
  player = null
  it.setOnPlaybackPositionListener {}
- it.changeVolume(RadioPlayer.MIN_VOLUME) { _ ->
- it.stop()
+ it.pause()
+ it.destroy()
  onUpdate.dispatch(Events.Player.Stopped)
- }
  }
  }
 
@@ -487,7 +453,8 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  if (event !is Events.Queue) {
  return
  }
- prepareNextPlayer()
+ // ExoPlayer handles gapless transitions internally;
+ // no need to pre-buffer the next player.
  }
 
  override fun onKordXReady() {

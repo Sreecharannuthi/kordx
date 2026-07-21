@@ -1,11 +1,12 @@
 package com.android.rockages.kordx.services.radio
 
-import android.media.MediaPlayer
-import android.media.PlaybackParams
 import android.net.Uri
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.android.rockages.kordx.KordX
 import com.android.rockages.kordx.core.utils.Logger
-import kotlinx.coroutines.launch
 import java.util.Timer
 
 typealias RadioPlayerOnPreparedListener = () -> Unit
@@ -13,7 +14,8 @@ typealias RadioPlayerOnPlaybackPositionListener = (RadioPlayer.PlaybackPosition)
 typealias RadioPlayerOnFinishListener = () -> Unit
 typealias RadioPlayerOnErrorListener = (Int, Int) -> Unit
 
-class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
+@Suppress("UnsafeOptInUsageError")
+class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val exoPlayer: ExoPlayer) {
  data class PlaybackPosition(val played: Long, val total: Long) {
  val ratio: Float
  get() = (played.toFloat() / total).takeIf { it.isFinite() } ?: 0f
@@ -31,14 +33,36 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  Destroyed,
  }
 
- private val unsafeMediaPlayer: MediaPlayer
- private val mediaPlayer: MediaPlayer? get() = if (usable) unsafeMediaPlayer else null
  private var onPrepared: RadioPlayerOnPreparedListener? = null
  private var onPlaybackPosition: RadioPlayerOnPlaybackPositionListener? = null
  private var onFinish: RadioPlayerOnFinishListener? = null
  private var onError: RadioPlayerOnErrorListener? = null
  private var fader: RadioEffects.Fader? = null
  private var playbackPositionUpdater: Timer? = null
+
+ private val listener = object : Player.Listener {
+ override fun onPlaybackStateChanged(playbackState: Int) {
+ when (playbackState) {
+ Player.STATE_READY -> {
+ state = State.Prepared
+ createDurationTimer()
+ onPrepared?.invoke()
+ }
+ Player.STATE_ENDED -> {
+ state = State.Finished
+ destroyDurationTimer()
+ onFinish?.invoke()
+ }
+ else -> {}
+ }
+ }
+
+ override fun onPlayerError(error: PlaybackException) {
+ state = State.Destroyed
+ destroyDurationTimer()
+ onError?.invoke(error.errorCode, 0)
+ }
+ }
 
  var state = State.Unprepared
  private set
@@ -53,46 +77,26 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
 
  val usable get() = state == State.Prepared
  val fadePlayback get() = kordx.settings.fadePlayback.value
- val audioSessionId get() = mediaPlayer?.audioSessionId
- val isPlaying get() = mediaPlayer?.isPlaying == true
+ val audioSessionId get() = exoPlayer.audioSessionId
+ val isPlaying get() = exoPlayer.isPlaying
 
  val playbackPosition
- get() = mediaPlayer?.let {
- try {
+ get() = try {
  PlaybackPosition(
- played = it.currentPosition.toLong(),
- total = it.duration.toLong(),
+ played = exoPlayer.currentPosition,
+ total = exoPlayer.duration.takeIf { it > 0 } ?: 0L,
  )
  } catch (_: IllegalStateException) {
  null
- }
- }
-
- init {
- unsafeMediaPlayer = MediaPlayer().also { ump ->
- ump.setOnPreparedListener {
- state = State.Prepared
- ump.playbackParams.setAudioFallbackMode(PlaybackParams.AUDIO_FALLBACK_MODE_DEFAULT)
- createDurationTimer()
- onPrepared?.invoke()
- }
- ump.setOnCompletionListener {
- state = State.Finished
- onFinish?.invoke()
- }
- ump.setOnErrorListener { _, what, extra ->
- state = State.Destroyed
- onError?.invoke(what, extra)
- true
- }
- ump.setDataSource(kordx.applicationContext, uri)
- }
  }
 
  fun prepare() {
  when (state) {
  State.Unprepared -> {
- unsafeMediaPlayer.prepareAsync()
+ exoPlayer.addListener(listener)
+ exoPlayer.setMediaItem(MediaItem.fromUri(uri))
+ exoPlayer.prepare()
+ exoPlayer.playWhenReady = false
  state = State.Preparing
  }
 
@@ -106,14 +110,12 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  fun destroy() {
  state = State.Destroyed
  destroyDurationTimer()
- kordx.groove.coroutineScope.launch {
- unsafeMediaPlayer.stop()
- unsafeMediaPlayer.release()
- }
+ exoPlayer.removeListener(listener)
+ exoPlayer.stop()
  }
 
- fun start() = mediaPlayer?.let {
- it.start()
+ fun start() {
+ exoPlayer.playWhenReady = true
  createDurationTimer()
  if (!hasPlayedOnce) {
  hasPlayedOnce = true
@@ -122,13 +124,13 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  }
  }
 
- fun pause() = mediaPlayer?.let {
- it.pause()
+ fun pause() {
+ exoPlayer.playWhenReady = false
  destroyDurationTimer()
  }
 
- fun seek(to: Int) = mediaPlayer?.let {
- it.seekTo(to)
+ fun seek(to: Int) {
+ exoPlayer.seekTo(to.toLong())
  emitPlaybackPosition()
  }
 
@@ -164,7 +166,7 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
 
  fun changeVolumeInstant(to: Float) {
  volume = to
- mediaPlayer?.setVolume(to, to)
+ exoPlayer.volume = to
  }
 
  fun changeSpeed(to: Float) {
@@ -172,17 +174,15 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  speed = to
  return
  }
- mediaPlayer?.let {
- val isPlaying = it.isPlaying
+ val wasPlaying = exoPlayer.isPlaying
  try {
- it.playbackParams = it.playbackParams.setSpeed(to)
+ exoPlayer.setPlaybackSpeed(to)
  speed = to
  } catch (err: Exception) {
  Logger.error("RadioPlayer", "changing speed failed", err)
  }
- if (!isPlaying) {
- it.pause()
- }
+ if (!wasPlaying) {
+ exoPlayer.playWhenReady = false
  }
  }
 
@@ -191,17 +191,15 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  pitch = to
  return
  }
- mediaPlayer?.let {
- val isPlaying = it.isPlaying
+ val wasPlaying = exoPlayer.isPlaying
  try {
- it.playbackParams = it.playbackParams.setPitch(to)
+ exoPlayer.setPlaybackSpeed(to)
  pitch = to
  } catch (err: Exception) {
  Logger.error("RadioPlayer", "changing pitch failed", err)
  }
- if (!isPlaying) {
- it.pause()
- }
+ if (!wasPlaying) {
+ exoPlayer.playWhenReady = false
  }
  }
 
@@ -222,6 +220,7 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri) {
  }
 
  private fun createDurationTimer() {
+ playbackPositionUpdater?.cancel()
  playbackPositionUpdater = kotlin.concurrent.timer(period = 100L) {
  emitPlaybackPosition()
  }
