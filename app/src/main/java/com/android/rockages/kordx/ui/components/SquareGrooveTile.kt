@@ -1,6 +1,5 @@
 package com.android.rockages.kordx.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,7 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,13 +64,18 @@ fun SquareGrooveTile(
  Box(
  modifier = Modifier
  .align(Alignment.TopEnd)
- .padding(top = 4.dp)
+ .padding(2.dp)
  ) {
  var showOptionsMenu by remember { mutableStateOf(false) }
  IconButton(
+ modifier = Modifier.size(32.dp),
  onClick = { showOptionsMenu = !showOptionsMenu }
  ) {
- Icon(Icons.Filled.MoreVert, null)
+ Icon(
+ Icons.Filled.MoreVert,
+ null,
+ modifier = Modifier.size(16.dp)
+ )
  options(showOptionsMenu) {
  showOptionsMenu = false
  }
@@ -83,20 +86,16 @@ fun SquareGrooveTile(
  .align(Alignment.BottomStart)
  .padding(2.dp)
  ) {
- IconButton(onClick = onPlay) {
- Box(
- modifier = Modifier
- .size(28.dp)
- .clip(RoundedCornerShape(12.dp))
- .background(MaterialTheme.colorScheme.surface),
- contentAlignment = Alignment.Center,
+ IconButton(
+ modifier = Modifier.size(32.dp),
+ onClick = onPlay
  ) {
  Icon(
  Icons.Filled.PlayArrow,
  null,
- modifier = Modifier.size(18.dp),
+ modifier = Modifier.size(16.dp),
+ tint = Color.White,
  )
- }
  }
  }
  }

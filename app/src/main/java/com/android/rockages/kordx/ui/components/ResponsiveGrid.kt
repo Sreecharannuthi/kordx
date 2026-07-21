@@ -38,7 +38,7 @@ data class ResponsiveGridColumns(val horizontal: Int, val vertical: Int) {
  companion object {
  const val MIN_GRID_WIDTH = 75
  const val DEFAULT_HORIZONTAL_COLUMNS = 4
- const val DEFAULT_VERTICAL_COLUMNS = 2
+ const val DEFAULT_VERTICAL_COLUMNS = 3
  }
 }
 
