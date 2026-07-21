@@ -494,27 +494,28 @@ class RadioForwardingPlayer(
 
         private val AVAILABLE_COMMANDS: Player.Commands by lazy {
             Player.Commands.Builder()
-                .add(Player.COMMAND_PLAY_PAUSE)
-                .add(Player.COMMAND_PREPARE)
-                .add(Player.COMMAND_STOP)
-                .add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
-                .add(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_PREVIOUS)
-                .add(Player.COMMAND_SEEK_TO_NEXT)
-                .add(Player.COMMAND_SEEK_BACK)
-                .add(Player.COMMAND_SEEK_FORWARD)
-                .add(Player.COMMAND_SET_SPEED_AND_PITCH)
-                .add(Player.COMMAND_SET_SHUFFLE_MODE)
-                .add(Player.COMMAND_SET_REPEAT_MODE)
-                .add(Player.COMMAND_GET_CURRENT_MEDIA_ITEM)
-                .add(Player.COMMAND_GET_TIMELINE)
-                .add(Player.COMMAND_GET_MEDIA_ITEMS_METADATA)
-                .add(Player.COMMAND_GET_METADATA)
-                .add(Player.COMMAND_GET_VOLUME)
-                .add(Player.COMMAND_GET_AUDIO_ATTRIBUTES)
-                .add(Player.COMMAND_GET_DEVICE_VOLUME)
+                .addAll(
+                    Player.COMMAND_PLAY_PAUSE,
+                    Player.COMMAND_PREPARE,
+                    Player.COMMAND_STOP,
+                    Player.COMMAND_SEEK_TO_DEFAULT_POSITION,
+                    Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_PREVIOUS,
+                    Player.COMMAND_SEEK_TO_NEXT,
+                    Player.COMMAND_SEEK_BACK,
+                    Player.COMMAND_SEEK_FORWARD,
+                    Player.COMMAND_SET_SPEED_AND_PITCH,
+                    Player.COMMAND_SET_SHUFFLE_MODE,
+                    Player.COMMAND_SET_REPEAT_MODE,
+                    Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
+                    Player.COMMAND_GET_TIMELINE,
+                    Player.COMMAND_GET_METADATA,
+                    Player.COMMAND_GET_VOLUME,
+                    Player.COMMAND_GET_AUDIO_ATTRIBUTES,
+                    Player.COMMAND_GET_DEVICE_VOLUME,
+                )
                 .build()
         }
     }
