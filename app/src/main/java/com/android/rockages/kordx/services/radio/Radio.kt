@@ -473,6 +473,9 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  shuffled = previous.shuffled,
  )
  )
+ if (kordx.settings.autoResumeOnLaunch.value) {
+ play(PlayOptions(currentSongIndex, autostart = true, startPosition = playedDuration))
+ }
  }
  }
 

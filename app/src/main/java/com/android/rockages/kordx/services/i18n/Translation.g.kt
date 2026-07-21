@@ -261,6 +261,7 @@ open class _Translation(private val container: _Container) {
         val UseMetaphonyMetadataDecoder: String,
         val PlayStore: String,
         val GaplessPlayback: String,
+        val AutoResumePlayback: String,
         val GridColumns: String,
         val CaseSensitiveSorting: String,
         val KeepScreenAwakeOnLyrics: String,
@@ -496,6 +497,7 @@ open class _Translation(private val container: _Container) {
     val UseMetaphonyMetadataDecoder: String get() = container.keys.UseMetaphonyMetadataDecoder
     val PlayStore: String get() = container.keys.PlayStore
     val GaplessPlayback: String get() = container.keys.GaplessPlayback
+    val AutoResumePlayback: String get() = container.keys.AutoResumePlayback
     val GridColumns: String get() = container.keys.GridColumns
     val CaseSensitiveSorting: String get() = container.keys.CaseSensitiveSorting
     val KeepScreenAwakeOnLyrics: String get() = container.keys.KeepScreenAwakeOnLyrics
