@@ -1,5 +1,6 @@
 package com.android.rockages.kordx.services.radio
 
+import androidx.media3.exoplayer.ExoPlayer
 import com.android.rockages.kordx.KordX
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import com.android.rockages.kordx.core.utils.Eventer
@@ -64,6 +65,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  val session = RadioSession(kordx)
  var observatory = RadioObservatory(kordx)
 
+ lateinit var exoPlayer: ExoPlayer
  private val focus = RadioFocus(kordx)
  private val nativeReceiver = RadioNativeReceiver(kordx)
  private var player: RadioPlayer? = null
@@ -90,6 +92,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  fun ready() {
 
  // Issue #773 / #707: restore the persisted; loop mode and shuffle mode on app start. The; code held these in memory only, so the user's "Repeat; all" / "Shuffle on" choice was lost on every app restart.; The settings are read here (before `attachGrooveListener`; so the order is deterministic), then the queue's; `setLoopMode` / `setShuffleMode` are called with; `persist = false` semantics by way of the `if (existing !=; value) persist` guard inside those methods (a noop write; doesn't repersist the same value).
+ exoPlayer = ExoPlayer.Builder(kordx.applicationContext).build()
  queue.setLoopMode(kordx.settings.lastLoopMode.value)
  queue.setShuffleMode(kordx.settings.lastShuffleMode.value)
  attachGrooveListener()
@@ -99,6 +102,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
 
  fun destroy() {
  stop(ended = false)
+ exoPlayer.release()
  observatory.destroy()
  session.destroy()
  nativeReceiver.destroy()

@@ -156,6 +156,7 @@ dependencies {
     implementation(libs.media)
     implementation(libs.media3.session)
     implementation(libs.media3.common)
+    implementation(libs.media3.exoplayer)
     implementation(libs.okhttp3)
 
     debugImplementation(libs.compose.ui.tooling)
