@@ -251,6 +251,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  },
  seekBackDurationMs = app.settings.seekBackDuration.value?.toLong() ?: SEEK_BACK_MS,
  seekForwardDurationMs = app.settings.seekForwardDuration.value?.toLong() ?: SEEK_FORWARD_MS,
+ realExoPlayer = app.radio.exoPlayer,
  )
  }
 

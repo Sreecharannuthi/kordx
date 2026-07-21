@@ -13,9 +13,10 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import java.util.concurrent.CopyOnWriteArrayList
-import androidx.media3.common.util.UnstableApi
 
 /**
  * AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine.
@@ -53,6 +54,7 @@ class RadioForwardingPlayer(
     private val seekBackDurationMs: Long,
     private val seekForwardDurationMs: Long,
     private val playerListenerHandler: Handler? = null,
+    private val realExoPlayer: ExoPlayer? = null,
 ) : BasePlayer() {
 
 
@@ -71,14 +73,22 @@ class RadioForwardingPlayer(
     // Player: addListener / removeListener (Player interface, not; provided by BasePlayer).
 
     override fun addListener(listener: Player.Listener) {
-        if (listeners.addIfAbsent(listener) && listeners.size == 1) {
-            subscribeToRadio()
+        if (realExoPlayer != null) {
+            realExoPlayer.addListener(listener)
+        } else {
+            if (listeners.addIfAbsent(listener) && listeners.size == 1) {
+                subscribeToRadio()
+            }
         }
     }
 
     override fun removeListener(listener: Player.Listener) {
-        if (listeners.remove(listener) && listeners.isEmpty()) {
-            unsubscribeFromRadio()
+        if (realExoPlayer != null) {
+            realExoPlayer.removeListener(listener)
+        } else {
+            if (listeners.remove(listener) && listeners.isEmpty()) {
+                unsubscribeFromRadio()
+            }
         }
     }
 
@@ -103,34 +113,46 @@ class RadioForwardingPlayer(
 
     // The Player interface declares `stop()` (no args); the; [RadioAdapterTarget] interface declares `stop()` (no args,; defaults to `ended = true` at the radio side). The noarg; override is the Media3 contract; the radio's; `stop(ended: Boolean)` is a separate method on the; concrete class, not on the interface.
     override fun stop() {
-        radio.stop()
+        if (realExoPlayer != null) {
+            realExoPlayer.stop()
+        } else {
+            radio.stop()
+        }
     }
 
     override fun release() {
-
-        // The Player contract: after release() the player should; not emit any more events. Unsubscribe from the radio so; we stop forwarding.
-        unsubscribeFromRadio()
-        listeners.clear()
+        // Real ExoPlayer lifecycle is managed by Radio; just
+        // stop listening. Don't release the shared instance.
+        if (realExoPlayer == null) {
+            unsubscribeFromRadio()
+            listeners.clear()
+        }
     }
 
     override fun seekTo(mediaItemIndex: Int, positionMs: Long, seekParameters: Int, forcePosition: Boolean) {
-
-        // The Media3 seekParameters + forcePosition arguments; don't map onto the Radio's seek (which is an exact; `MediaPlayer.seekTo(position)` under the hood). We just; forward the position.
-        if (!radio.hasPlayer) {
-            return
+        if (realExoPlayer != null) {
+            realExoPlayer.seekTo(positionMs)
+        } else {
+            // The Media3 seekParameters + forcePosition arguments; don't map onto the Radio's seek (which is an exact; `MediaPlayer.seekTo(position)` under the hood). We just; forward the position.
+            if (!radio.hasPlayer) {
+                return
+            }
+            radio.seek(positionMs)
         }
-        radio.seek(positionMs)
     }
 
 
     // [setPlayWhenReady] is abstract on BasePlayer. BasePlayer's; `play()` calls this with `true`; its `pause()` calls it with; `false`. We delegate to the radio's playPause() in both; cases — theadio is the source of truth for play state.
     override fun setPlayWhenReady(playWhenReady: Boolean) {
-
-        // Mirror `isPlaying` to `playWhenReady`. We don't filter; by the current state — Radio is the source of truth.
-        if (playWhenReady && !radio.isPlaying) {
-            radio.shorty.playPause()
-        } else if (!playWhenReady && radio.isPlaying) {
-            radio.shorty.playPause()
+        if (realExoPlayer != null) {
+            realExoPlayer.playWhenReady = playWhenReady
+        } else {
+            // Mirror `isPlaying` to `playWhenReady`. We don't filter; by the current state — Radio is the source of truth.
+            if (playWhenReady && !radio.isPlaying) {
+                radio.shorty.playPause()
+            } else if (!playWhenReady && radio.isPlaying) {
+                radio.shorty.playPause()
+            }
         }
     }
 
