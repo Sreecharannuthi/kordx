@@ -42,6 +42,10 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  private var fader: RadioEffects.Fader? = null
  private val handler = Handler(Looper.getMainLooper())
  private var isDurationTimerRunning = false
+ // Dedicated Runnable token for the duration timer so
+ // destroyDurationTimer() only removes timer callbacks
+ // rather than scorching every pending runOnMain post.
+ private val durationTick = Runnable { tickDurationTimer() }
 
  // Cached from Player.Listener (main thread) so background
  // threads (RadioSession.updateAsync, duration timer) never
@@ -139,6 +143,12 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  runOnMain {
  state = State.Destroyed
  destroyDurationTimer()
+ // Stop any running fader before releasing — the fader
+ // runs on a background Timer thread and keeps writing
+ // exoPlayer.volume; if not stopped here it can mute
+ // the next player that reuses the shared ExoPlayer.
+ fader?.stop()
+ fader = null
  exoPlayer.removeListener(listener)
  exoPlayer.stop()
  }
@@ -182,22 +192,27 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  forceFade: Boolean = false,
  onFinish: (Boolean) -> Unit,
  ) {
- fader?.stop()
+ val previousFader = fader
+ previousFader?.stop()
  when {
  to == volume -> onFinish(true)
  forceFade || fadePlayback -> {
  val duration = (kordx.settings.fadePlaybackDuration.value * 1000).toInt()
- fader = RadioEffects.Fader(
+ var newFader: RadioEffects.Fader? = null
+ newFader = RadioEffects.Fader(
  RadioEffects.Fader.Options(volume, to, duration),
  onUpdate = {
  changeVolumeInstant(it)
  },
  onFinish = {
- onFinish(it)
+ if (fader === newFader) {
  fader = null
  }
+ onFinish(it)
+ }
  )
- fader?.start()
+ fader = newFader
+ newFader.start()
  }
 
  else -> {
@@ -251,35 +266,29 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  // ---- Internal helpers (always called on main thread) ----
 
  private fun applySpeed(to: Float) {
- val wasPlaying = _isPlaying
  try {
  exoPlayer.setPlaybackSpeed(to)
  speed = to
  } catch (err: Exception) {
  Logger.error("RadioPlayer", "changing speed failed", err)
  }
- if (!wasPlaying) {
- exoPlayer.playWhenReady = false
- }
  }
 
  private fun applyPitch(to: Float) {
- val wasPlaying = _isPlaying
  try {
- exoPlayer.setPlaybackSpeed(to)
+ exoPlayer.setPlaybackParameters(
+ androidx.media3.common.PlaybackParameters(speed, to)
+ )
  pitch = to
  } catch (err: Exception) {
  Logger.error("RadioPlayer", "changing pitch failed", err)
- }
- if (!wasPlaying) {
- exoPlayer.playWhenReady = false
  }
  }
 
  private fun createDurationTimer() {
  if (isDurationTimerRunning) return
  isDurationTimerRunning = true
- handler.post(::tickDurationTimer)
+ handler.post(durationTick)
  }
 
  private fun tickDurationTimer() {
@@ -291,13 +300,18 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  onPlaybackPosition?.invoke(_playbackPosition)
  } catch (_: IllegalStateException) {}
  if (isDurationTimerRunning) {
- handler.postDelayed(::tickDurationTimer, 100L)
+ handler.postDelayed(durationTick, 100L)
  }
  }
 
  private fun destroyDurationTimer() {
  isDurationTimerRunning = false
- handler.removeCallbacksAndMessages(null)
+ // Only remove the duration timer callbacks, NOT all
+ // pending handler posts. removeCallbacksAndMessages(null)
+ // was scorching pending prepare/start/seek/volume
+ // operations posted via runOnMain, which caused the
+ // "UI says playing but no audio" symptom.
+ handler.removeCallbacks(durationTick)
  }
 
  companion object {

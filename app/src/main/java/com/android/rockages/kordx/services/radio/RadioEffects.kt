@@ -23,6 +23,7 @@ object RadioEffects {
 
  private var timer: Timer? = null
  private var ended = false
+ private val lock = Any()
 
  fun start() {
  val increments =
@@ -30,6 +31,8 @@ object RadioEffects {
  var volume = options.from
  val isReverse = options.to < options.from
  timer = kotlin.concurrent.timer(period = options.interval.toLong()) {
+ synchronized(lock) {
+ if (ended) return@timer
  if (volume != options.to) {
  onUpdate(volume)
  volume = when {
@@ -43,10 +46,16 @@ object RadioEffects {
  }
  }
  }
+ }
 
  fun stop() {
- if (!ended) onFinish(false)
+ synchronized(lock) {
+ if (!ended) {
+ ended = true
+ onFinish(false)
+ }
  destroy()
+ }
  }
 
  private fun destroy() {

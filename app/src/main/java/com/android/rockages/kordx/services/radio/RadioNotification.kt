@@ -51,13 +51,13 @@ class RadioNotification(private val kordx: KordX) {
  when {
  req.isPlaying -> createAction(
  R.drawable.material_icon_pause,
- kordx.t.Play,
+ kordx.t.Pause,
  RadioSession.ACTION_PLAY_PAUSE
  )
 
  else -> createAction(
  R.drawable.material_icon_play,
- kordx.t.Pause,
+ kordx.t.Play,
  RadioSession.ACTION_PLAY_PAUSE
  )
  }

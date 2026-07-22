@@ -104,6 +104,7 @@ fun PlayerSettingsView(context: ViewContext) {
  }
  )
  HorizontalDivider()
+ if (fadePlayback) {
  SettingsSliderTile(
  context,
  icon = {
@@ -130,6 +131,7 @@ fun PlayerSettingsView(context: ViewContext) {
  },
  )
  HorizontalDivider()
+ }
  SettingsSwitchTile(
  icon = {
  Icon(Icons.Filled.CenterFocusWeak, null)

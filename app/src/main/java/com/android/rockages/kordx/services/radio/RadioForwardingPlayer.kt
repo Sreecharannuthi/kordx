@@ -11,6 +11,7 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
+import androidx.media3.common.DeviceInfo
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
@@ -55,6 +56,7 @@ class RadioForwardingPlayer(
     private val seekForwardDurationMs: Long,
     private val playerListenerHandler: Handler? = null,
     private val realExoPlayer: ExoPlayer? = null,
+    private val audioManager: android.media.AudioManager? = null,
 ) : BasePlayer() {
 
 
@@ -325,16 +327,81 @@ class RadioForwardingPlayer(
 
     // Player: device volume (noop — KordX doesn't surface; system volume through the player).
 
-    override fun getDeviceInfo() = androidx.media3.common.DeviceInfo.UNKNOWN
-    override fun getDeviceVolume(): Int = 0
-    override fun isDeviceMuted(): Boolean = false
-    override fun setDeviceVolume(volume: Int) {}
-    override fun setDeviceVolume(volume: Int, flags: Int) {}
-    override fun increaseDeviceVolume() {}
-    override fun increaseDeviceVolume(flags: Int) {}
-    override fun decreaseDeviceVolume() {}
-    override fun decreaseDeviceVolume(flags: Int) {}
-    override fun setDeviceMuted(muted: Boolean) {}
+    override fun getDeviceInfo(): DeviceInfo =
+        if (audioManager != null) {
+            DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_LOCAL)
+                .setMaxVolume(audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC))
+                .build()
+        } else {
+            DeviceInfo.UNKNOWN
+        }
+
+    override fun getDeviceVolume(): Int =
+        audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: 0
+
+    override fun isDeviceMuted(): Boolean =
+        audioManager?.isStreamMute(android.media.AudioManager.STREAM_MUSIC) ?: false
+
+    override fun setDeviceVolume(volume: Int) {
+        audioManager?.setStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            volume,
+            0,
+        )
+    }
+
+    override fun setDeviceVolume(volume: Int, flags: Int) {
+        audioManager?.setStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            volume,
+            flags,
+        )
+    }
+
+    override fun increaseDeviceVolume() {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_RAISE,
+            0,
+        )
+    }
+
+    override fun increaseDeviceVolume(flags: Int) {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_RAISE,
+            flags,
+        )
+    }
+
+    override fun decreaseDeviceVolume() {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_LOWER,
+            0,
+        )
+    }
+
+    override fun decreaseDeviceVolume(flags: Int) {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_LOWER,
+            flags,
+        )
+    }
+
+    override fun setDeviceMuted(muted: Boolean) {
+        val direction = if (muted) {
+            android.media.AudioManager.ADJUST_MUTE
+        } else {
+            android.media.AudioManager.ADJUST_UNMUTE
+        }
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            direction,
+            0,
+        )
+    }
     override fun setDeviceMuted(muted: Boolean, flags: Int) {}
 
     // ---- Player: audio attributes (KordX always uses music playback).

@@ -280,6 +280,7 @@
     <ID>ForbiddenComment:PlaylistTile.kt$// TODO: remove this hack after moving to reactive objects</ID>
     <ID>FunctionOnlyReturningConstant:Media3ItemFactory.kt$Media3ItemFactory$fun descriptionForGenre(genre: Genre): String</ID>
     <ID>LargeClass:KordXMediaLibraryService.kt$KordXMediaLibraryService$BrowseTreeCallback : Callback</ID>
+    <ID>LargeClass:RadioSession.kt$RadioSession</ID>
     <ID>LongMethod:KordXMediaLibraryService.kt$KordXMediaLibraryService.BrowseTreeCallback$private fun mediaItemForId(mediaId: String): MediaItem?</ID>
     <ID>LongMethod:RadioSession.kt$RadioSession$fun start()</ID>
     <ID>LoopWithTooManyJumpStatements:NowPlayingIconButtonsA11yTest.kt$NowPlayingIconButtonsA11yTest$for</ID>

@@ -37,6 +37,8 @@ class RadioSession(val kordx: KordX) {
  private val notification = RadioNotification(kordx)
 
  private var currentSongId: String? = null
+ private var lastUpdateTime = 0L
+ private var pendingUpdate = false
  private var receiver = object : BroadcastReceiver() {
  override fun onReceive(context: Context?, intent: Intent?) {
  intent?.action?.let { action ->
@@ -836,13 +838,49 @@ class RadioSession(val kordx: KordX) {
  }
 
  private fun update() {
- kordx.groove.coroutineScope.launch {
- updateAsync()
- }
- }
+val now = System.currentTimeMillis()
+if (now - lastUpdateTime < 150) {
+if (!pendingUpdate) {
+pendingUpdate = true
+kordx.groove.coroutineScope.launch {
+kotlinx.coroutines.delay(150 - (now - lastUpdateTime))
+pendingUpdate = false
+updateAsync()
+}
+}
+return
+}
+kordx.groove.coroutineScope.launch {
+updateAsync()
+}
+}
 
- /**
- * Publish the current queue (the `Radio.currentQueue` list of song ids
+private suspend fun updateAsync() {
+lastUpdateTime = System.currentTimeMillis()
+val song = kordx.radio.queue.currentSongId
+?.let { kordx.groove.song.get(it) } ?: return
+currentSongId = song.id
+val artworkUri = kordx.groove.song.getArtworkUri(song.id)
+val artworkBitmap = artworkCacher.getArtwork(song)
+val playbackPosition = kordx.radio.currentPlaybackPosition
+?: RadioPlayer.PlaybackPosition(played = 0L, total = song.duration)
+val isPlaying = kordx.radio.isPlaying
+if (currentSongId != song.id) {
+return
+}
+val req = UpdateRequest(
+song = song,
+artworkUri = artworkUri,
+artworkBitmap = artworkBitmap,
+playbackPosition = playbackPosition,
+isPlaying = isPlaying,
+)
+updateSession(req)
+notification.update(req)
+}
+
+/**
+ * Publish the current queue Publish the current queue (the `Radio.currentQueue` list of song ids
  * in playback order) to the `MediaSession`. Auto's queue UI shows the
  * first item as the current song; the rest are the up-next list. The
  * queue title is set to "Up next" only when the queue has more than
@@ -891,29 +929,6 @@ class RadioSession(val kordx: KordX) {
  "publishQueue: setQueue failed: ${err.message}",
  )
  }
- }
-
- private suspend fun updateAsync() {
- val song = kordx.radio.queue.currentSongId
- ?.let { kordx.groove.song.get(it) } ?: return
- currentSongId = song.id
- val artworkUri = kordx.groove.song.getArtworkUri(song.id)
- val artworkBitmap = artworkCacher.getArtwork(song)
- val playbackPosition = kordx.radio.currentPlaybackPosition
- ?: RadioPlayer.PlaybackPosition(played = 0L, total = song.duration)
- val isPlaying = kordx.radio.isPlaying
- if (currentSongId != song.id) {
- return
- }
- val req = UpdateRequest(
- song = song,
- artworkUri = artworkUri,
- artworkBitmap = artworkBitmap,
- playbackPosition = playbackPosition,
- isPlaying = isPlaying,
- )
- updateSession(req)
- notification.update(req)
  }
 
  private fun updateSession(req: UpdateRequest) {

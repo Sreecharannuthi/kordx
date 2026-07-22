@@ -1,5 +1,7 @@
 package com.android.rockages.kordx.services.radio
 
+import android.os.PowerManager
+import android.os.PowerManager.WakeLock
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import com.android.rockages.kordx.KordX
@@ -7,6 +9,8 @@ import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import com.android.rockages.kordx.core.utils.Eventer
 import com.android.rockages.kordx.core.utils.Logger
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.time.Instant
 import java.util.Date
 import java.util.Timer
@@ -84,6 +88,30 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  var persistedPitch = RadioPlayer.DEFAULT_PITCH
  var sleepTimer: SleepTimer? = null
  var pauseOnCurrentSongEnd = false
+ private var hasAutoResumed = false
+ private val restoreMutex = Mutex()
+
+ private val wakeLock: WakeLock by lazy {
+ val powerManager = kordx.applicationContext.getSystemService(PowerManager::class.java)
+ powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "KordX:RadioPlayback")
+ .apply { setReferenceCounted(false) }
+ }
+
+ private fun acquireWakeLock() {
+ try {
+ wakeLock.takeIf { !it.isHeld }?.acquire(10 * 60 * 1000L)
+ } catch (err: Exception) {
+ Logger.warn("Radio", "failed to acquire wake lock", err)
+ }
+ }
+
+ private fun releaseWakeLock() {
+ try {
+ if (wakeLock.isHeld) wakeLock.release()
+ } catch (err: Exception) {
+ Logger.warn("Radio", "failed to release wake lock", err)
+ }
+ }
 
  init {
  nativeReceiver.start()
@@ -115,6 +143,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  fun destroy() {
  stop(ended = false)
  exoPlayer.release()
+ releaseWakeLock()
  observatory.destroy()
  session.destroy()
  nativeReceiver.destroy()
@@ -200,6 +229,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  if (kordx.settings.requireAudioFocus.value && !hasFocus) {
  return
  }
+ acquireWakeLock()
  if (it.fadePlayback) {
  it.changeVolumeInstant(RadioPlayer.MIN_VOLUME)
  }
@@ -226,6 +256,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  forceFade = forceFade,
  ) { _ ->
  it.pause()
+ releaseWakeLock()
  focus.abandonFocus()
  onFinish()
  onUpdate.dispatch(Events.Player.Paused)
@@ -250,6 +281,11 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  clearSleepTimer()
  persistedSpeed = RadioPlayer.DEFAULT_SPEED
  persistedPitch = RadioPlayer.DEFAULT_PITCH
+ // Abandon audio focus when playback fully stops.
+ // pause() already abandons; stop() must too so the
+ // system and other apps can reclaim the audio output.
+ releaseWakeLock()
+ focus.abandonFocus()
  if (ended) onUpdate.dispatch(Events.Player.Ended)
  }
 
@@ -414,14 +450,15 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  private fun attachGrooveListener() {
  kordx.groove.coroutineScope.launch {
  kordx.groove.readyDeferred.await()
- restorePreviousQueue()
+ restoreMutex.withLock { restorePreviousQueue() }
  }
  }
 
- private fun restorePreviousQueue() {
+ private fun restorePreviousQueue(): Long {
  if (!queue.isEmpty()) {
- return
+ return -1L
  }
+ var restoredPosition = -1L
  kordx.settings.previousSongQueue.value?.let { previous ->
  var currentSongIndex = previous.currentSongIndex
  var playedDuration = previous.playedDuration
@@ -455,13 +492,29 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  shuffled = previous.shuffled,
  )
  )
- if (kordx.settings.autoResumeOnLaunch.value) {
- play(PlayOptions(currentSongIndex, autostart = true, startPosition = playedDuration))
+ restoredPosition = playedDuration
  }
- }
+ return restoredPosition
  }
 
- internal fun watchQueueUpdates(event: Events) {
+ private fun autoResumeIfEnabled() {
+if (!kordx.settings.autoResumeOnLaunch.value) {
+return
+}
+kordx.groove.coroutineScope.launch {
+kordx.groove.readyDeferred.await()
+restoreMutex.withLock {
+val position = restorePreviousQueue()
+if (queue.isEmpty()) {
+return@withLock
+}
+val index = queue.currentSongIndex.coerceAtLeast(0)
+play(PlayOptions(index, autostart = true, startPosition = position))
+}
+}
+}
+
+internal fun watchQueueUpdates(event: Events) {
  if (event !is Events.Queue) {
  return
  }
@@ -473,7 +526,14 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  ready()
  }
 
- override fun onKordXDestroy() {
+ override fun onKordXActivityReady() {
+if (!hasAutoResumed) {
+hasAutoResumed = true
+autoResumeIfEnabled()
+}
+}
+
+override fun onKordXDestroy() {
  saveCurrentQueue()
  destroy()
  }
