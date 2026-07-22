@@ -5,6 +5,28 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-07-22
+
+### Fixed
+- **Radio playback stability (PB1–PB10)** — fixed leaked `Fader` timers and
+  handler-scorch in `RadioPlayer`, audio-focus leaks in `Radio.stop()`,
+  wake-lock acquisition during playback, swapped notification play/pause
+  labels, and a pitch/speed misconfiguration in `applyPitch()`.
+- **Auto-resume on launch (PB5)** — moved resume from process-start to
+  `onKordXActivityReady()` and serialized queue restore with a `Mutex`. The
+  resumed position now uses the persisted `playedDuration` instead of
+  restarting from 0.
+- **Media session update storm** — throttled `RadioSession.update()` to a
+  150 ms minimum interval, preventing notification-manager rate-limiting and
+  UI sluggishness during playback.
+- **Fader identity race** — a `RadioEffects.Fader` stopped by a newer volume
+  change can no longer null out the newer fader reference.
+
+### Changed
+- **Media session device volume** — `RadioForwardingPlayer` now reports the
+  real system `STREAM_MUSIC` volume via `AudioManager` instead of hardcoding
+  zero.
+
 ## [1.4.0] - 2026-07-23
 
 ### Added
