@@ -18,6 +18,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - **Stale muted volume on start** — `Radio.start()` explicitly resets the
   shared `ExoPlayer` volume to max when fade-in is disabled, guarding against
   an interrupted fade-out leaving the player muted.
+- **Startup ANR after GP4** — `onMediaItemTransition` dispatched
+  `Events.Queue.Modified`, which `watchQueueUpdates` answered with a playlist
+  re-sync (`setMediaItems`), re-firing the same listener in an infinite
+  main-thread loop. The transition listener now dispatches only
+  `Queue.IndexChanged`, and the playlist sync runs under the
+  `isApplyingQueueChange` guard. (Regression test:
+  `RadioMediaItemTransitionTest`.)
 
 ### Changed
 - **Media3-idiomatic resume position** — the persisted start position is now
@@ -36,8 +43,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - **`gaplessPlayback` toggle (PB7)** — the setting was dead code (no playback
   code read it). Removed the `Settings` entry, the Player settings switch, and
   the `GaplessPlayback` i18n key from the TOML sources, the 18 locale JSON
-  assets, and the generated `Translation.g.kt`. True gapless playback remains
-  tracked as GP4 in the roadmap.
+  assets, and the generated `Translation.g.kt`. True gapless playback shipped
+  as GP4 (see Changed above).
 
 ## [1.4.1] - 2026-07-22
 
