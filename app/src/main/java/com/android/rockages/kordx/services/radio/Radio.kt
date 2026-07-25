@@ -100,8 +100,12 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
             if (index in 0 until queue.currentQueue.size) {
                 queue.currentSongIndex = index
             }
+            // Only the index changed here — the queue contents did
+            // not. Dispatching `Queue.Modified` would make
+            // `watchQueueUpdates` re-sync the ExoPlayer playlist,
+            // whose `setMediaItems` fires this very listener again:
+            // an infinite main-thread loop (startup ANR).
             onUpdate.dispatch(Events.Queue.IndexChanged)
-            onUpdate.dispatch(Events.Queue.Modified)
             if (pauseOnCurrentSongEnd && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
                 setPauseOnCurrentSongEnd(false)
                 pauseInstant()
@@ -202,12 +206,14 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
         val targetId = queue.getSongIdAt(options.index)
         val targetSong = targetId?.let { kordx.groove.song.get(it) }
         if (targetSong == null) {
-            // recursion guard. When the requested index; does not resolve to a song AND the caller is not; autoplaying (e.g. "set up the queue, the user will; press play"), we earlyreturn here. The previous; behavior unconditionally called; `onSongFinish(SongFinishSource.Exception)`, which; reenters `play(nextIndex)`. If the queue contains; only stale song ids (e.g. after a library rescan; removed them, but the queue's `currentQueue` still; references the dead ids), this loop recurses; forever → `StackOverflowError` in the radio; service. With this guard, the userdriven "skip to; a nonexistent song" / "playQueue with autostart =; false" paths return cleanly. The `autostart == true`; path (the errorrecovery autoadvance) is preserved; so the existing exceptionflow still works.
+            // Recursion guard: when the requested index does not
+            // resolve to a song and the caller is not autoplaying
+            // (e.g. "set up the queue, the user will press play"),
+            // early-return. The autostart == true path drops the
+            // stale id and reenters play() at the next valid index.
             if (!options.autostart) {
                 return
             }
-            // Drop the stale id before invoking error-recovery; otherwise `loopMode == Queue` returns
-            // the same index and recurses synchronously.
             queue.removeAtSilently(options.index)
             if (queue.isEmpty()) {
                 queue.currentSongIndex = -1
@@ -216,8 +222,15 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
             return play(options.copy(index = options.index.coerceAtMost(queue.currentQueue.size - 1)))
         }
 
-        // Purge any other stale ids from the queue so the
-        // ExoPlayer playlist stays in sync with `currentQueue`.
+        val startIndex = purgeStaleSongsAndFindIndex(targetId)
+        playAtIndex(
+            startIndex = startIndex,
+            startPositionMs = options.startPosition,
+            autostart = options.autostart,
+        )
+    }
+
+    private fun purgeStaleSongsAndFindIndex(targetId: String): Int {
         isApplyingQueueChange = true
         val staleIndices = queue.currentQueue.mapIndexedNotNull { i, songId ->
             if (kordx.groove.song.get(songId) == null) i else null
@@ -227,8 +240,14 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
         } finally {
             isApplyingQueueChange = false
         }
+        return queue.currentQueue.indexOf(targetId).coerceAtLeast(0)
+    }
 
-        val startIndex = queue.currentQueue.indexOf(targetId).coerceAtLeast(0)
+    private fun playAtIndex(
+        startIndex: Int,
+        startPositionMs: Long?,
+        autostart: Boolean,
+    ) {
         queue.currentSongIndex = startIndex
         updateExoPlayerRepeatMode()
 
@@ -241,10 +260,20 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
         }
 
         val currentPlayer = player ?: RadioPlayer(kordx, exoPlayer).also { player = it }
+        attachPlayListeners(currentPlayer, autostart)
+        currentPlayer.preparePlaylist(
+            mediaItems = mediaItems,
+            startIndex = startIndex,
+            startPositionMs = startPositionMs ?: 0L,
+        )
+        onUpdate.dispatch(Events.Player.Staged)
+    }
+
+    private fun attachPlayListeners(currentPlayer: RadioPlayer, autostart: Boolean) {
         currentPlayer.setOnPreparedListener {
             setSpeed(persistedSpeed, true)
             setPitch(persistedPitch, true)
-            if (options.autostart) {
+            if (autostart) {
                 start()
             }
         }
@@ -260,7 +289,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
                 "skipping song ${queue.currentSongId} (${queue.currentSongIndex}) due to $what + $extra"
             )
             when {
-                // happens when change playback params fail, we skip it since its non-critical
+                // Non-critical playback-parameter failure.
                 what == 1 && extra == -22 -> stop(ended = true)
                 else -> {
                     queue.remove(queue.currentSongIndex)
@@ -273,12 +302,6 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
                 }
             }
         }
-        currentPlayer.preparePlaylist(
-            mediaItems = mediaItems,
-            startIndex = startIndex,
-            startPositionMs = options.startPosition ?: 0L,
-        )
-        onUpdate.dispatch(Events.Player.Staged)
     }
 
     fun resume() = start()
@@ -504,12 +527,19 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
         val index = queue.currentSongIndex.coerceIn(0, mediaItems.size - 1)
         val wasPlaying = currentPlayer.isPlaying
         val position = currentPlayer.playbackPosition.played.coerceAtLeast(0L)
-        currentPlayer.syncPlaylist(
-            mediaItems = mediaItems,
-            startIndex = index,
-            startPositionMs = position,
-            playWhenReady = wasPlaying,
-        )
+        // Guard against re-entrancy: `syncPlaylist` calls
+        // `setMediaItems`, which fires `onMediaItemTransition`.
+        isApplyingQueueChange = true
+        try {
+            currentPlayer.syncPlaylist(
+                mediaItems = mediaItems,
+                startIndex = index,
+                startPositionMs = position,
+                playWhenReady = wasPlaying,
+            )
+        } finally {
+            isApplyingQueueChange = false
+        }
         updateExoPlayerRepeatMode()
     }
 
