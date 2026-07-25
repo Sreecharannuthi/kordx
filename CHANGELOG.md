@@ -23,6 +23,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - **Media3-idiomatic resume position** — the persisted start position is now
   applied via `exoPlayer.setMediaItem(item, startPositionMs)` instead of a
   post-prepare `seekTo`; a restore no longer dispatches a seek event.
+- **True gapless playback (GP4)** — replaced the per-song `RadioPlayer`
+  stop-and-start lifecycle with a single shared `ExoPlayer` playlist built via
+  `setMediaItems(...)`. Loop modes map to ExoPlayer repeat modes, and manual
+  next/previous use `seekToNextMediaItem()` / `seekToPreviousMediaItem()`.
 - **Focus denial is now logged** — `Radio.start()` warns when
   `requireAudioFocus` blocks playback start (previously silent).
 - **Fader lifecycle debug logging** — `RadioEffects.Fader` logs start/stop at

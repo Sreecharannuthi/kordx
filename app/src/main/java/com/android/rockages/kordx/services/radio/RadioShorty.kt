@@ -1,7 +1,6 @@
 package com.android.rockages.kordx.services.radio
 
 import com.android.rockages.kordx.KordX
-import kotlin.random.Random
 
 class RadioShorty(private val kordx: KordX) : RadioShortyAdapterTarget {
  override fun playPause() {
@@ -80,13 +79,20 @@ class RadioShorty(private val kordx: KordX) : RadioShortyAdapterTarget {
  if (songIds.isEmpty()) {
  return
  }
+ // Stage the queue without starting so that toggling shuffle
+ // rebuilds the playlist exactly once (instead of starting,
+ // then reshuffling mid-playback, then rebuilding again).
  kordx.radio.queue.add(
  songIds,
- options = options.run {
- copy(index = if (shuffle) Random.nextInt(songIds.size) else options.index)
- }
+ options = options.copy(autostart = false)
  )
  kordx.radio.queue.setShuffleMode(shuffle)
+ val startIndex = kordx.radio.queue.currentSongIndex.coerceAtLeast(0)
+ if (options.autostart) {
+ kordx.radio.play(Radio.PlayOptions(index = startIndex))
+ } else {
+ kordx.radio.play(Radio.PlayOptions(index = startIndex, autostart = false))
+ }
  }
 
  fun playQueue(

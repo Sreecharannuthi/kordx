@@ -1,6 +1,5 @@
 package com.android.rockages.kordx.services.radio
 
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.C
@@ -17,326 +16,370 @@ typealias RadioPlayerOnFinishListener = () -> Unit
 typealias RadioPlayerOnErrorListener = (Int, Int) -> Unit
 
 @Suppress("UnsafeOptInUsageError")
-class RadioPlayer(
-    val kordx: KordX,
-    val id: String,
-    val uri: Uri,
-    private val exoPlayer: ExoPlayer,
-    private val startPositionMs: Long = 0L,
-) {
- data class PlaybackPosition(val played: Long, val total: Long) {
- val ratio: Float
- get() = (played.toFloat() / total).takeIf { it.isFinite() } ?: 0f
+class RadioPlayer(val kordx: KordX, private val exoPlayer: ExoPlayer) {
+    data class PlaybackPosition(val played: Long, val total: Long) {
+        val ratio: Float
+            get() = (played.toFloat() / total).takeIf { it.isFinite() } ?: 0f
 
- companion object {
- val zero = PlaybackPosition(0L, 0L)
- }
- }
+        companion object {
+            val zero = PlaybackPosition(0L, 0L)
+        }
+    }
 
- enum class State {
- Unprepared,
- Preparing,
- Prepared,
- Finished,
- Destroyed,
- }
+    enum class State {
+        Unprepared,
+        Preparing,
+        Prepared,
+        Finished,
+        Destroyed,
+    }
 
- private var onPrepared: RadioPlayerOnPreparedListener? = null
- private var onPlaybackPosition: RadioPlayerOnPlaybackPositionListener? = null
- private var onFinish: RadioPlayerOnFinishListener? = null
- private var onError: RadioPlayerOnErrorListener? = null
- private var fader: RadioEffects.Fader? = null
- private val handler = Handler(Looper.getMainLooper())
- private var isDurationTimerRunning = false
- // Dedicated Runnable token for the duration timer so
- // destroyDurationTimer() only removes timer callbacks
- // rather than scorching every pending runOnMain post.
- private val durationTick = Runnable { tickDurationTimer() }
+    private var onPrepared: RadioPlayerOnPreparedListener? = null
+    private var onPlaybackPosition: RadioPlayerOnPlaybackPositionListener? = null
+    private var onFinish: RadioPlayerOnFinishListener? = null
+    private var onError: RadioPlayerOnErrorListener? = null
+    private var fader: RadioEffects.Fader? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var isDurationTimerRunning = false
+    // Dedicated Runnable token for the duration timer so
+    // destroyDurationTimer() only removes timer callbacks
+    // rather than scorching every pending runOnMain post.
+    private val durationTick = Runnable { tickDurationTimer() }
 
- // Cached from Player.Listener (main thread) so background
- // threads (RadioSession.updateAsync, duration timer) never
- // touch ExoPlayer directly. ExoPlayer enforces main-thread
- // access and throws IllegalStateException otherwise.
- @Volatile private var _isPlaying = false
- @Volatile private var _playbackPosition = PlaybackPosition.zero
+    // Cached from Player.Listener (main thread) so background
+    // threads (RadioSession.updateAsync, duration timer) never
+    // touch ExoPlayer directly. ExoPlayer enforces main-thread
+    // access and throws IllegalStateException otherwise.
+    @Volatile private var _isPlaying = false
+    @Volatile private var _playbackPosition = PlaybackPosition.zero
 
- private val listener = object : Player.Listener {
- override fun onPlaybackStateChanged(playbackState: Int) {
- when (playbackState) {
- Player.STATE_READY -> {
- state = State.Prepared
- val dur = try { exoPlayer.duration } catch (_: IllegalStateException) { C.TIME_UNSET }
- // Seed the position from the player itself: with
- // setMediaItem(item, startPositionMs) the initial
- // position is the restore point, so the UI shows the
- // resumed position even before playback starts (the
- // staged autostart=false restore path never ticks the
- // duration timer until play).
- val pos = try { exoPlayer.currentPosition } catch (_: IllegalStateException) { 0L }
- _playbackPosition = PlaybackPosition(
- played = pos.coerceAtLeast(0L),
- total = if (dur > 0) dur else 0L,
- )
- createDurationTimer()
- onPlaybackPosition?.invoke(_playbackPosition)
- onPrepared?.invoke()
- }
- Player.STATE_ENDED -> {
- state = State.Finished
- destroyDurationTimer()
- onFinish?.invoke()
- }
- else -> {}
- }
- }
+    private val listener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    state = State.Prepared
+                    val dur = try { exoPlayer.duration } catch (_: IllegalStateException) { C.TIME_UNSET }
+                    // Seed the position from the player itself: with
+                    // setMediaItems(..., startIndex, startPositionMs) the initial
+                    // position is the restore point, so the UI shows the
+                    // resumed position even before playback starts (the
+                    // staged autostart=false restore path never ticks the
+                    // duration timer until play).
+                    val pos = try { exoPlayer.currentPosition } catch (_: IllegalStateException) { 0L }
+                    _playbackPosition = PlaybackPosition(
+                        played = pos.coerceAtLeast(0L),
+                        total = if (dur > 0) dur else 0L,
+                    )
+                    createDurationTimer()
+                    onPlaybackPosition?.invoke(_playbackPosition)
+                    onPrepared?.invoke()
+                }
+                Player.STATE_ENDED -> {
+                    state = State.Finished
+                    destroyDurationTimer()
+                    onFinish?.invoke()
+                }
+                else -> {}
+            }
+        }
 
- override fun onIsPlayingChanged(isPlaying: Boolean) {
- _isPlaying = isPlaying
- }
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            _isPlaying = isPlaying
+        }
 
- override fun onPlayerError(error: PlaybackException) {
- state = State.Destroyed
- destroyDurationTimer()
- onError?.invoke(error.errorCode, 0)
- }
- }
+        override fun onPlayerError(error: PlaybackException) {
+            state = State.Destroyed
+            destroyDurationTimer()
+            onError?.invoke(error.errorCode, 0)
+        }
+    }
 
- var state = State.Unprepared
- private set
- var hasPlayedOnce = false
- private set
- var volume = MAX_VOLUME
- private set
- var speed = DEFAULT_SPEED
- private set
- var pitch = DEFAULT_PITCH
- private set
+    init {
+        exoPlayer.addListener(listener)
+    }
 
- val usable get() = state == State.Prepared
- val fadePlayback get() = kordx.settings.fadePlayback.value
+    var state = State.Unprepared
+        private set
+    var hasPlayedOnce = false
+        private set
+    var volume = MAX_VOLUME
+        private set
+    var speed = DEFAULT_SPEED
+        private set
+    var pitch = DEFAULT_PITCH
+        private set
 
- // audioSessionId: safe to read from any thread once
- // the player is in STATE_READY (session ID is cached
- // internally by ExoPlayer after prepare).
- val audioSessionId get() = try { exoPlayer.audioSessionId } catch (_: IllegalStateException) { 0 }
- val isPlaying get() = _isPlaying
- val playbackPosition get() = _playbackPosition
+    val usable get() = state == State.Prepared
+    val fadePlayback get() = kordx.settings.fadePlayback.value
 
- /**
- * Runs [block] on the main thread. If already on main,
- * executes immediately. Otherwise posts to the main handler.
- * All ExoPlayer access MUST go through this wrapper.
- */
- private inline fun runOnMain(crossinline block: () -> Unit) {
- if (Looper.myLooper() == Looper.getMainLooper()) {
- block()
- } else {
- handler.post { block() }
- }
- }
+    // audioSessionId: safe to read from any thread once
+    // the player is in STATE_READY (session ID is cached
+    // internally by ExoPlayer after prepare).
+    val audioSessionId get() = try { exoPlayer.audioSessionId } catch (_: IllegalStateException) { 0 }
+    val isPlaying get() = _isPlaying
+    val playbackPosition get() = _playbackPosition
 
- fun prepare() {
- runOnMain {
- when (state) {
- State.Unprepared -> {
- exoPlayer.addListener(listener)
- // Media3-idiomatic resume: the start position is
- // applied at setMediaItem time, so no post-prepare
- // seekTo is needed (and no seek event is dispatched
- // for a restore, which is not a user seek).
- exoPlayer.setMediaItem(MediaItem.fromUri(uri), startPositionMs.coerceAtLeast(0L))
- exoPlayer.prepare()
- exoPlayer.playWhenReady = false
- state = State.Preparing
- }
- State.Prepared -> onPrepared?.invoke()
- else -> {}
- }
- }
- }
+    /**
+     * Runs [block] on the main thread. If already on main,
+     * executes immediately. Otherwise posts to the main handler.
+     * All ExoPlayer access MUST go through this wrapper.
+     */
+    private inline fun runOnMain(crossinline block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            block()
+        } else {
+            handler.post { block() }
+        }
+    }
 
- fun stop() = destroy()
+    /**
+     * Prepares the shared [ExoPlayer] with a playlist starting at
+     * [startIndex] and [startPositionMs]. The start position is
+     * applied at playlist construction time (Media3-idiomatic),
+     * so no post-prepare seek is needed.
+     */
+    fun preparePlaylist(
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        startPositionMs: Long,
+    ) {
+        runOnMain {
+            exoPlayer.setMediaItems(
+                mediaItems,
+                startIndex,
+                startPositionMs.coerceAtLeast(0L),
+            )
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = false
+            state = State.Preparing
+        }
+    }
 
- fun destroy() {
- runOnMain {
- state = State.Destroyed
- destroyDurationTimer()
- // Stop any running fader before releasing — the fader
- // runs on a background Timer thread and keeps writing
- // exoPlayer.volume; if not stopped here it can mute
- // the next player that reuses the shared ExoPlayer.
- fader?.stop()
- fader = null
- exoPlayer.removeListener(listener)
- exoPlayer.stop()
- }
- }
+    /**
+     * Replaces the current playlist while preserving playback state. Used when
+     * the user edits the queue (add / remove / shuffle) while the player is
+     * already prepared.
+     */
+    fun syncPlaylist(
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        startPositionMs: Long,
+        playWhenReady: Boolean,
+    ) {
+        runOnMain {
+            exoPlayer.setMediaItems(
+                mediaItems,
+                startIndex,
+                startPositionMs.coerceAtLeast(0L),
+            )
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = playWhenReady
+            state = State.Preparing
+        }
+    }
 
- fun start() {
-     runOnMain {
-         createDurationTimer()
-         if (!hasPlayedOnce) {
-             hasPlayedOnce = true
-             applySpeed(speed)
-             applyPitch(pitch)
-         }
-         exoPlayer.playWhenReady = true
-         _isPlaying = true
-     }
- }
+    fun setRepeatMode(mode: Int) {
+        runOnMain { exoPlayer.repeatMode = mode }
+    }
 
- fun pause() {
- runOnMain {
- exoPlayer.playWhenReady = false
- destroyDurationTimer()
- _isPlaying = false
- }
- }
+    fun stop() = destroy()
 
- fun seek(to: Int) {
- runOnMain {
- exoPlayer.seekTo(to.toLong())
- try {
- val played = exoPlayer.currentPosition
- val total = exoPlayer.duration.takeIf { it > 0 } ?: _playbackPosition.total
- _playbackPosition = PlaybackPosition(played, total)
- onPlaybackPosition?.invoke(_playbackPosition)
- } catch (_: IllegalStateException) {}
- }
- }
+    fun destroy() {
+        runOnMain {
+            state = State.Destroyed
+            destroyDurationTimer()
+            // Stop any running fader before releasing — the fader
+            // runs on a background Timer thread and keeps writing
+            // exoPlayer.volume; if not stopped here it can mute
+            // the next playback that reuses the shared ExoPlayer.
+            fader?.stop()
+            fader = null
+            exoPlayer.removeListener(listener)
+            exoPlayer.stop()
+        }
+    }
 
- fun changeVolume(
- to: Float,
- forceFade: Boolean = false,
- onFinish: (Boolean) -> Unit,
- ) {
- val previousFader = fader
- previousFader?.stop()
- when {
- to == volume -> onFinish(true)
- forceFade || fadePlayback -> {
- val duration = (kordx.settings.fadePlaybackDuration.value * 1000).toInt()
- var newFader: RadioEffects.Fader? = null
- newFader = RadioEffects.Fader(
- RadioEffects.Fader.Options(volume, to, duration),
- onUpdate = {
- changeVolumeInstant(it)
- },
- onFinish = {
- if (fader === newFader) {
- fader = null
- }
- onFinish(it)
- }
- )
- fader = newFader
- newFader.start()
- }
+    fun start() {
+        runOnMain {
+            createDurationTimer()
+            if (!hasPlayedOnce) {
+                hasPlayedOnce = true
+                applySpeed(speed)
+                applyPitch(pitch)
+            }
+            exoPlayer.playWhenReady = true
+            _isPlaying = true
+        }
+    }
 
- else -> {
- changeVolumeInstant(to)
- onFinish(true)
- }
- }
- }
+    fun pause() {
+        runOnMain {
+            exoPlayer.playWhenReady = false
+            destroyDurationTimer()
+            _isPlaying = false
+        }
+    }
 
- fun changeVolumeInstant(to: Float) {
- volume = to
- runOnMain { exoPlayer.volume = to }
- }
+    fun next() {
+        runOnMain {
+            if (exoPlayer.hasNextMediaItem()) {
+                exoPlayer.seekToNextMediaItem()
+            }
+        }
+    }
 
- fun changeSpeed(to: Float) {
- if (!hasPlayedOnce) {
- speed = to
- return
- }
- runOnMain {
- applySpeed(to)
- }
- }
+    fun previous() {
+        runOnMain {
+            if (exoPlayer.hasPreviousMediaItem()) {
+                exoPlayer.seekToPreviousMediaItem()
+            }
+        }
+    }
 
- fun changePitch(to: Float) {
- if (!hasPlayedOnce) {
- pitch = to
- return
- }
- runOnMain {
- applyPitch(to)
- }
- }
+    fun seek(to: Int) {
+        runOnMain {
+            exoPlayer.seekTo(to.toLong())
+            try {
+                val played = exoPlayer.currentPosition
+                val total = exoPlayer.duration.takeIf { it > 0 } ?: _playbackPosition.total
+                _playbackPosition = PlaybackPosition(played, total)
+                onPlaybackPosition?.invoke(_playbackPosition)
+            } catch (_: IllegalStateException) {}
+        }
+    }
 
- fun setOnPreparedListener(listener: RadioPlayerOnPreparedListener?) {
- onPrepared = listener
- }
+    fun changeVolume(
+        to: Float,
+        forceFade: Boolean = false,
+        onFinish: (Boolean) -> Unit,
+    ) {
+        val previousFader = fader
+        previousFader?.stop()
+        when {
+            to == volume -> onFinish(true)
+            forceFade || fadePlayback -> {
+                val duration = (kordx.settings.fadePlaybackDuration.value * 1000).toInt()
+                var newFader: RadioEffects.Fader? = null
+                newFader = RadioEffects.Fader(
+                    RadioEffects.Fader.Options(volume, to, duration),
+                    onUpdate = {
+                        changeVolumeInstant(it)
+                    },
+                    onFinish = {
+                        if (fader === newFader) {
+                            fader = null
+                        }
+                        onFinish(it)
+                    }
+                )
+                fader = newFader
+                newFader.start()
+            }
 
- fun setOnPlaybackPositionListener(listener: RadioPlayerOnPlaybackPositionListener?) {
- onPlaybackPosition = listener
- }
+            else -> {
+                changeVolumeInstant(to)
+                onFinish(true)
+            }
+        }
+    }
 
- fun setOnFinishListener(listener: RadioPlayerOnFinishListener?) {
- onFinish = listener
- }
+    fun changeVolumeInstant(to: Float) {
+        volume = to
+        runOnMain { exoPlayer.volume = to }
+    }
 
- fun setOnErrorListener(listener: RadioPlayerOnErrorListener?) {
- onError = listener
- }
+    fun changeSpeed(to: Float) {
+        if (!hasPlayedOnce) {
+            speed = to
+            return
+        }
+        runOnMain {
+            applySpeed(to)
+        }
+    }
 
- // ---- Internal helpers (always called on main thread) ----
+    fun changePitch(to: Float) {
+        if (!hasPlayedOnce) {
+            pitch = to
+            return
+        }
+        runOnMain {
+            applyPitch(to)
+        }
+    }
 
- private fun applySpeed(to: Float) {
- try {
- exoPlayer.setPlaybackSpeed(to)
- speed = to
- } catch (err: Exception) {
- Logger.error("RadioPlayer", "changing speed failed", err)
- }
- }
+    fun setOnPreparedListener(listener: RadioPlayerOnPreparedListener?) {
+        onPrepared = listener
+    }
 
- private fun applyPitch(to: Float) {
- try {
- exoPlayer.setPlaybackParameters(
- androidx.media3.common.PlaybackParameters(speed, to)
- )
- pitch = to
- } catch (err: Exception) {
- Logger.error("RadioPlayer", "changing pitch failed", err)
- }
- }
+    fun setOnPlaybackPositionListener(listener: RadioPlayerOnPlaybackPositionListener?) {
+        onPlaybackPosition = listener
+    }
 
- private fun createDurationTimer() {
- if (isDurationTimerRunning) return
- isDurationTimerRunning = true
- handler.post(durationTick)
- }
+    fun setOnFinishListener(listener: RadioPlayerOnFinishListener?) {
+        onFinish = listener
+    }
 
- private fun tickDurationTimer() {
- if (!isDurationTimerRunning) return
- try {
- val played = exoPlayer.currentPosition
- val total = exoPlayer.duration.takeIf { it > 0 } ?: _playbackPosition.total
- _playbackPosition = PlaybackPosition(played, total)
- onPlaybackPosition?.invoke(_playbackPosition)
- } catch (_: IllegalStateException) {}
- if (isDurationTimerRunning) {
- handler.postDelayed(durationTick, 100L)
- }
- }
+    fun setOnErrorListener(listener: RadioPlayerOnErrorListener?) {
+        onError = listener
+    }
 
- private fun destroyDurationTimer() {
- isDurationTimerRunning = false
- // Only remove the duration timer callbacks, NOT all
- // pending handler posts. removeCallbacksAndMessages(null)
- // was scorching pending prepare/start/seek/volume
- // operations posted via runOnMain, which caused the
- // "UI says playing but no audio" symptom.
- handler.removeCallbacks(durationTick)
- }
+    // ---- Internal helpers (always called on main thread) ----
 
- companion object {
- const val MIN_VOLUME = 0f
- const val MAX_VOLUME = 1f
- const val DUCK_VOLUME = 0.2f
- const val DEFAULT_SPEED = 1f
- const val DEFAULT_PITCH = 1f
- }
+    private fun applySpeed(to: Float) {
+        try {
+            exoPlayer.setPlaybackSpeed(to)
+            speed = to
+        } catch (err: Exception) {
+            Logger.error("RadioPlayer", "changing speed failed", err)
+        }
+    }
+
+    private fun applyPitch(to: Float) {
+        try {
+            exoPlayer.setPlaybackParameters(
+                androidx.media3.common.PlaybackParameters(speed, to)
+            )
+            pitch = to
+        } catch (err: Exception) {
+            Logger.error("RadioPlayer", "changing pitch failed", err)
+        }
+    }
+
+    private fun createDurationTimer() {
+        if (isDurationTimerRunning) return
+        isDurationTimerRunning = true
+        handler.post(durationTick)
+    }
+
+    private fun tickDurationTimer() {
+        if (!isDurationTimerRunning) return
+        try {
+            val played = exoPlayer.currentPosition
+            val total = exoPlayer.duration.takeIf { it > 0 } ?: _playbackPosition.total
+            _playbackPosition = PlaybackPosition(played, total)
+            onPlaybackPosition?.invoke(_playbackPosition)
+        } catch (_: IllegalStateException) {}
+        if (isDurationTimerRunning) {
+            handler.postDelayed(durationTick, 100L)
+        }
+    }
+
+    private fun destroyDurationTimer() {
+        isDurationTimerRunning = false
+        // Only remove the duration timer callbacks, NOT all
+        // pending handler posts. removeCallbacksAndMessages(null)
+        // was scorching pending prepare/start/seek/volume
+        // operations posted via runOnMain, which caused the
+        // "UI says playing but no audio" symptom.
+        handler.removeCallbacks(durationTick)
+    }
+
+    companion object {
+        const val MIN_VOLUME = 0f
+        const val MAX_VOLUME = 1f
+        const val DUCK_VOLUME = 0.2f
+        const val DEFAULT_SPEED = 1f
+        const val DEFAULT_PITCH = 1f
+    }
 }

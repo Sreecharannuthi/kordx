@@ -146,16 +146,16 @@ class RadioQueueLoopShufflePersistenceTest {
  val source = loadSource(
  "app/src/main/java/com/android/rockages/kordx/services/radio/Radio.kt"
  )
- // `Radio.stop` should still call `stopCurrentSong()`.
+ // `Radio.stop` must tear down the active RadioPlayer (`it.destroy()` + `player = null`).
  val stopFn = source.substringAfter("fun stop(ended: Boolean)").substringBefore("\n }")
  assertTrue(
- stopFn.contains("stopCurrentSong()"),
- "Radio.stop(ended) must still call stopCurrentSong()"
+ stopFn.contains("it.destroy()") || stopFn.contains("player = null"),
+ "Radio.stop(ended) must destroy the active player and clear the field"
  )
- // `Radio.clearQueue` must NOT call `stopCurrentSong()`.
+ // `Radio.clearQueue` must NOT touch the player.
  val clearQueueFn = source.substringAfter("fun clearQueue()").substringBefore("\n }")
  assertTrue(
- !clearQueueFn.contains("stopCurrentSong()"),
+ !clearQueueFn.contains("it.destroy()") && !clearQueueFn.contains("player = null"),
  "Radio.clearQueue() must NOT stop the current song (Fix for Issue #843)"
  )
  }

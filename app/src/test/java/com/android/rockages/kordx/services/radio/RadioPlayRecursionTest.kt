@@ -53,14 +53,11 @@ class RadioPlayRecursionTest {
  /**
  * Strip Kotlin line comments (the double-slash form) and
  * block comments (slash-star ... star-slash) from the
- * source. The source contains a comment that
- * references `onSongFinish(SongFinishSource.Exception)`
- * (the long block comment above the guard), which would
- * otherwise be matched by `String.indexOf` and confuse the
+ * source. Comments referencing removed symbols would
+ * otherwise be matched by `String.indexOf` and confuse
  * source-order assertions. We replace each comment with
  * spaces (one per character) so character positions in the
- * original string are preserved — important for the
- * `autostartIdx < onSongFinishIdx` style assertions.
+ * original string are preserved.
  */
  private fun stripComments(source: String): String {
  val out = StringBuilder(source.length)
@@ -69,13 +66,11 @@ class RadioPlayRecursionTest {
  val c = source[i]
  val n = if (i + 1 < source.length) source[i + 1] else ' '
  if (c == '/' && n == '/') {
- // Line comment: consume to end of line.
  while (i < source.length && source[i] != '\n') {
  out.append(' ')
  i++
  }
  } else if (c == '/' && n == '*') {
- // Block comment: consume to `*/`.
  out.append(' ')
  out.append(' ')
  i += 2
@@ -98,29 +93,29 @@ class RadioPlayRecursionTest {
  return out.toString()
  }
 
- // ---- Fix 1: early-return guard when song == null && !autostart.
+ // ---- Fix 1: early-return guard when targetSong == null && !autostart.
 
  @Test
  fun radioPlayChecksAutostartInNullSongBranch() {
  val source = loadRadio()
  val playBody = radioPlayBody(source)
 
- // The guard: inside the `if (song == null) { ... }` branch,; we must check `!options.autostart` and `return` BEFORE; the `onSongFinish(SongFinishSource.Exception)` call.
+ // The guard: inside the `if (targetSong == null) { ... }` branch,; we must check `!options.autostart` and `return` BEFORE; the recursive `play(...)` fallback.
  assertTrue(
- playBody.contains("if (song == null)"),
- "Radio.play() should have a `if (song == null)` branch"
+ playBody.contains("if (targetSong == null)"),
+ "Radio.play() should have a `if (targetSong == null)` branch"
  )
  assertTrue(
  playBody.contains("options.autostart"),
  "Radio.play() should reference `options.autostart` (the early-return guard)"
  )
 
- // The guard must be inside the `if (song == null) { ... }`; block, NOT outside it. Assert by checking the relative; order: `if (song == null) {` appears before the autostart; check.
- val nullSongIdx = playBody.indexOf("if (song == null)")
+ // The guard must be inside the `if (targetSong == null) { ... }`; block, NOT outside it.
+ val nullSongIdx = playBody.indexOf("if (targetSong == null)")
  val autostartIdx = playBody.indexOf("options.autostart")
  assertTrue(
  autostartIdx > nullSongIdx,
- "options.autostart check must come AFTER the `if (song == null)` branch open"
+ "options.autostart check must come AFTER the `if (targetSong == null)` branch open"
  )
  }
 
@@ -129,9 +124,9 @@ class RadioPlayRecursionTest {
  val source = loadRadio()
  val playBody = radioPlayBody(source)
 
- // Extract the `if (song == null) { ... }` block. We use a; bracecounting approach to find the matching close brace.
- val nullSongStart = playBody.indexOf("if (song == null) {")
- assertTrue(nullSongStart >= 0, "Could not find `if (song == null) {`")
+ // Extract the `if (targetSong == null) { ... }` block.
+ val nullSongStart = playBody.indexOf("if (targetSong == null) {")
+ assertTrue(nullSongStart >= 0, "Could not find `if (targetSong == null) {")
  val blockStart = playBody.indexOf('{', nullSongStart)
  assertTrue(blockStart >= 0)
  var depth = 0
@@ -151,37 +146,37 @@ class RadioPlayRecursionTest {
  assertTrue(blockEnd > blockStart, "Could not find matching close brace")
  val nullSongBlock = playBody.substring(blockStart, blockEnd + 1)
 
- // The block must contain both a `!options.autostart`; check AND a `return` statement before the; `onSongFinish(SongFinishSource.Exception)` call.
+ // The block must contain both a `!options.autostart`; check AND a `return` statement before the; recursive `play(...)` fallback.
  assertTrue(
  nullSongBlock.contains("!options.autostart"),
- "`if (song == null)` block must check `!options.autostart` (the early-return guard)"
+ "`if (targetSong == null)` block must check `!options.autostart` (the early-return guard)"
  )
  assertTrue(
  nullSongBlock.contains("return"),
- "`if (song == null)` block must `return` (the early-return guard)"
+ "`if (targetSong == null)` block must `return` (the early-return guard)"
  )
 
- // The `onSongFinish(SongFinishSource.Exception)` call must; still be present (the `autostart == true` autoadvance; path is preserved).
+ // The autostart == true path must still recover by reentering play().
  assertTrue(
- nullSongBlock.contains("onSongFinish(SongFinishSource.Exception)"),
- "`onSongFinish(SongFinishSource.Exception)` must remain for the autostart == true path"
+ nullSongBlock.contains("play(options.copy("),
+ "`if (targetSong == null)` block must reenter `play(...)` for the autostart == true path"
  )
  }
 
  @Test
- fun radioPlayGuardPrecedesOnSongFinish() {
+ fun radioPlayGuardPrecedesRecursivePlay() {
  val source = stripComments(loadRadio())
  val playBody = radioPlayBody(source)
 
- // Within the `if (song == null) { ... }` block, the; `!options.autostart` earlyreturn must come BEFORE the; `onSongFinish(SongFinishSource.Exception)` call so the; recursion is shortcircuited.
+ // Within the `if (targetSong == null) { ... }` block, the; `!options.autostart` earlyreturn must come BEFORE the; recursive `play(...)` call so the recursion is shortcircuited.
  val autostartIdx = playBody.indexOf("!options.autostart")
- val onSongFinishIdx = playBody.indexOf("onSongFinish(SongFinishSource.Exception)")
+ val recursivePlayIdx = playBody.indexOf("play(options.copy(")
  assertTrue(autostartIdx >= 0, "autostart check not found")
- assertTrue(onSongFinishIdx >= 0, "onSongFinish call not found")
+ assertTrue(recursivePlayIdx >= 0, "recursive play() call not found")
  assertTrue(
- autostartIdx < onSongFinishIdx,
- "The early-return guard (`!options.autostart`) must precede the `onSongFinish` call " +
- "inside the `if (song == null)` block, so the recursion is short-circuited."
+ autostartIdx < recursivePlayIdx,
+ "The early-return guard (`!options.autostart`) must precede the recursive `play(...)` call " +
+ "inside the `if (targetSong == null)` block, so the recursion is short-circuited."
  )
  }
 
@@ -218,14 +213,12 @@ class RadioPlayRecursionTest {
 
  // The workaround wrote the index as part of the; directfield block. passes the index through; `RadioShorty.playQueue(options = Radio.PlayOptions(index = ...))`.; We assert the LITERAL directwrite assignment pattern; (without going through `playQueue`) is gone.
  val directWritePattern = "kordx.radio.queue.currentSongIndex ="
- val occurrences = source.windowed(directWritePattern.length, 1, false)
- .count { it == directWritePattern }
 
- // The pattern `kordx.radio.queue.currentSongIndex =` should; no longer appear in the ACTION_SHUFFLE_ALL handler. We; accept occurrences elsewhere (e.g. `onSongFinish`,; `Radio.play`); specifically removes the one; inside the `ACTION_SHUFFLE_ALL` branch.; We assert the count of direct writes in; body is reduced. The source had 1 in the; shuffleall handler. should remove it. Other; call sites in RadioSession keep it (none in the current; source, but be defensive).; For now, assert that the shuffleall branch in; particular does not contain the direct write. We extract; the ACTION_SHUFFLE_ALL branch body.
+ // Extract the ACTION_SHUFFLE_ALL branch body.
  val branchStart = source.indexOf("RadioSessionState.ACTION_SHUFFLE_ALL ->")
  assertTrue(branchStart >= 0, "ACTION_SHUFFLE_ALL branch not found")
 
- // Find the next `RadioSessionState.ACTION_` (the next branch); or the next `}` at the actionblock level. The actions are; sibling `when` branches inside a `fun handleCustomAction`,; so the next branch starts at the same indentation.
+ // Find the next `RadioSessionState.ACTION_` (the next branch); or the next `}` at the actionblock level.
  val nextBranchIdx = source.indexOf("RadioSessionState.ACTION_", branchStart + 1)
  val branchEnd = if (nextBranchIdx >= 0) nextBranchIdx else source.length
  val shuffleAllBranch = source.substring(branchStart, branchEnd)
@@ -283,32 +276,32 @@ class RadioPlayRecursionTest {
  }
 
 
- // Crosscheck: the Radio.play() recursion guard is reachable; from the playQueue> queue.add> afterAdd> play; chain. (The earlyreturn is what makes the; ACTION_SHUFFLE_ALL reversion safe.)
+ // Crosscheck: the Radio.play() recursion guard is reachable; from the playQueue> queue.add> afterAdd> play; chain.
 
  @Test
- fun radioPlayGuardIsBeforeOnSongFinishInSourceOrder() {
+ fun radioPlayGuardIsBeforeRecursivePlayInSourceOrder() {
  val source = stripComments(loadRadio())
  val playBody = radioPlayBody(source)
  val guardIdx = playBody.indexOf("if (!options.autostart)")
- val onSongFinishIdx = playBody.indexOf("onSongFinish(SongFinishSource.Exception)")
+ val recursivePlayIdx = playBody.indexOf("play(options.copy(")
  assertTrue(guardIdx >= 0, "Early-return guard `if (!options.autostart)` not found in Radio.play()")
- assertTrue(onSongFinishIdx >= 0, "`onSongFinish` call not found in Radio.play()")
+ assertTrue(recursivePlayIdx >= 0, "recursive `play(...)` call not found in Radio.play()")
  assertTrue(
- guardIdx < onSongFinishIdx,
- "The early-return guard must appear BEFORE the `onSongFinish` call in the source."
+ guardIdx < recursivePlayIdx,
+ "The early-return guard must appear BEFORE the recursive `play(...)` call in the source."
  )
  }
 
  @Test
  fun radioPlayBodyHasExpectedShape() {
 
- // Sanity check: the play body still has the right shape; after the edit. If refactor breaks; the body, this fails first and gives a clear; diagnostic.
+ // Sanity check: the play body still has the right shape; after the GP4 playlist refactor.
  val source = loadRadio()
  val playBody = radioPlayBody(source)
  assertNotNull(playBody)
  assertTrue(
- playBody.contains("stopCurrentSong()"),
- "Radio.play() should still call `stopCurrentSong()` at the top"
+ playBody.contains("preparePlaylist("),
+ "Radio.play() should prepare an ExoPlayer playlist via `preparePlaylist()`"
  )
  assertTrue(
  playBody.contains("queue.getSongIdAt(options.index)"),
