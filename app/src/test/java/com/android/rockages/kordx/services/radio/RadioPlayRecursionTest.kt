@@ -100,7 +100,9 @@ class RadioPlayRecursionTest {
  val source = loadRadio()
  val playBody = radioPlayBody(source)
 
- // The guard: inside the `if (targetSong == null) { ... }` branch,; we must check `!options.autostart` and `return` BEFORE; the recursive `play(...)` fallback.
+ // The guard: inside the `if (targetSong == null) { ... }` branch,
+ // we must check `!options.autostart` and `return` BEFORE the
+ // recursive `play(...)` fallback.
  assertTrue(
  playBody.contains("if (targetSong == null)"),
  "Radio.play() should have a `if (targetSong == null)` branch"
@@ -168,7 +170,9 @@ class RadioPlayRecursionTest {
  val source = stripComments(loadRadio())
  val playBody = radioPlayBody(source)
 
- // Within the `if (targetSong == null) { ... }` block, the; `!options.autostart` earlyreturn must come BEFORE the; recursive `play(...)` call so the recursion is shortcircuited.
+ // Within the `if (targetSong == null) { ... }` block, the
+ // `!options.autostart` early-return must come BEFORE the
+ // recursive `play(...)` call so the recursion is short-circuited.
  val autostartIdx = playBody.indexOf("!options.autostart")
  val recursivePlayIdx = playBody.indexOf("play(options.copy(")
  assertTrue(autostartIdx >= 0, "autostart check not found")
