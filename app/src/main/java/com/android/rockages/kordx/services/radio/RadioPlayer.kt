@@ -17,7 +17,13 @@ typealias RadioPlayerOnFinishListener = () -> Unit
 typealias RadioPlayerOnErrorListener = (Int, Int) -> Unit
 
 @Suppress("UnsafeOptInUsageError")
-class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val exoPlayer: ExoPlayer) {
+class RadioPlayer(
+    val kordx: KordX,
+    val id: String,
+    val uri: Uri,
+    private val exoPlayer: ExoPlayer,
+    private val startPositionMs: Long = 0L,
+) {
  data class PlaybackPosition(val played: Long, val total: Long) {
  val ratio: Float
  get() = (played.toFloat() / total).takeIf { it.isFinite() } ?: 0f
@@ -60,11 +66,19 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  Player.STATE_READY -> {
  state = State.Prepared
  val dur = try { exoPlayer.duration } catch (_: IllegalStateException) { C.TIME_UNSET }
+ // Seed the position from the player itself: with
+ // setMediaItem(item, startPositionMs) the initial
+ // position is the restore point, so the UI shows the
+ // resumed position even before playback starts (the
+ // staged autostart=false restore path never ticks the
+ // duration timer until play).
+ val pos = try { exoPlayer.currentPosition } catch (_: IllegalStateException) { 0L }
  _playbackPosition = PlaybackPosition(
- played = _playbackPosition.played,
+ played = pos.coerceAtLeast(0L),
  total = if (dur > 0) dur else 0L,
  )
  createDurationTimer()
+ onPlaybackPosition?.invoke(_playbackPosition)
  onPrepared?.invoke()
  }
  Player.STATE_ENDED -> {
@@ -126,7 +140,11 @@ class RadioPlayer(val kordx: KordX, val id: String, val uri: Uri, private val ex
  when (state) {
  State.Unprepared -> {
  exoPlayer.addListener(listener)
- exoPlayer.setMediaItem(MediaItem.fromUri(uri))
+ // Media3-idiomatic resume: the start position is
+ // applied at setMediaItem time, so no post-prepare
+ // seekTo is needed (and no seek event is dispatched
+ // for a restore, which is not a user seek).
+ exoPlayer.setMediaItem(MediaItem.fromUri(uri), startPositionMs.coerceAtLeast(0L))
  exoPlayer.prepare()
  exoPlayer.playWhenReady = false
  state = State.Preparing

@@ -37,10 +37,16 @@ class RadioFocus(val kordx: KordX) {
 
  AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
  hasFocus = false
- restoreVolumeOnFocusGain = kordx.radio.isPlaying
+ val wasPlaying = kordx.radio.isPlaying
  if (!kordx.settings.ignoreAudioFocusLoss.value) {
  kordx.radio.pause()
  }
+ // Arm AFTER pause(): Radio.pause() cancels any pending
+ // focus-gain resume (so user-initiated pauses never
+ // auto-resume); the focus-loss path re-arms it here so
+ // playback interrupted by focus loss still resumes on
+ // AUDIOFOCUS_GAIN.
+ restoreVolumeOnFocusGain = wasPlaying
  }
 
  AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
@@ -62,4 +68,16 @@ class RadioFocus(val kordx: KordX) {
  audioManager,
  audioFocusRequest
  ) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+
+ /**
+ * Cancels a pending focus-gain auto-resume. Called by
+ * [Radio] when playback is paused or stopped outside the
+ * focus-loss path (user pause, stop, sleep timer), so a
+ * later AUDIOFOCUS_GAIN does not resurrect playback the
+ * user explicitly stopped. The focus-loss path itself
+ * re-arms the flag after calling `Radio.pause()`.
+ */
+ fun cancelPendingFocusResume() {
+ restoreVolumeOnFocusGain = false
+ }
 }

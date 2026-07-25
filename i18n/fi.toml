@@ -250,7 +250,6 @@ Loseless = "Häviötön"
 UseMetaphonyMetadataDecoder = "Käytä Metaphony-metatietodekooderia"
 PlayStore = "Play-Kauppa"
 GridSize = "Ruudukon koko"
-GaplessPlayback = "Aukoton toisto"
 
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"

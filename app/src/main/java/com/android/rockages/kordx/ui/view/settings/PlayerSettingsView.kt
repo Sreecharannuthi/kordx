@@ -52,7 +52,6 @@ fun PlayerSettingsView(context: ViewContext) {
  val pauseOnHeadphonesDisconnect by context.kordx.settings.pauseOnHeadphonesDisconnect.flow.collectAsState()
  val seekBackDuration by context.kordx.settings.seekBackDuration.flow.collectAsState()
  val seekForwardDuration by context.kordx.settings.seekForwardDuration.flow.collectAsState()
- val gaplessPlayback by context.kordx.settings.gaplessPlayback.flow.collectAsState()
  val autoResumeOnLaunch by context.kordx.settings.autoResumeOnLaunch.flow.collectAsState()
 
  Scaffold(
@@ -233,19 +232,6 @@ fun PlayerSettingsView(context: ViewContext) {
  context.kordx.settings.seekForwardDuration.setValue(
  context.kordx.settings.seekForwardDuration.defaultValue,
  )
- },
- )
- HorizontalDivider()
- SettingsSwitchTile(
- icon = {
- Icon(Icons.Filled.PlayArrow, null)
- },
- title = {
- Text(context.kordx.t.GaplessPlayback)
- },
- value = gaplessPlayback,
- onChange = { value ->
- context.kordx.settings.gaplessPlayback.setValue(value)
  },
  )
  HorizontalDivider()

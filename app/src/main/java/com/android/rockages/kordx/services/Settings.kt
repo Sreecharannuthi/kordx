@@ -333,7 +333,6 @@ class Settings(private val kordx: KordX) {
  ImagePreserver.Quality.Medium,
  )
  val useMetaphony = BooleanEntry("use_metaphony", true)
- val gaplessPlayback = BooleanEntry("gapless_playback", true)
  val autoResumeOnLaunch = BooleanEntry("auto_resume_on_launch", false)
  val caseSensitiveSorting = BooleanEntry("case_sensitive_sorting", false)
  val lyricsKeepScreenAwake = BooleanEntry("lyrics_keep_screen_awake", true)

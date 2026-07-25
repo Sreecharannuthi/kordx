@@ -176,13 +176,14 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  }
  try {
  queue.currentSongIndex = options.index
- player = RadioPlayer(kordx, song.id, song.uri, exoPlayer)
+ player = RadioPlayer(
+ kordx,
+ song.id,
+ song.uri,
+ exoPlayer,
+ startPositionMs = (options.startPosition ?: 0L).coerceAtLeast(0L),
+ )
  player!!.setOnPreparedListener {
- options.startPosition?.let {
- if (it > 0L) {
- seek(it)
- }
- }
  setSpeed(persistedSpeed, true)
  setPitch(persistedPitch, true)
  if (options.autostart) {
@@ -227,11 +228,21 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  player?.let {
  val hasFocus = focus.requestFocus()
  if (kordx.settings.requireAudioFocus.value && !hasFocus) {
+ Logger.warn(
+ "Radio",
+ "audio focus request denied; playback not started (requireAudioFocus=true)"
+ )
  return
  }
  acquireWakeLock()
  if (it.fadePlayback) {
  it.changeVolumeInstant(RadioPlayer.MIN_VOLUME)
+ } else {
+ // Defensive: the shared ExoPlayer instance could have been
+ // left muted by a previous player's fader (e.g. pause()
+ // fade-out interrupted by process death). Ensure we start
+ // from full volume when no fade-in is requested.
+ it.changeVolumeInstant(RadioPlayer.MAX_VOLUME)
  }
  it.changeVolume(RadioPlayer.MAX_VOLUME) {}
  it.start()
@@ -251,6 +262,11 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  if (!it.isPlaying) {
  return@let
  }
+ // A pause that reaches here is user/app initiated (the
+ // focus-loss path re-arms the flag in RadioFocus AFTER
+ // calling pause), so any pending focus-gain resume is
+ // cancelled — a manual pause must not auto-resume later.
+ focus.cancelPendingFocusResume()
  it.changeVolume(
  to = RadioPlayer.MIN_VOLUME,
  forceFade = forceFade,
@@ -266,6 +282,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
 
  fun pauseInstant() {
  player?.let {
+ focus.cancelPendingFocusResume()
  it.pause()
  onUpdate.dispatch(Events.Player.Paused)
  }
@@ -284,6 +301,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
  // Abandon audio focus when playback fully stops.
  // pause() already abandons; stop() must too so the
  // system and other apps can reclaim the audio output.
+ focus.cancelPendingFocusResume()
  releaseWakeLock()
  focus.abandonFocus()
  if (ended) onUpdate.dispatch(Events.Player.Ended)
@@ -504,12 +522,21 @@ return
 kordx.groove.coroutineScope.launch {
 kordx.groove.readyDeferred.await()
 restoreMutex.withLock {
-val position = restorePreviousQueue()
+restorePreviousQueue()
 if (queue.isEmpty()) {
 return@withLock
 }
-val index = queue.currentSongIndex.coerceAtLeast(0)
-play(PlayOptions(index, autostart = true, startPosition = position))
+// Whichever coroutine wins the restore race, RadioQueue.restore()
+// stages a paused RadioPlayer at the persisted position via
+// afterAdd(autostart = false, startPosition = playedDuration).
+// Starting that staged player is all that is required here. The
+// previous implementation called play() again, which destroyed the
+// already-staged player and, when this coroutine lost the race
+// (restorePreviousQueue() returned -1), restarted the song from 0
+// instead of resuming at the saved position.
+if (!isPlaying) {
+resume()
+}
 }
 }
 }
@@ -518,8 +545,11 @@ internal fun watchQueueUpdates(event: Events) {
  if (event !is Events.Queue) {
  return
  }
- // ExoPlayer handles gapless transitions internally;
- // no need to pre-buffer the next player.
+ // Track transitions are stop-and-start: onSongFinish()
+ // destroys the current RadioPlayer and prepares the next
+ // one on the shared ExoPlayer. True gapless playback via
+ // the ExoPlayer playlist/concatenation API is tracked as
+ // GP4 in specs/architecture/roadmap.md.
  }
 
  override fun onKordXReady() {

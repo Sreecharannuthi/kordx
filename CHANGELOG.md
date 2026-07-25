@@ -5,6 +5,36 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- **Auto-resume position race** — `Radio.autoResumeIfEnabled()` no longer
+  re-calls `play()` after losing the restore `Mutex` race (which destroyed the
+  already-staged player and restarted the song from 0). It now resumes the
+  player that `RadioQueue.restore()` already staged at the persisted position.
+- **Focus-gain auto-resume after manual pause** — `Radio.pause()`,
+  `pauseInstant()`, and `stop()` cancel the pending focus-gain resume via
+  `RadioFocus.cancelPendingFocusResume()`; only focus-loss pauses re-arm it.
+- **Stale muted volume on start** — `Radio.start()` explicitly resets the
+  shared `ExoPlayer` volume to max when fade-in is disabled, guarding against
+  an interrupted fade-out leaving the player muted.
+
+### Changed
+- **Media3-idiomatic resume position** — the persisted start position is now
+  applied via `exoPlayer.setMediaItem(item, startPositionMs)` instead of a
+  post-prepare `seekTo`; a restore no longer dispatches a seek event.
+- **Focus denial is now logged** — `Radio.start()` warns when
+  `requireAudioFocus` blocks playback start (previously silent).
+- **Fader lifecycle debug logging** — `RadioEffects.Fader` logs start/stop at
+  debug level (`Logger.debug`).
+
+### Removed
+- **`gaplessPlayback` toggle (PB7)** — the setting was dead code (no playback
+  code read it). Removed the `Settings` entry, the Player settings switch, and
+  the `GaplessPlayback` i18n key from the TOML sources, the 18 locale JSON
+  assets, and the generated `Translation.g.kt`. True gapless playback remains
+  tracked as GP4 in the roadmap.
+
 ## [1.4.1] - 2026-07-22
 
 ### Fixed

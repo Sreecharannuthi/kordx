@@ -21,6 +21,9 @@ dist
 secrets
 .kotlin
 
+# local agent tooling (bigpowers/pi)
+.pi/
+
 # Release signing config + the actual keystore (never commit real secrets).
 # `app/keystore.properties.example` IS committed as a template.
 /app/keystore.properties
