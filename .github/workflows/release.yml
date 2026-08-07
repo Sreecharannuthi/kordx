@@ -84,14 +84,15 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Ensure release tag is new
+      - name: Ensure release tag is available
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: |
           if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
-            echo "::error::Tag ${RELEASE_TAG} already exists"
-            exit 1
+            echo "Tag ${RELEASE_TAG} already exists; the release will be updated with the APKs from this workflow."
+          else
+            echo "Tag ${RELEASE_TAG} does not exist yet; it will be created by the release step."
           fi
 
       - name: Decode release keystore
