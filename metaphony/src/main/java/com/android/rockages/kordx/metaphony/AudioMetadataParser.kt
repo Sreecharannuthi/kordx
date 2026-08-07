@@ -2,6 +2,8 @@ package com.android.rockages.kordx.metaphony
 
 import com.android.rockages.kordx.metaphony.AudioMetadata.Picture
 import java.time.LocalDate
+import java.time.Year
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import kotlin.String
 
@@ -111,15 +113,15 @@ class AudioMetadataParser internal constructor() {
  }
 
  val DATE_YEAR = DateTimeFormatter.ofPattern("yyyy")
- val DATE_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy")
+ val DATE_YEAR_MONTH = DateTimeFormatter.ofPattern("yyyy-MM")
  val DATE_YEAR_MONTH_DATE = DateTimeFormatter.ISO_LOCAL_DATE
 
  private fun parseDate(text: String): LocalDate? {
  runCatching {
- return LocalDate.parse(text, DATE_YEAR)
+ return Year.parse(text, DATE_YEAR).let { LocalDate.of(it.value, 1, 1) }
  }
  runCatching {
- return LocalDate.parse(text, DATE_YEAR_MONTH)
+ return YearMonth.parse(text, DATE_YEAR_MONTH).let { LocalDate.of(it.year, it.monthValue, 1) }
  }
  runCatching {
  return LocalDate.parse(text, DATE_YEAR_MONTH_DATE)

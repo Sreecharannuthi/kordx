@@ -21,6 +21,11 @@ dist
 secrets
 .kotlin
 
+# Release signing config + the actual keystore (never commit real secrets).
+# `app/keystore.properties.example` IS committed as a template.
+/app/keystore.properties
+/app/keystore/
+
 # local test audio (not part of the build)
 /sample
 # local env helper

@@ -94,8 +94,9 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  }
 
  fun remove(index: Int) {
- originalQueue.removeAt(index)
+ val songId = currentQueue.getOrNull(index) ?: return
  currentQueue.removeAt(index)
+ originalQueue.remove(songId)
  kordx.radio.onUpdate.dispatch(Radio.Events.Queue.Modified)
  if (currentSongIndex == index) {
  kordx.radio.play(Radio.PlayOptions(index = currentSongIndex))
@@ -105,23 +106,43 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  }
 
  fun remove(indices: List<Int>) {
- var deflection = 0
+ if (indices.isEmpty()) {
+ return
+ }
+ val originalCurrentSongIndex = currentSongIndex
  var currentSongRemoved = false
  val sortedIndices = indices.sortedDescending()
  for (i in sortedIndices) {
- val index = i - deflection
- originalQueue.removeAt(index)
- currentQueue.removeAt(index)
- when {
- i < currentSongIndex -> deflection++
- i == currentSongIndex -> currentSongRemoved = true
+ val songId = currentQueue.getOrNull(i) ?: continue
+ currentQueue.removeAt(i)
+ originalQueue.remove(songId)
+ if (i == originalCurrentSongIndex) {
+ currentSongRemoved = true
  }
  }
- currentSongIndex -= deflection
+ val removedBeforeCurrent = sortedIndices.count { it < originalCurrentSongIndex }
+ currentSongIndex = originalCurrentSongIndex - removedBeforeCurrent
  kordx.radio.onUpdate.dispatch(Radio.Events.Queue.Modified)
  if (currentSongRemoved) {
  kordx.radio.play(Radio.PlayOptions(index = currentSongIndex))
  }
+ }
+
+ /**
+ * Removes the song at [index] from both queues and adjusts
+ * [currentSongIndex], but does NOT trigger playback. Used by
+ * [Radio.play] when it discovers a stale song id at the requested
+ * index, so the stale id is dropped before the error-recovery
+ * auto-advance path is invoked.
+ */
+ internal fun removeAtSilently(index: Int) {
+ val songId = currentQueue.getOrNull(index) ?: return
+ currentQueue.removeAt(index)
+ originalQueue.remove(songId)
+ if (index < currentSongIndex) {
+ currentSongIndex--
+ }
+ kordx.radio.onUpdate.dispatch(Radio.Events.Queue.Modified)
  }
 
  override fun setLoopMode(loopMode: LoopMode) {

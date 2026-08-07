@@ -72,6 +72,20 @@ class AudioMetadataParserTest {
         assertMetadata("mp3id24", metadata)
     }
 
+    @Test
+    fun repeatedParseDoesNotCrash() {
+        // Regression guard for JNI local-ref leaks / buffer leaks: parsing the same
+        // file many times in a row must remain stable. The per-invocation local refs
+        // are freed on return, but this still exercises the ReleaseStringUTFChars and
+        // DeleteLocalRef paths added in CR1.
+        val context = InstrumentationRegistry.getInstrumentation().context
+        val filename = "audio.mp3"
+        repeat(100) {
+            val metadata = AudioMetadataParser.parse(filename, openFd(context, filename))
+            Assert.assertNotNull("parse succeeded on iteration $it", metadata)
+        }
+    }
+
     fun assertMetadata(source: String, metadata: AudioMetadata?) {
         Assert.assertNotNull(metadata)
         metadata!!

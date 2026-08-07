@@ -73,7 +73,7 @@ class RadioQueueRemoveTest {
             "app/src/main/java/com/android/rockages/kordx/services/radio/Radio.kt"
         )
         assertTrue(
-            source.contains("queue.removeAtSilently(index)"),
+            source.contains("queue.removeAtSilently(options.index)"),
             "Radio.play must drop the stale id via removeAtSilently before invoking error-recovery"
         )
     }

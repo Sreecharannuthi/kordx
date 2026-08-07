@@ -92,3 +92,9 @@ storage permissions are required beyond what SAF provides.
 - **R8 / dalvik verifier crash on launch** — `android.enableR8.fullMode` is
   intentionally `false` to work around a dalvik split-verifier bug with the
   large generated i18n serialization class. Do not flip it on without testing.
+
+## 6. Releasing
+
+See [`docs/RELEASING.md`](docs/RELEASING.md) for the maintainer
+runbook (tag-push release flow, required GitHub Secrets, the 5
+APKs explained, manual upload fallback).

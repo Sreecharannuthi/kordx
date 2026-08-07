@@ -69,11 +69,14 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  override fun onCreate() {
  super.onCreate()
- Log.i(LOG_TAG, "onCreate: building MediaLibrarySession ( browse tree)")
+ Log.i(LOG_TAG, "onCreate: building MediaLibrarySession (browse tree + playback)")
  val player = createPlayer()
  val callback = createCallback()
 
- // `Builder(this, ...)` is the MediaLibraryServicenested builder; constructor that takes the owning service (instead of a bare; Context). It wires the session into the service's lifecycle so; `onGetSession` will be called by the framework on bind.
+ // `Builder(this, ...)` is the MediaLibraryService-nested builder
+ // constructor that takes the owning service (instead of a bare
+ // Context). It wires the session into the service's lifecycle so
+ // `onGetSession` will be called by the framework on bind.
  mediaSession = MediaLibrarySession.Builder(this, player, callback).build()
  Log.i(
  LOG_TAG,
@@ -81,14 +84,14 @@ class KordXMediaLibraryService : MediaLibraryService() {
  "callback=${callback::class.java.simpleName}, session=$mediaSession)"
  )
 
- // 26g — publish the 3 Now Playing card custom actions; (shuffle / repeat / favorite) via `setMediaButtonPreferences`.; The buttons are rebuilt on every relevant `Player.Listener`; event (see [refreshNowPlayingButtons]); the initial publish; here surfaces the buttons on AAOS / Auto from the moment; the framework binds to the service. State defaults to; "no shuffle / no loop / not favorite" because the 26c26h; parallelrun phase uses [NoOpRadioAdapterTarget] (no live; playback); the legacy `RadioSession` continues to drive; playback during this phase and the 26i cutover will switch; to the real `KordX.radio` state lookup.
- refreshNowPlayingButtons(
- shuffleOn = false,
- loopMode = RadioQueue.LoopMode.None,
- isFavorite = false,
- )
-
- // 26h — publish the 2 rootlevel custom browse actions; (SHUFFLE_ALL + SEARCH) via `setCustomLayout`. AAOS; surfaces these buttons at the root of the browse tree; (vs. the Now Playing card, which uses; `setMediaButtonPreferences`). This is the; 26 deliverable — the 2 root actions are now exposed at; the root of the AAOS browse tree, not on the Now Playing; card. The button list is static (no live state — both; "Shuffle all" and "Search" are always available),; so a single `setCustomLayout` call at session creation; is sufficient (the legacy `MediaSession.setCustomLayout`; accepted a `List<PlaybackStateCompat.CustomAction>` — the; Media3 equivalent accepts a `List<CommandButton>`; the; migration is APIshapeonly, the dispatch back to; `RadioSession.handleCustomAction` is unchanged).
+ // 26h — publish the 2 root-level custom browse actions
+ // (SHUFFLE_ALL + SEARCH) via `setCustomLayout`. AAOS
+ // surfaces these buttons at the root of the browse tree
+ // (vs. the Now Playing card, which uses
+ // `setMediaButtonPreferences`). The Now Playing card actions
+ // are refreshed by [BrowseTreeCallback.publishCurrentPlaybackButtons]
+ // in response to player events and custom commands, so no
+ // hardcoded initial publish is needed.
  mediaSession?.setCustomLayout(
  RadioSessionState.rootCustomButtons(iconResolver = ::resolveDrawable)
  )
@@ -97,7 +100,9 @@ class KordXMediaLibraryService : MediaLibraryService() {
  "onCreate: published 2 root custom actions (SHUFFLE_ALL, SEARCH)"
  )
 
- // 26i — register the 2 debug receivers (DEBUG_ACTION_SCAN +; DEBUG_ACTION_SONG_LIST) so the AVD validation gate can; exercise the 26f placeholders under the new service. The; remaining 8 `DEBUG_ACTION_*` receivers (the 1822 batch); land in 26k.
+ // 26i — register the 2 debug receivers (DEBUG_ACTION_SCAN +
+ // DEBUG_ACTION_SONG_LIST) so the AVD validation gate can
+ // exercise the 26f placeholders under the new service.
  if (BuildConfig.DEBUG) {
  registerDebugReceivers()
  }
@@ -213,23 +218,49 @@ class KordXMediaLibraryService : MediaLibraryService() {
  /**
  * Build the Media3 [Player] that the new [MediaLibrarySession] wraps.
  *
- * 26c / 26d wire the player to a [NoOpRadioAdapterTarget] (a
- * hand-rolled no-op implementation of the 3 [RadioAdapterTarget]
- * sub-interfaces introduced in 26b) because the -era
- * `RadioSession` continues to drive playback via
- * `RadioSession.attachToBrowserService()` during the parallel-run
- * phase. The [RadioForwardingPlayer] is still shape-correct (it
- * satisfies the `Player` contract and reports `STATE_IDLE` + an
- * empty queue because the [NoOpRadioAdapterTarget] has no `Radio`
- * engine behind it). 26i replaces this with the real `KordX.radio`
- * wiring (the same `Radio` instance that `RadioSession` uses).
+ * CR3 wires the player directly to the real `KordX.radio`
+ * instance so that Android Auto transport controls (play,
+ * pause, skip, seek, shuffle, repeat) drive the same playback
+ * engine used by the phone UI. The [RadioForwardingPlayer]
+ * translates Radio events into Media3 [Player] events and
+ * exposes the queue as a Media3 timeline.
+ *
+ * A defensive no-op fallback is kept for the theoretical case
+ * where [KordX.instance] is null at service creation time; in
+ * practice [KordXApplication] creates the graph during
+ * `Application.onCreate`, so this path should never be hit.
  */
- internal fun createPlayer(): Player = RadioForwardingPlayer(
+ internal fun createPlayer(): Player {
+ val app = KordX.instance
+ if (app == null) {
+ Log.w(
+ LOG_TAG,
+ "createPlayer: KordX.instance is null, falling back to no-op player"
+ )
+ return RadioForwardingPlayer(
  radio = NoOpRadioAdapterTarget(),
  songMediaItemResolver = { _ -> null },
  seekBackDurationMs = SEEK_BACK_MS,
  seekForwardDurationMs = SEEK_FORWARD_MS,
  )
+ }
+ return RadioForwardingPlayer(
+ radio = app.radio,
+ songMediaItemResolver = { songId ->
+ app.groove.song.get(songId)?.let { song ->
+ val iconUri = app.groove.song.getArtworkUri(song.id)
+ val albumId = app.groove.album.getIdFromSong(song)
+ Media3ItemFactory.playableSongItem(
+ song = song,
+ iconUri = iconUri,
+ albumId = albumId,
+ )
+ }
+ },
+ seekBackDurationMs = app.settings.seekBackDuration.value?.toLong() ?: SEEK_BACK_MS,
+ seekForwardDurationMs = app.settings.seekForwardDuration.value?.toLong() ?: SEEK_FORWARD_MS,
+ )
+ }
 
  /**
  * Build the [MediaLibrarySession.Callback] with real
@@ -635,21 +666,13 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26i — the `SHUFFLE_ALL` action handler. Mirrors the
- * legacy `RadioSession.handleCustomAction` `SHUFFLE_ALL`
- * branch: set up the shuffled queue directly via the
- * queue's public `originalQueue` / `currentQueue` fields,
- * bypassing `RadioShorty.playQueue` and `RadioQueue.add`
- * (the `Radio.play()` recursion bug documented in the
- * legacy handler — see `RadioSession.handleCustomAction`).
- * The plan: "Set up the queue, with `autostart =
- * false` and let the user start playback via the standard
- * play action. The plan's 'playback begins' is
- * interpreted as 'the queue is set up ready to play' — this
- * is the production music-app pattern (Spotify / Apple
- * Music both set up the queue + start playback on the
- * user's explicit play action, not on the 'shuffle all'
- * button)."
+ * CR3 — the `SHUFFLE_ALL` action handler. Uses the public
+ * [RadioShorty.playQueue] API (with `shuffle = true` and
+ * `autostart = false`) instead of writing directly to the
+ * queue's internal fields. This avoids the `Radio.play()` stale-id
+ * recursion bug and keeps the queue invariants consistent.
+ * Playback starts on the user's explicit play action, which is
+ * the standard music-app pattern for "shuffle all".
  */
  private fun handleShuffleAll() {
  val allSongIds = app.groove.song.all.value
@@ -660,16 +683,14 @@ class KordXMediaLibraryService : MediaLibraryService() {
  )
  return
  }
- val shuffledIndex = kotlin.random.Random.nextInt(allSongIds.size)
- app.radio.queue.reset()
- app.radio.queue.originalQueue.addAll(allSongIds)
- app.radio.queue.currentQueue.addAll(allSongIds)
- app.radio.queue.currentSongIndex = shuffledIndex
- app.radio.queue.setShuffleMode(true)
+ app.radio.shorty.playQueue(
+ songIds = allSongIds,
+ options = Radio.PlayOptions(autostart = false),
+ shuffle = true,
+ )
  com.android.rockages.kordx.core.utils.Logger.warn(
  LOG_TAG,
- "handleShuffleAll: ${allSongIds.size} songs in random order " +
- "(index=$shuffledIndex)"
+ "handleShuffleAll: ${allSongIds.size} songs queued in random order"
  )
  publishCurrentPlaybackButtons()
  }

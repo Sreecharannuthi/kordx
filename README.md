@@ -1,5 +1,13 @@
 # KordX
 
+[![License: AGPL-3.0](https://img.shields.io/github/license/Sreecharannuthi/kordx?color=blue)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/Sreecharannuthi/kordx?include_prereleases&sort=semver)](https://github.com/Sreecharannuthi/kordx/releases/latest)
+[![CI](https://img.shields.io/github/actions/workflow/status/Sreecharannuthi/kordx/ci.yml?branch=main&label=CI)](https://github.com/Sreecharannuthi/kordx/actions/workflows/ci.yml)
+[![Min SDK](https://img.shields.io/badge/min%20SDK-31%20(Android%2012)-3DDC84?logo=android&logoColor=white)]()
+[![Target SDK](https://img.shields.io/badge/target%20SDK-35-3DDC84?logo=android&logoColor=white)]()
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF?logo=kotlin&logoColor=white)]()
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-1.7-4285F4?logo=jetpackcompose&logoColor=white)]()
+
 > An offline-first, open-source Android music player built with Jetpack Compose and Material 3.
 
 KordX is a lightweight, privacy-respecting music player for the music you already
@@ -30,9 +38,9 @@ for playback.
 
 ## Screenshots
 
-> Add real captures from a running build here (e.g. `docs/screenshots/*.png`).
-> Build and run the app (see [BUILDING.md](BUILDING.md)), then drop a few
-> representative shots into this section.
+| Home (For You) | Songs | Albums | Now Playing | Artists |
+|:---:|:---:|:---:|:---:|:---:|
+| ![KordX Home](docs/screenshots/home.png) | ![Songs list](docs/screenshots/songs.png) | ![Albums grid](docs/screenshots/albums.png) | ![Now Playing](docs/screenshots/now-playing.png) | ![Artists](docs/screenshots/artists.png) |
 
 ---
 

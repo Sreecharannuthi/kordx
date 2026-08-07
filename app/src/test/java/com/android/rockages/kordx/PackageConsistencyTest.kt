@@ -1,5 +1,6 @@
 package com.android.rockages.kordx
 
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -19,6 +20,22 @@ class PackageConsistencyTest {
         assertTrue(
             BuildConfig.APPLICATION_ID.endsWith(".debug"),
             "Debug build should have .debug suffix"
+        )
+    }
+
+    @Test
+    fun noStaleSymphonyInApplicationId() {
+        assertFalse(
+            BuildConfig.APPLICATION_ID.contains("symphony", ignoreCase = true),
+            "Application ID must not contain 'symphony'"
+        )
+    }
+
+    @Test
+    fun noStaleRemusicInApplicationId() {
+        assertFalse(
+            BuildConfig.APPLICATION_ID.contains("remusic", ignoreCase = true),
+            "Application ID must not contain 'remusic'"
         )
     }
 

@@ -15,12 +15,8 @@ set up and how changes are reviewed.
    ./gradlew :app:assembleDebug
    ```
 
-3. (Optional) regenerate i18n after editing translation sources:
-
-   ```bash
-   npm install
-   npm run i18n:build
-   ```
+That's it for code changes. No `npm install` is required for a normal build —
+the i18n JSON assets are already committed under `app/src/main/assets/i18n/`.
 
 ## Code style
 
@@ -41,9 +37,23 @@ set up and how changes are reviewed.
 
 Translations live as TOML sources under `i18n/`. They are compiled into the
 JSON assets the app loads at runtime (`app/src/main/assets/i18n/`), which are
-committed to the repository, so a normal build needs no extra step. To update
-translations, edit the TOML sources and regenerate the bundled assets, then
-commit the results. Do not hand-edit the generated JSON.
+**committed to the repository** so a normal build needs no extra step.
+
+The i18n build toolchain (Phrasey + the `.phrasey/` config + the npm
+`i18n:build` script) lives in the dev / test bed
+([`charan1601/remusic`](https://github.com/charan1601/remusic)) and is **not**
+shipped in this public repo. To update a translation:
+
+1. Edit the relevant `i18n/<locale>.toml` file (do **not** hand-edit the
+   generated JSON).
+2. Open a PR against this repo with the TOML change.
+3. After the PR is merged, the maintainer regenerates the JSONs from the dev
+   test bed and cuts a follow-up commit. (The maintainer workflow is
+   documented in `docs/AGENTS.md` §"Git push rule" → "Promotion workflow".)
+
+This keeps the public repo dependency-free for contributors while still
+allowing the maintainer to update translations without round-tripping through
+the dev test bed's CI.
 
 ## Pull requests
 
