@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.KordX"
+        tools:targetApi="tiramisu">
+
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+
+        <meta-data
+            android:name="com.google.android.gms.car.notification.SmallIcon"
+            android:resource="@drawable/ic_launcher_foreground" />
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/Theme.KordX.SplashScreen"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity android:name=".ErrorActivity" />
+
+        <service
+            android:name=".services.radio.RadioNotificationService"
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="true" />
+
+        <!--  — the AndroidX Media3 `MediaLibraryService` is now
+             the active media browser service for AAOS / Auto. The
+             legacy `KordXMediaBrowserService` (the AndroidX
+             `MediaBrowserServiceCompat`-based service used through
+             ) has been deleted. The 26i cutover wires the
+             new service to drive playback via the live
+             `KordX.radio` state and bumps `minSdk` to 31 (the
+             Media3 `MediaLibraryService.setCustomLayout` +
+             `CommandButton` API is API 31+). The  
+             `BROWSER_SERVICE_EXTRAS_KEY_SEARCH_SUPPORTED` is
+             preserved via the `MediaSession.ConnectionResult.AcceptedResultBuilder`
+             in `KordXMediaLibraryService.BrowseTreeCallback.onConnect`
+             (the Media3 equivalent). See the
+             13-sub-plan. -->
+        <service
+            android:name=".services.radio.KordXMediaLibraryService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true"
+            tools:ignore="ExportedService,MissingMediaBrowserServiceIntentFilter">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+            </intent-filter>
+        </service>
+
+        <activity-alias
+            android:name=".MediaSearchActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            tools:ignore="ExportedActivity">
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>

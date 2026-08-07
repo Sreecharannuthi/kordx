@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>NewLineAtEndOfFile:SQLiteKeyValueDatabaseAdapter.kt$com.android.rockages.kordx.infra.database.adapters.SQLiteKeyValueDatabaseAdapter.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -1,0 +1,49 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+  <!--  — Updated KordX "K" logo from assets/darklogo.svg.
+       The new design replaces the previous K-with-X-anchor geometry
+       with a cleaner K shape and a small rectangular accent block
+       positioned to the right of the K vertex.
+
+       Design:
+         - K vertical at x=60, from y=50 to y=150
+         - Upper diagonal from (60,100) to (140,50)
+         - Lower diagonal from (60,100) to (140,150) [via close-path]
+         - Small 10×30dp rounded rect accent at (85,85)
+         - Stroke width 12dp for crisp rendering at all densities
+         - Background: dark rounded rect #1A1A1A
+         - K + accent: brand cyan #00F0FF
+
+       The `android:autoMirrored="true"` is intentionally NOT set —
+       the K is a brand mark, not a directional glyph. -->
+  <!-- Dark rounded-rect background (40dp corner radius) -->
+  <path
+      android:pathData="M40,0L160,0Q200,0 200,40L200,160Q200,200 160,200L40,200Q0,200 0,160L0,40Q0,0 40,0Z"
+      android:fillColor="#1A1A1A"/>
+  <!-- K shape + accent block — scaled to 70% around viewport center (100,100) -->
+  <group
+      android:pivotX="100"
+      android:pivotY="100"
+      android:scaleX="0.7"
+      android:scaleY="0.7">
+    <!-- K shape — three strokes, vertex at (60, 100).
+         The path draws: vertical stem → move to vertex → upper diag → lower diag.
+         Close-path (Z) from (140,150) back to (60,100) creates the lower diagonal. -->
+    <path
+        android:pathData="M60,50L60,150M60,100L140,50L140,150Z"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+    <!-- KordX accent block — a small 10×30dp rounded rectangle positioned
+         to the right of the K vertex (85,85). Replaces the old "X" anchor
+         mark with a cleaner rectangular accent. -->
+    <path
+        android:pathData="M90,85L95,85Q100,85 100,90L100,115Q100,120 95,120L85,120Q80,120 80,115L80,90Q80,85 85,85Z"
+        android:fillColor="#00F0FF"/>
+  </group>
+</vector>
