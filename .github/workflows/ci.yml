@@ -1,6 +1,8 @@
 # KordX CI - validation only. This workflow never publishes releases.
 #
-# Pull requests and pushes to main run builds, JVM tests, and static analysis.
+# Pull requests and pushes to main run debug builds, JVM tests, and static analysis.
+# Signed release APKs are built and published only by the manually triggered
+# .github/workflows/release.yml workflow.
 # Metaphony instrumentation tests are intentionally not run in CI because they
 # require an Android Virtual Device/emulator. They are run manually by the
 # maintainer; see CONTRIBUTING.md "Reporting issues" for details.
@@ -66,9 +68,6 @@ jobs:
 
       - name: Build (debug, all modules)
         run: ./gradlew :app:assembleDebug :core:assembleDebug :infra:assembleDebug :metaphony:assembleDebug --no-daemon --stacktrace
-
-      - name: Build (release, app)
-        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
 
       - name: Compile app instrumentation tests
         run: ./gradlew :app:compileDebugAndroidTestKotlin --no-daemon --stacktrace

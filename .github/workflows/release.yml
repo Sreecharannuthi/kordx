@@ -1,9 +1,9 @@
 # KordX release workflow - explicit release publishing only.
 #
-# This workflow has no push or pull_request trigger. Normal code pushes run
-# .github/workflows/ci.yml and can never publish a release. Start a release
-# manually from the Actions tab after CI has passed for the intended commit.
-# The manual run builds and publishes the GitHub Release directly.
+# This workflow is intentionally independent from CI. It has no push or
+# pull_request trigger, so normal code pushes can never publish a release.
+# Start it manually from the Actions tab after CI has passed for the intended
+# commit. The manual run builds and publishes the signed release APKs.
 
 name: Release
 
@@ -14,6 +14,7 @@ on:
         description: "Type release to build and publish the release"
         required: true
         default: ""
+        type: string
 
 permissions:
   contents: write
