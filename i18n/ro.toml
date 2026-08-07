@@ -1,17 +1,7 @@
 locale = "ro"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Salut!"
 IntroductoryMessage = """
-Mulțumim că faci parte din open-beta-ul aplicației KordX. Dacă întâmpini bug-uri sau vrei să sugerezi îmbunătățiri, te rugăm să deschizi un issue pe Github.
-
-Alătură-te comunității noastre de Discord și Reddit pentru a-ți împărtăși ideile și pentru a fi la curent cu dezvoltarea aplicației.
-
-Aplicația KordX este gratuită, fiind susținută în întregime prin donați făcute prin Github Sponsors, Ko-fi și Patreon.
-
-Din nou, mulțumim pentru că ai încercat KordX!
-"""
 Songs = "Piese"
 Artists = "Artiști"
 Albums = "Albume"
@@ -212,11 +202,16 @@ ArtistTagValueSeparators = "Separatori pentru tag-ul de Artist"
 GenreTagValueSeparators = "Separatori pentru tag-ul de Gen"
 DiscNumber = "Numărul discului"
 Browser = "Browser"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

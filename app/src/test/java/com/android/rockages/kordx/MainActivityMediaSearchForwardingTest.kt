@@ -150,7 +150,7 @@ class MainActivityMediaSearchForwardingTest {
             body.contains("MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH"),
             "forwardMediaSearchIntent must compare against " +
                 "`MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH` " +
-                "(the public SDK constant for the AAOS voice-search action)."
+                "(the public SDK constant for the Auto voice-search action)."
         )
 
         // The no-op path: the action comparison must be followed by
@@ -169,7 +169,7 @@ class MainActivityMediaSearchForwardingTest {
         val source = loadMainActivity()
 
         // The helper must read `MediaStore.EXTRA_MEDIA_FOCUS` (a Bundle
-        // holding the typed-search fields — AAOS's "play the album X"
+        // holding the typed-search fields — Auto's "play the album X"
         // path). We assert the getBundleExtra call is present and is
         // routed to the typed-search composition path.
         val helperStart = source.indexOf("private fun forwardMediaSearchIntent(intent: Intent?)")
@@ -182,7 +182,7 @@ class MainActivityMediaSearchForwardingTest {
         )
 
         // The composed query must include the typed-search fields
-        // AAOS sends. We assert the four main field keys are read
+        // Auto sends. We assert the four main field keys are read
         // (title, album, artist, genre; the playlist key is
         // SoftDeprecated but still functional and is in the source).
         assertTrue(
@@ -212,7 +212,7 @@ class MainActivityMediaSearchForwardingTest {
         val source = loadMainActivity()
 
         // The helper must read `SearchManager.QUERY` (a String) for
-        // raw text searches. This is the AAOS "play X" / "shuffle
+        // raw text searches. This is the Auto "play X" / "shuffle
         // some music" path.
         val helperStart = source.indexOf("private fun forwardMediaSearchIntent(intent: Intent?)")
         assertTrue(helperStart >= 0, "forwardMediaSearchIntent helper not found")
@@ -220,7 +220,7 @@ class MainActivityMediaSearchForwardingTest {
         assertTrue(
             body.contains("getStringExtra(SearchManager.QUERY)"),
             "forwardMediaSearchIntent must read `SearchManager.QUERY` " +
-                "for raw text searches (the AAOS voice-search contract)."
+                "for raw text searches (the Auto voice-search contract)."
         )
     }
 
@@ -309,25 +309,19 @@ class MainActivityMediaSearchForwardingTest {
     }
 
     @Test
-    fun mainActivityManifestAliasIsUnchanged() {
+    fun mainActivityManifestUsesDedicatedMediaSearchActivity() {
 
-        // The manifest's `MediaSearchActivity` activity-alias is the
-        // trigger for the forwarding — verify the alias still targets
-        // `MainActivity` and still declares the
-        // `android.media.action.MEDIA_PLAY_FROM_SEARCH` intent filter.
+        // Voice playback is handled by a dedicated activity so Android Auto
+        // does not need to launch the Compose phone UI. Verify the dedicated
+        // component and its standard media-search intent filter.
         val manifest = loadSource("app/src/main/AndroidManifest.xml")
         assertTrue(
-            manifest.contains("android:name=\".MediaSearchActivity\""),
-            "AndroidManifest.xml must still declare the `.MediaSearchActivity` activity-alias."
-        )
-        assertTrue(
-            manifest.contains("android:targetActivity=\".MainActivity\""),
-            "AndroidManifest.xml's MediaSearchActivity alias must still target `.MainActivity`."
+            manifest.contains("android:name=\".services.radio.MediaSearchActivity\""),
+            "AndroidManifest.xml must declare the dedicated MediaSearchActivity."
         )
         assertTrue(
             manifest.contains("android.media.action.MEDIA_PLAY_FROM_SEARCH"),
-            "AndroidManifest.xml's MediaSearchActivity alias must still " +
-                "declare the `android.media.action.MEDIA_PLAY_FROM_SEARCH` intent filter."
+            "MediaSearchActivity must declare the MEDIA_PLAY_FROM_SEARCH intent filter."
         )
     }
 

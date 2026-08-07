@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.lang.reflect.Modifier
+import java.io.File
 
 class KordXMediaLibraryServiceTest {
 
@@ -262,6 +263,17 @@ class KordXMediaLibraryServiceTest {
  android.os.Bundle::class.java,
  )
  else -> error("Unknown callback method: $methodName")
+ }
+
+ @Test
+ fun sessionBuilder_enablesPeriodicPositionUpdates() {
+ val source = File(
+ "src/main/java/com/android/rockages/kordx/services/radio/KordXMediaLibraryService.kt",
+ ).readText()
+ assertTrue(
+ source.contains(".setPeriodicPositionUpdateEnabled(true)"),
+ "Media3 must periodically publish position snapshots to platform media controls",
+ )
  }
 
  /**

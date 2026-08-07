@@ -283,6 +283,7 @@ class Settings(private val kordx: KordX) {
  val fadePlayback = BooleanEntry("fade_playback", false)
  val requireAudioFocus = BooleanEntry("require_audio_focus", true)
  val ignoreAudioFocusLoss = BooleanEntry("ignore_audio_focus_loss", false)
+ val pauseOnAudioFocusDuck = BooleanEntry("pause_on_audio_focus_duck", true)
  val playOnHeadphonesConnect = BooleanEntry("play_on_headphones_connect", false)
  val pauseOnHeadphonesDisconnect = BooleanEntry("pause_on_headphones_disconnect", true)
  val primaryColor = NullableStringEntry("primary_color")
@@ -331,7 +332,24 @@ class Settings(private val kordx: KordX) {
  enumEntries<NowPlayingLyricsLayout>(),
  NowPlayingLyricsLayout.ReplaceArtwork,
  )
- val artistTagSeparators = StringSetEntry("artist_tag_separators", setOf(";", "/", ",", "+"))
+ val artistTagSeparators = StringSetEntry(
+ "artist_tag_separators",
+ setOf(";", "/", ",", "+", "&", "feat.", "featuring", "ft.", " x ", " X "),
+ )
+ /**
+ * Persisted artist merge map. Each entry is `"source|target"` where
+ * both strings are raw artist display names. When a source artist is
+ * encountered during scanning or lookup, it is treated as the target
+ * artist (songs/albums are aggregated under the target's profile).
+ */
+ val artistMergeMap = StringSetEntry("artist_merge_map", emptySet())
+
+ /**
+ * Persisted album-artist merge map. Same format as [artistMergeMap]
+ * but scoped to album-artist profiles so "Album Artist" / "AlbumArtist"
+ * variants can be merged independently of artist profiles.
+ */
+ val albumArtistMergeMap = StringSetEntry("album_artist_merge_map", emptySet())
  val genreTagSeparators = StringSetEntry("genre_tag_separators", setOf(";", "/", ",", "+"))
  val miniPlayerTextMarquee = BooleanEntry("mini_player_text_marquee", true)
  val mediaFolders = object : Entry<Set<Uri>>("media_folders") {

@@ -274,6 +274,12 @@ open class _Translation(private val container: _Container) {
         val NoMusicYet: String get() = values["NoMusicYet"] ?: ""
         val AddMediaFolders: String get() = values["AddMediaFolders"] ?: ""
         val Scanning: String get() = values["Scanning"] ?: ""
+        val PauseOnAudioFocusDuck: String get() = values["PauseOnAudioFocusDuck"] ?: ""
+        val MergeWith: String get() = values["MergeWith"] ?: ""
+        val MergeArtists: String get() = values["MergeArtists"] ?: ""
+        val MergeArtistsConfirmation: String get() = values["MergeArtistsConfirmation"] ?: ""
+        val MergedArtists: String get() = values["MergedArtists"] ?: ""
+        val SuggestedMerges: String get() = values["SuggestedMerges"] ?: ""
     }
 
     val LocaleDisplayName: String get() = container.locale.display
@@ -511,31 +517,37 @@ open class _Translation(private val container: _Container) {
     val NoMusicYet: String get() = container.keys.NoMusicYet
     val AddMediaFolders: String get() = container.keys.AddMediaFolders
     val Scanning: String get() = container.keys.Scanning
+    val PauseOnAudioFocusDuck: String get() = container.keys.PauseOnAudioFocusDuck
+    val MergeWith: String get() = container.keys.MergeWith
+    val MergeArtists: String get() = container.keys.MergeArtists
+    val MergeArtistsConfirmation: String get() = container.keys.MergeArtistsConfirmation
+    val MergedArtists: String get() = container.keys.MergedArtists
+    val SuggestedMerges: String get() = container.keys.SuggestedMerges
 
-    fun PlayingXofY(x: String, y: String): String = container.keys.PlayingXofY.format(x, y)
-    fun UnknownArtistX(x: String): String = container.keys.UnknownArtistX.format(x)
-    fun XSongs(x: String): String = container.keys.XSongs.format(x)
-    fun XArtists(x: String): String = container.keys.XArtists.format(x)
-    fun XAlbums(x: String): String = container.keys.XAlbums.format(x)
-    fun MadeByX(x: String): String = container.keys.MadeByX.format(x)
-    fun NewVersionAvailableX(x: String): String = container.keys.NewVersionAvailableX.format(x)
-    fun XKbps(x: String): String = container.keys.XKbps.format(x)
-    fun XSecs(x: String): String = container.keys.XSecs.format(x)
-    fun UnknownGenreX(x: String): String = container.keys.UnknownGenreX.format(x)
-    fun XGenres(x: String): String = container.keys.XGenres.format(x)
-    fun XFoldersYFiles(x: String, y: String): String = container.keys.XFoldersYFiles.format(x, y)
-    fun XItems(x: String): String = container.keys.XItems.format(x)
-    fun XPlaylists(x: String): String = container.keys.XPlaylists.format(x)
-    fun UnknownPlaylistX(x: String): String = container.keys.UnknownPlaylistX.format(x)
-    fun XFolders(x: String): String = container.keys.XFolders.format(x)
-    fun XBit(x: String): String = container.keys.XBit.format(x)
-    fun XKHz(x: String): String = container.keys.XKHz.format(x)
-    fun ShareFailedX(x: String): String = container.keys.ShareFailedX.format(x)
-    fun ExportFailedX(x: String): String = container.keys.ExportFailedX.format(x)
-    fun ExportedX(x: String): String = container.keys.ExportedX.format(x)
-    fun LaunchingEqualizerFailedX(x: String): String = container.keys.LaunchingEqualizerFailedX.format(x)
-    fun UnknownAlbumX(x: String): String = container.keys.UnknownAlbumX.format(x)
-    fun CopiedXToClipboard(x: String): String = container.keys.CopiedXToClipboard.format(x)
-    fun XChannels(x: String): String = container.keys.XChannels.format(x)
+    fun PlayingXofY(x: String, y: String): String = container.keys.PlayingXofY.substitutePlaceholders(x, y)
+    fun UnknownArtistX(x: String): String = container.keys.UnknownArtistX.substitutePlaceholders(x)
+    fun XSongs(x: String): String = container.keys.XSongs.substitutePlaceholders(x)
+    fun XArtists(x: String): String = container.keys.XArtists.substitutePlaceholders(x)
+    fun XAlbums(x: String): String = container.keys.XAlbums.substitutePlaceholders(x)
+    fun MadeByX(x: String): String = container.keys.MadeByX.substitutePlaceholders(x)
+    fun NewVersionAvailableX(x: String): String = container.keys.NewVersionAvailableX.substitutePlaceholders(x)
+    fun XKbps(x: String): String = container.keys.XKbps.substitutePlaceholders(x)
+    fun XSecs(x: String): String = container.keys.XSecs.substitutePlaceholders(x)
+    fun UnknownGenreX(x: String): String = container.keys.UnknownGenreX.substitutePlaceholders(x)
+    fun XGenres(x: String): String = container.keys.XGenres.substitutePlaceholders(x)
+    fun XFoldersYFiles(x: String, y: String): String = container.keys.XFoldersYFiles.substitutePlaceholders(x, y)
+    fun XItems(x: String): String = container.keys.XItems.substitutePlaceholders(x)
+    fun XPlaylists(x: String): String = container.keys.XPlaylists.substitutePlaceholders(x)
+    fun UnknownPlaylistX(x: String): String = container.keys.UnknownPlaylistX.substitutePlaceholders(x)
+    fun XFolders(x: String): String = container.keys.XFolders.substitutePlaceholders(x)
+    fun XBit(x: String): String = container.keys.XBit.substitutePlaceholders(x)
+    fun XKHz(x: String): String = container.keys.XKHz.substitutePlaceholders(x)
+    fun ShareFailedX(x: String): String = container.keys.ShareFailedX.substitutePlaceholders(x)
+    fun ExportFailedX(x: String): String = container.keys.ExportFailedX.substitutePlaceholders(x)
+    fun ExportedX(x: String): String = container.keys.ExportedX.substitutePlaceholders(x)
+    fun LaunchingEqualizerFailedX(x: String): String = container.keys.LaunchingEqualizerFailedX.substitutePlaceholders(x)
+    fun UnknownAlbumX(x: String): String = container.keys.UnknownAlbumX.substitutePlaceholders(x)
+    fun CopiedXToClipboard(x: String): String = container.keys.CopiedXToClipboard.substitutePlaceholders(x)
+    fun XChannels(x: String): String = container.keys.XChannels.substitutePlaceholders(x)
 }
     

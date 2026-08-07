@@ -1,17 +1,7 @@
 locale = "fi"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Hei siellä!"
 IntroductoryMessage = """
-Kiitos osallistumisestasi KordXn avoimeen betaan. Jos kohtaat virheitä tai haluat antaa parannusehdotuksia, avaa kysymys GitHub-repositoriossamme.
-
-Liity Discord- ja Reddit-yhteisöihimme antaaksesi palautetta ja pysyäksesi ajan tasalla kehityksestä.
-
-KordX on täysin ilmainen sovellus, jota ylläpidetään vapaaehtoisvoimin. Osallistuminen on erittäin tervetullutta.
-
-Kiitos, kun käytät KordXä!
-"""
 Songs = "Kappaleet"
 Artists = "Artistit"
 Albums = "Albumit"
@@ -251,11 +241,16 @@ Loseless = "Häviötön"
 UseMetaphonyMetadataDecoder = "Käytä Metaphony-metatietodekooderia"
 PlayStore = "Play-Kauppa"
 GridSize = "Ruudukon koko"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

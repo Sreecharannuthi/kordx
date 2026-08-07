@@ -50,8 +50,23 @@ class RadioFocus(val kordx: KordX) {
  }
 
  AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
- restoreVolumeOnFocusGain = kordx.radio.isPlaying
- if (kordx.radio.isPlaying) {
+ val wasPlaying = kordx.radio.isPlaying
+ if (!wasPlaying) {
+ return@setOnAudioFocusChangeListener
+ }
+ // Short-form video apps (Reels / Shorts / TikTok) request
+ // transient-may-duck focus. Most users prefer a full pause
+ // over ducking to 20% volume; the legacy duck path remains
+ // available via the pauseOnAudioFocusDuck setting.
+ val pauseOnDuck = !kordx.settings.ignoreAudioFocusLoss.value &&
+ kordx.settings.pauseOnAudioFocusDuck.value
+ if (pauseOnDuck) {
+ kordx.radio.pause()
+ // Radio.pause() cancels pending focus resume; re-arm so
+ // playback resumes when the short-form video ends.
+ restoreVolumeOnFocusGain = true
+ } else {
+ restoreVolumeOnFocusGain = true
  kordx.radio.duck()
  }
  }

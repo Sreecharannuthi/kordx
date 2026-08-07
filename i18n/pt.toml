@@ -1,18 +1,7 @@
-# "pt" is the default for "pt-BR" in CLDR standards
 locale = "pt"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Olá!"
 IntroductoryMessage = """
-Obrigado por fazer parte do KordX open-beta. Se encontrar algum bug ou quiser sugerir melhorias, por favor, abra um problema em nosso repositório no Github.
-
-Junte-se à nossa comunidade no Discord e Reddit para compartilhar seus comentários e ficar atualizado com o desenvolvimento.
-
-O KordX é totalmente gratuito e é apoiado exclusivamente por contribuições de pessoas generosas. Qualquer contribuição será muito apreciada.
-
-Mais uma vez, obrigado por experimentar o KordX!
-"""
 Songs = "Músicas"
 Artists = "Artistas"
 Albums = "Álbuns"
@@ -230,11 +219,16 @@ Purple = "Roxo"
 Fuchsia = "Fuchsia"
 Pink = "Rosa"
 Rose = "Rosa Claro"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

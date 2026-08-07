@@ -1,17 +1,7 @@
 locale = "hi"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "नमस्ते!"
 IntroductoryMessage = """
-KordX ओपन-बीटा का हिस्सा बनने के लिए धन्यवाद। यदि आपको कोई बग मिलता है या सुधार सुझाना चाहते हैं, तो कृपया हमारे Github रिपॉजिटरी में एक इश्यू खोलें।
-
-फीडबैक साझा करने और विकास से अपडेट रहने के लिए हमारे Discord और Reddit समुदाय से जुड़ें।
-
-KordX पूरी तरह से मुफ्त है और पूरी तरह से दयालु व्यक्तियों द्वारा किए गए योगदानों द्वारा समर्थित है। किसी भी योगदान की अत्यधिक सराहना की जाएगी।
-
-एक बार फिर, KordX आज़माने के लिए धन्यवाद!
-"""
 Songs = "गाने"
 Artists = "कलाकार"
 Albums = "एल्बम"
@@ -266,3 +256,10 @@ NothingPlayedYetSubtitle = "यहाँ देखने के लिए KordX 
 NoMusicYet = "अभी तक कोई संगीत नहीं"
 AddMediaFolders = "KordX ऐप सेटिंग्स में मीडिया फ़ोल्डर जोड़ें"
 Scanning = "स्कैन हो रहा है…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

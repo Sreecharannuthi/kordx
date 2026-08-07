@@ -2,6 +2,8 @@ package com.android.rockages.kordx.ui.view
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Merge
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,12 +28,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,7 +49,7 @@ import coil.compose.AsyncImage
 import com.android.rockages.kordx.core.groove.Artist
 import com.android.rockages.kordx.services.groove.*
 import com.android.rockages.kordx.ui.components.AnimatedNowPlayingBottomBar
-import com.android.rockages.kordx.ui.components.IconButtonPlaceholder
+import com.android.rockages.kordx.ui.components.ArtistMergeDialog
 import com.android.rockages.kordx.ui.components.IconTextBody
 import com.android.rockages.kordx.ui.components.SongList
 import com.android.rockages.kordx.ui.components.TopAppBarMinimalTitle
@@ -63,6 +72,13 @@ fun ArtistView(context: ViewContext, route: ArtistViewRoute) {
  }
  val isViable by remember(allArtistNames) {
  derivedStateOf { allArtistNames.contains(route.artistName) }
+ }
+ var showMergeDialog by remember { mutableStateOf(false) }
+ var menuExpanded by remember { mutableStateOf(false) }
+ val mergedSources by remember(route.artistName) {
+ derivedStateOf {
+ context.kordx.groove.artist.getMergedSources(route.artistName)
+ }
  }
 
  Scaffold(
@@ -89,7 +105,24 @@ fun ArtistView(context: ViewContext, route: ArtistViewRoute) {
  containerColor = Color.Transparent
  ),
  actions = {
- IconButtonPlaceholder()
+ IconButton(onClick = { menuExpanded = true }) {
+ Icon(Icons.Filled.MoreVert, null)
+ }
+ DropdownMenu(
+ expanded = menuExpanded,
+ onDismissRequest = { menuExpanded = false },
+ ) {
+ DropdownMenuItem(
+ text = { Text(context.kordx.t.MergeWith) },
+ leadingIcon = {
+ Icon(Icons.Filled.Merge, null)
+ },
+ onClick = {
+ menuExpanded = false
+ showMergeDialog = true
+ },
+ )
+ }
  },
  )
  },
@@ -105,7 +138,9 @@ fun ArtistView(context: ViewContext, route: ArtistViewRoute) {
  songIds = songIds,
  leadingContent = {
  item {
- ArtistCompactHeader(context, artist!!)
+ ArtistCompactHeader(context, artist!!, mergedSources) {
+ context.kordx.groove.artist.unmerge(it)
+ }
  HorizontalDivider()
  Spacer(modifier = Modifier.height(4.dp))
  }
@@ -118,20 +153,34 @@ fun ArtistView(context: ViewContext, route: ArtistViewRoute) {
  AnimatedNowPlayingBottomBar(context)
  }
  )
+
+ if (showMergeDialog) {
+ ArtistMergeDialog(
+ context = context,
+ sourceName = route.artistName,
+ onDismissRequest = { showMergeDialog = false },
+ )
+ }
 }
 
 /**
  * Compact artist header — small circular artwork + name + stats in a single row.
  * Replaces the full-width [GenericGrooveBanner] to keep the focus on the song list.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ArtistCompactHeader(context: ViewContext, artist: Artist) {
- Row(
- verticalAlignment = Alignment.CenterVertically,
+private fun ArtistCompactHeader(
+ context: ViewContext,
+ artist: Artist,
+ mergedSources: List<String> = emptyList(),
+ onUnmerge: ((String) -> Unit)? = null,
+) {
+ Column(
  modifier = Modifier
  .fillMaxWidth()
  .padding(horizontal = 16.dp, vertical = 12.dp),
  ) {
+ Row(verticalAlignment = Alignment.CenterVertically) {
  AsyncImage(
  artist.createArtworkImageRequest(context.kordx).build(),
  null,
@@ -163,6 +212,25 @@ private fun ArtistCompactHeader(context: ViewContext, artist: Artist) {
  maxLines = 1,
  overflow = TextOverflow.Ellipsis,
  )
+ }
+ }
+ }
+ if (mergedSources.isNotEmpty()) {
+ Spacer(modifier = Modifier.height(8.dp))
+ Text(
+ context.kordx.t.MergedArtists,
+ style = MaterialTheme.typography.labelMedium,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
+ )
+ FlowRow {
+ mergedSources.forEach { source ->
+ val chipText = "${source} ×"
+ TextButton(
+ onClick = { onUnmerge?.invoke(source) },
+ ) {
+ Text(chipText)
+ }
+ }
  }
  }
  }

@@ -40,6 +40,13 @@ android {
     buildFeatures {
         buildConfig = true
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -51,4 +58,6 @@ dependencies {
     implementation(libs.room.ktx)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.vintage)
+    testImplementation(libs.robolectric)
 }

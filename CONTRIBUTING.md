@@ -40,16 +40,15 @@ JSON assets the app loads at runtime (`app/src/main/assets/i18n/`), which are
 **committed to the repository** so a normal build needs no extra step.
 
 The i18n build toolchain (Phrasey + the `.phrasey/` config + the npm
-`i18n:build` script) lives in the dev / test bed
-([`charan1601/remusic`](https://github.com/charan1601/remusic)) and is **not**
-shipped in this public repo. To update a translation:
+`i18n:build` script) lives in the maintainer's private development test bed
+and is **not** shipped in this public repo. To update a translation:
 
 1. Edit the relevant `i18n/<locale>.toml` file (do **not** hand-edit the
    generated JSON).
 2. Open a PR against this repo with the TOML change.
 3. After the PR is merged, the maintainer regenerates the JSONs from the dev
-   test bed and cuts a follow-up commit. (The maintainer workflow is
-   documented in `specs/AGENTS.md` §"Git push rule" → "Promotion workflow".)
+   test bed and cuts a follow-up commit using the maintainer's internal
+   promotion workflow.
 
 This keeps the public repo dependency-free for contributors while still
 allowing the maintainer to update translations without round-tripping through

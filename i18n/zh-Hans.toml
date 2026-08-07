@@ -1,18 +1,7 @@
-# not sure if this is correct
 locale = "zh-Hans"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "您好！"
 IntroductoryMessage = """
-感谢您试用KordX公开测试版。如果您遇到了任何问题，或想提出任何建议，请您在我们的Github仓库中创建新的Issue。
-
-您也可以加入我们的Discord或Reddit社区以分享您的使用体验并获得开发的最新进度。
-
-KordX由来自Github Sponsors，Ko-fi和Patreon的捐赠支持开发。
-
-再一次感谢您试用KordX！
-"""
 Songs = "歌曲"
 Artists = "艺术家"
 Albums = "专辑"
@@ -182,11 +171,16 @@ XBit = "{x}-bit"
 XKHz = "{x} kHz"
 ShareSong = "分享歌曲"
 ShareFailedX = "分享失败 （错误代码： {x}）"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

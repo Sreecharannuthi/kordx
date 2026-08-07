@@ -38,6 +38,34 @@ class Media3ItemFactoryTest {
  }
 
  @Test
+ fun playable_setsPositiveDurationForSystemProgressRange() {
+ val item = Media3ItemFactory.playable(
+ id = "song:1",
+ title = "Song A",
+ durationMs = 240_000L,
+ )
+
+ assertEquals(240_000L, item.mediaMetadata.durationMs)
+ }
+
+ @Test
+ fun playable_omitsNonPositiveDuration() {
+ val zeroDuration = Media3ItemFactory.playable(
+ id = "song:zero",
+ title = "Song Zero",
+ durationMs = 0L,
+ )
+ val negativeDuration = Media3ItemFactory.playable(
+ id = "song:negative",
+ title = "Song Negative",
+ durationMs = -1L,
+ )
+
+ assertNull(zeroDuration.mediaMetadata.durationMs)
+ assertNull(negativeDuration.mediaMetadata.durationMs)
+ }
+
+ @Test
  fun nonPlayable_setsBothBrowsableAndPlayableFalse() {
  val item = Media3ItemFactory.nonPlayable(id = "placeholder:scanning", title = "Scanning…")
  val md = item.mediaMetadata

@@ -1,6 +1,7 @@
 package com.android.rockages.kordx.services.radio
 
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
+import com.android.rockages.kordx.core.utils.Eventer
 
 /**
  * Narrow adapter surface for [Radio]. Lets the [RadioForwardingPlayer] be
@@ -19,6 +20,7 @@ interface RadioAdapterTarget {
  val currentSpeed: Float
  val currentPitch: Float
  val audioSessionId: Int?
+ val onPlaybackPositionUpdate: Eventer<RadioPlayer.PlaybackPosition>
  val queue: RadioQueueAdapterTarget
  val shorty: RadioShortyAdapterTarget
 

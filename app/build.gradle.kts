@@ -17,9 +17,10 @@ android {
         applicationId = "com.android.rockages.kordx"
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        versionCode = 17
-        versionName = "1.6.6"
+        versionCode = 26
+        versionName = "1.7.6"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -163,5 +164,11 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.vintage)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
     androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.test.core)
 }

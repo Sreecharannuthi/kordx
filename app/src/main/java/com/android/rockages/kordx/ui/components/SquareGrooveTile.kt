@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -86,17 +85,7 @@ fun SquareGrooveTile(
  .align(Alignment.BottomStart)
  .padding(2.dp)
  ) {
- IconButton(
- modifier = Modifier.size(32.dp),
- onClick = onPlay
- ) {
- Icon(
- Icons.Filled.PlayArrow,
- null,
- modifier = Modifier.size(16.dp),
- tint = Color.White,
- )
- }
+ PlayButtonOverlay(onClick = onPlay)
  }
  }
  Spacer(modifier = Modifier.height(8.dp))

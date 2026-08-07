@@ -17,7 +17,7 @@ class KordXApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // Register the crash handler first — before the graph build — so
-        // Application-, service-, and Auto cold-start crashes are covered
+        // Application-, service-, and Android Auto cold-start crashes are covered
         // (previously registered in MainActivity.onCreate, too late for
         // anything that crashes without a UI launch). Chains to the
         // previously installed handler when the error screen can't start.

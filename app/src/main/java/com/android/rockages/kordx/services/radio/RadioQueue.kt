@@ -91,10 +91,14 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  ) = add(listOf(songId), index, options)
 
  private fun afterAdd(options: Radio.PlayOptions) {
+ // Notify queue observers before staging a new player. If this event is
+ // dispatched after radio.play(), syncPlayerPlaylist() can run while the
+ // asynchronous ExoPlayer prepare is still at position 0 and overwrite a
+ // restored startPosition with zero.
+ kordx.radio.onUpdate.dispatch(Radio.Events.Queue.Modified)
  if (!kordx.radio.hasPlayer) {
  kordx.radio.play(options)
  }
- kordx.radio.onUpdate.dispatch(Radio.Events.Queue.Modified)
  }
 
  fun remove(index: Int) {

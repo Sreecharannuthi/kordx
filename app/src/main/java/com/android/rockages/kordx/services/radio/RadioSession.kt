@@ -15,7 +15,7 @@ import com.android.rockages.kordx.services.groove.getSongIds
 import com.android.rockages.kordx.services.groove.getSortedSongIds
 
 /**
- * Legacy-free dispatcher for Android Auto / AAOS voice-search and debug-only
+ * Legacy-free dispatcher for Android Auto / Auto voice-search and debug-only
  * broadcast commands. The Media3 session lives in [KordXMediaLibraryService];
  * this class only keeps the handler methods that are shared between the
  * `MEDIA_PLAY_FROM_SEARCH` activity-alias path and the AVD validation adb
@@ -306,15 +306,15 @@ class RadioSession(val kordx: KordX) {
             }
             RadioSessionState.ACTION_SEARCH -> {
 
-                // The AAOS client handles the actual voice / text input; we just log the
+                // The Auto client handles the actual voice / text input; we just log the
                 // receipt so the AVD validation gate confirms the action was routed. The
                 // plan: "opens the search bar (delegates to the same code path as
-                // `onSearch`)" — the AAOS search dialog is opened by the framework once
+                // `onSearch`)" — the Auto search dialog is opened by the framework once
                 // the action is dispatched; the KordX side doesn't need to do anything
                 // beyond logging.
                 Logger.warn(
                     "RadioSession",
-                    "search action received: opening AAOS search bar",
+                    "search action received: opening Auto search bar",
                 )
             }
         }

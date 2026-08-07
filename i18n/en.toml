@@ -1,17 +1,7 @@
 locale = "en"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Hello there!"
 IntroductoryMessage = """
-Thank you for being a part of KordX open-beta. If you encounter any bugs or want to suggest improvements, kindly open an issue in our Github Repository.
-
-Join our Discord and Reddit community to share you feedback and to stay up-to-date with the development.
-
-KordX is totally free-to-use and entirely supported by contributions made by kindhearted individuals. Any contribution will be highly appreciated.
-
-Once again, thank you for trying out KordX!
-"""
 Songs = "Songs"
 Artists = "Artists"
 Albums = "Albums"
@@ -254,9 +244,6 @@ PlayStore = "Play Store"
 GridColumns = "Grid columns"
 CaseSensitiveSorting = "Case sensitive sorting"
 KeepScreenAwakeOnLyrics = "Keep screen awake on lyrics content"
-# IconButton-only controls. Each is a short noun (not a verb) so
-# TalkBack reads it as the button's purpose rather than its action
-# (the "double-tap to activate" hint is appended by the framework).
 Repeat = "Repeat"
 Shuffle = "Shuffle"
 More = "More"
@@ -268,3 +255,10 @@ NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

@@ -10,7 +10,7 @@ import java.io.File
  *
  * These tests pin the safety-critical implementation choices in source
  * text because the full Android Auto / Media3 integration requires a
- * real Android runtime (AAOS/DHU). The structural assertions here are
+ * real Android runtime (Auto/DHU). The structural assertions here are
  * the cheapest way to ensure the wiring does not regress.
  *
  * Note: the spec-dependent overview assertion was removed because the

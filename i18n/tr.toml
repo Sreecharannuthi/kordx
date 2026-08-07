@@ -1,13 +1,7 @@
 locale = "tr"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Merhaba!"
 IntroductoryMessage = """
-KordX'yi seçtiğiniz için teşekkürler! Herhangi bir teknik sorunla karşılaşırsanız, Github Repo'muza bildirebilirsiniz.
-Diğer müzik severlerle bağlantı kurmak, destek almak ve en son güncellemelerden haberdar olmak için Discord ve Reddit topluluğumuza katılın. Cömertliğiniz, KordX'nin gelişiminin devam etmesine yardımcı oluyor, bu nedenle lütfen Github Sponsors üzerinden bağış yaparak bizi desteklemeyi düşünün.
-Son olarak, Müziğin keyfini Çıkarın!
-"""
 Songs = "Müzikler"
 Artists = "Sanatçılar"
 Albums = "Albümler"
@@ -203,11 +197,16 @@ ArtistTagValueSeparators = "Artist tag value separators"
 GenreTagValueSeparators = "Genre tag value separators"
 DiscNumber = "Disk numarası"
 Browser = "Browser"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

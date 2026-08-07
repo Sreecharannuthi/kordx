@@ -75,23 +75,23 @@ class MainActivity : ComponentActivity() {
     /**
      * — forward a `MEDIA_PLAY_FROM_SEARCH` intent's extras
      * to the [com.android.rockages.kordx.services.radio.RadioSession]
-     * so the AAOS voice-search button actually plays the requested
+     * so the Android Auto voice-search button actually plays the requested
      * song. The `MediaSearchActivity` activity-alias targets this
      * activity, so without this forwarding the framework delivers
      * the intent, the activity opens the Compose UI, and the query
      * is dropped on the floor.
      *
-     * The AAOS voice-search contract (per the `MediaStore` docs at
+     * The Android Auto voice-search contract (per the `MediaStore` docs at
      * <https://developer.android.com/reference/android/provider/MediaStore#INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH>):
      * - `intent.action == MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH`
      * (`"android.media.action.MEDIA_PLAY_FROM_SEARCH"`).
      * - `SearchManager.QUERY` extra holds the raw search text
-     * (the AAOS "play X" or "shuffle some music" cases).
+     * (the Auto "play X" or "shuffle some music" cases).
      * - `MediaStore.EXTRA_MEDIA_FOCUS` extra (a `Bundle`) holds
      * the typed-search fields (e.g. `artist:Beatles`,
      * `album:Help!`) with keys `EXTRA_MEDIA_TITLE`,
      * `EXTRA_MEDIA_ALBUM`, `EXTRA_MEDIA_ARTIST`,
-     * `EXTRA_MEDIA_GENRE`, `EXTRA_MEDIA_PLAYLIST`. The AAOS
+     * `EXTRA_MEDIA_GENRE`, `EXTRA_MEDIA_PLAYLIST`. The Android Auto
      * voice-search action is **one-of** QUERY / FOCUS / neither;
      * the framework contract is "deliver at most one of the
      * two".
@@ -101,11 +101,11 @@ class MainActivity : ComponentActivity() {
      * <artist> <genre> <playlist>"` query from the populated
      * fields (skip blanks so the fuzzy search isn't penalized
      * for empty fields) and forward via `handlePlayFromSearch`.
-     * This is the AAOS typed-search path (the user said
-     * "play the album X" and AAOS resolved it to `album:X`).
+     * This is the Android Auto typed-search path (the user said
+     * "play the album X" and Android Auto resolved it to `album:X`).
      * - QUERY present → forward as-is. The fuzzy search inside
      * `RadioSession.handlePlayFromSearch` handles the rest.
-     * - Neither present (the AAOS "play some music" / "shuffle
+     * - Neither present (the Android Auto "play some music" / "shuffle
      * all" case) → forward `null` (or empty string) which
      * `handlePlayFromSearch` treats as "shuffle all" per the
      * contract.
@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // Typed-search path: a Bundle with the artist / album /
-        // title / genre / playlist fields AAOS resolved from a
+        // title / genre / playlist fields Android Auto resolved from a
         // "play the album X" voice command. Compose a single
         // search query from the populated fields; the fuzzy
         // search in `KordXSearch` ranks by combined text.

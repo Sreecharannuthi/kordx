@@ -18,7 +18,7 @@ import java.time.Instant
 import java.util.Date
 import java.util.Timer
 
-@Suppress("UnsafeOptInUsageError")
+@Suppress("UnsafeOptInUsageError", "TooManyFunctions")
 class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
     sealed class Events {
         sealed class Player : Events() {
@@ -91,7 +91,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
     override val currentSpeed get() = player?.speed ?: RadioPlayer.DEFAULT_SPEED
     override val currentPitch get() = player?.pitch ?: RadioPlayer.DEFAULT_PITCH
     override val audioSessionId get() = player?.audioSessionId
-    val onPlaybackPositionUpdate = Eventer<RadioPlayer.PlaybackPosition>()
+    override val onPlaybackPositionUpdate = Eventer<RadioPlayer.PlaybackPosition>()
 
     var persistedSpeed = RadioPlayer.DEFAULT_SPEED
     var persistedPitch = RadioPlayer.DEFAULT_PITCH
@@ -411,13 +411,24 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
         clearSleepTimer()
         persistedSpeed = RadioPlayer.DEFAULT_SPEED
         persistedPitch = RadioPlayer.DEFAULT_PITCH
-        // Abandon audio focus when playback fully stops.
-        // pause() already abandons; stop() must too so the
-        // system and other apps can reclaim the audio output.
+        // A full stop is intentional for explicit stop/task removal. The
+        // persisted queue is saved by the task-removal caller before reset.
+        // Abandon audio focus so other apps can reclaim audio output.
         focus.cancelPendingFocusResume()
         releaseWakeLock()
         focus.abandonFocus()
         if (ended) onUpdate.dispatch(Events.Player.Ended)
+    }
+
+    /**
+     * Called when the user removes the app task from Recents. The service stops
+     * playback, but the process may survive, so allow the next Activity launch
+     * to run the auto-resume flow again.
+     */
+    fun onTaskRemoved() {
+        saveCurrentQueue()
+        stop(ended = true)
+        hasAutoResumed = false
     }
 
     /**
@@ -651,7 +662,7 @@ class Radio(private val kordx: KordX) : KordX.Hooks, RadioAdapterTarget {
      * begins. The Media3 service owns the single media notification (id 1001) and the
      * foreground-service lifecycle; this call just ensures the service is alive so the
      * notification appears for phone playback. If the service is already running (e.g.
-     * AAOS/Auto is connected), the call is a no-op.
+     * Auto/Auto is connected), the call is a no-op.
      */
     private fun startMediaLibraryService() {
         val ctx = kordx.applicationContext

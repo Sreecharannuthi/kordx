@@ -25,9 +25,8 @@ for playback.
   managing which media folders are indexed.
 - **Playlists & favorites** — create playlists, mark favorites, and resume exactly
   where you left off (queue, shuffle, and repeat state are persisted).
-- **Android Auto & AAOS** — browse and play your library from the car's head
-  unit, on both projected Android Auto and native Android Automotive OS.
-  See [Android Auto & Automotive](#android-auto--automotive).
+- **Android Auto** — browse and play your library from the car's head unit
+  via projected Android Auto. See [Android Auto](#android-auto).
 - **Material 3 design** — dynamic color, light/dark themes, and a responsive
   Compose UI.
 - **Multi-language** — 18 locales shipped out of the box via a TOML-based i18n pipeline
@@ -37,18 +36,14 @@ for playback.
 
 ---
 
-## Android Auto & Automotive
+## Android Auto
 
-KordX is built to be a first-class media app in the car, on both projected
-**Android Auto** and native **Android Automotive OS (AAOS)** head units:
+KordX is built to be a first-class media app in the car, via projected
+**Android Auto** (phone-to-head-unit projection):
 
 - **Full library browsing** — songs, albums, artists, genres, and playlists are
   served through a Media3 `MediaLibraryService` browse tree, with content-style
   hints so categories render as grids and tracks as lists on the car screen.
-- **Car Launcher discovery (AAOS)** — declares both the modern Media3 and the
-  legacy `android.media.browse.MediaBrowserService` interfaces plus
-  `appCategory="audio"`, so KordX shows up in the AAOS app grid and media
-  source selector like any preinstalled player.
 - **Now Playing card** — large playback controls with KordX's accent color and
   attribution icon, plus custom actions (shuffle, repeat, favorite) directly on
   the card. Tapping the card or the media notification opens the app.
@@ -57,11 +52,8 @@ KordX is built to be a first-class media app in the car, on both projected
 - **Gapless, resumable playback** — a single shared ExoPlayer playlist gives
   true gapless transitions; the queue and position persist across restarts.
 
-All of this ships in the one phone APK — there is no separate automotive build.
-
-| AAOS Car Launcher — KordX on the home-screen media widget |
-|:---:|
-| ![KordX on Android Automotive OS](screenshots/aaos.png) |
+All of this ships in the one phone APK — no separate automotive build is
+required (Android Automotive OS / TV are not currently targeted).
 
 ---
 

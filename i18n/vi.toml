@@ -1,17 +1,7 @@
 locale = "vi"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Chào đằng ấy!"
 IntroductoryMessage = """
-Cảm ơn bạn vì đã tham gia open beta của KordX. Nếu bạn gặp bất kỳ bug nào hoặc muốn đề xuất cải tiến, vui lòng mở issue trong Repo Github của chúng tôi.
-
-Tham gia cộng đồng Discord và Reddit của chúng tôi để chia sẻ phản hồi của bạn và để nhận được thông tin mới nhất về ứng dụng.
-
-KordX hoàn toàn miễn phí và được hỗ trợ hoàn toàn bởi sự đóng góp của những người tốt bụng. Mọi sự đóng góp đều sẽ được ghi nhận.
-
-Một lần nữa, cảm ơn bạn vì đã dùng thử KordX!
-"""
 Songs = "Bài hát"
 Artists = "Nghệ sĩ"
 Albums = "Album"
@@ -229,11 +219,16 @@ Purple = "Tía"
 Fuchsia = "Hồng vân anh"
 Pink = "Hồng"
 Rose = "Hoa hồng"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

@@ -33,7 +33,7 @@ class CustomBrowseActionTest {
  @Test
  fun shuffleAllActionConstantIsNamespaced() {
 
- // The action string is namespaced under; `com.android.rockages.kordx.radio.` so AAOS intent; filter clash is impossible.
+ // The action string is namespaced under; `com.android.rockages.kordx.radio.` so Auto intent; filter clash is impossible.
  assertTrue(
  RadioSessionState.ACTION_SHUFFLE_ALL.startsWith("com.android.rockages.kordx.radio."),
  "ACTION_SHUFFLE_ALL should be namespaced, got '${RadioSessionState.ACTION_SHUFFLE_ALL}'",
@@ -108,7 +108,7 @@ class CustomBrowseActionTest {
  @Test
  fun browserServiceSourceContainsNoBannedTerms() {
 
- // The AAOS browse tree must not expose non-music UI surfaces. The banned
+ // The Auto browse tree must not expose non-music UI surfaces. The banned
  // terms are: Settings, About, Equalizer, Sleep timer, Crossfade, Discord,
  // Reddit, GitHub report-issue, Update check, Onboarding, Theme picker,
  // Language picker, Cast, Bluetooth picker. The test greps the active

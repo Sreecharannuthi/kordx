@@ -8,16 +8,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- P0: AAOS hardware feature opt-outs. AAOS head units may not
-         report these features; declaring them as not-required prevents
-         the PackageManager from silently filtering the app out of the
-         Car Launcher (see specs/architecture/AAOS_HOME_MEDIA_LATEST.md §1.2). -->
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
-    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
-    <uses-feature android:name="android.hardware.wifi" android:required="false" />
-    <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
-
     <application
         android:name=".KordXApplication"
         android:allowBackup="true"
@@ -31,18 +21,21 @@
         android:theme="@style/Theme.KordX"
         tools:targetApi="tiramisu">
 
+        <!-- Android Auto projection metadata: declares the app as a media
+             app and provides the themed attribution icon / accent color
+             the Auto UI uses for playback controls. -->
         <meta-data
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
 
-        <!-- Attribution icon surfaced by Android Auto / AAOS media UIs.
+        <!-- Attribution icon surfaced by the Android Auto projection UI.
              Must be a single-color tintable vector so the car can theme it.
              Reuses the monochrome launcher foreground (icon.svg geometry). -->
         <meta-data
             android:name="androidx.car.app.TintableAttributionIcon"
             android:resource="@drawable/ic_launcher_monochrome" />
 
-        <!-- Accent color theme for Android Auto / AAOS playback controls. -->
+        <!-- Accent color theme for Android Auto playback controls. -->
         <meta-data
             android:name="com.google.android.gms.car.application.theme"
             android:resource="@style/KordXCarTheme" />
@@ -61,27 +54,27 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
         <activity android:name=".ErrorActivity" />
 
-        <!--  — the AndroidX Media3 `MediaLibraryService` is now
-             the active media browser service for AAOS / Auto. The
-             legacy `legacy MediaBrowserServiceCompat` (the AndroidX
-             `MediaBrowserServiceCompat`-based service used through
-             ) has been deleted. The 26i cutover wires the
-             new service to drive playback via the live
-             `KordX.radio` state and bumps `minSdk` to 31 (the
-             Media3 `MediaLibraryService.setCustomLayout` +
-             `CommandButton` API is API 31+). The  
-             `BROWSER_SERVICE_EXTRAS_KEY_SEARCH_SUPPORTED` is
-             preserved via the `MediaSession.ConnectionResult.AcceptedResultBuilder`
+        <provider
+            android:name=".services.radio.ArtworkContentProvider"
+            android:authorities="com.android.rockages.kordx.artwork"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            tools:ignore="ExportedContentProvider" />
+
+        <!-- The AndroidX Media3 `MediaLibraryService` is the active
+             media browser service for Android Auto projection. The
+             legacy `MediaBrowserServiceCompat`-based service has been
+             deleted. The 26i cutover wires the new service to drive
+             playback via the live `KordX.radio` state and bumps
+             `minSdk` to 31 (the Media3 `MediaLibraryService.setCustomLayout`
+             + `CommandButton` API is API 31+). The
+             `BROWSER_SERVICE_EXTRAS_KEY_SEARCH_SUPPORTED` is preserved
+             via the `MediaSession.ConnectionResult.AcceptedResultBuilder`
              in `KordXMediaLibraryService.BrowseTreeCallback.onConnect`
-             (the Media3 equivalent). See the
-             13-sub-plan. -->
+             (the Media3 equivalent). -->
         <service
             android:name=".services.radio.KordXMediaLibraryService"
             android:foregroundServiceType="mediaPlayback"
@@ -90,23 +83,22 @@
             <intent-filter>
                 <!-- Media3 API (modern) -->
                 <action android:name="androidx.media3.session.MediaLibraryService" />
-                <!-- Platform API (legacy) - REQUIRED for AAOS Car Launcher
-                     and Android Auto phone projection discovery -->
+                <!-- Platform API (legacy) - used for Android Auto
+                     phone projection discovery -->
                 <action android:name="android.media.browse.MediaBrowserService" />
                 <!-- Hardware media button events (headset / Bluetooth) on phone -->
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
 
-        <activity-alias
-            android:name=".MediaSearchActivity"
+        <activity
+            android:name=".services.radio.MediaSearchActivity"
             android:exported="true"
-            android:targetActivity=".MainActivity"
             tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity-alias>
+        </activity>
     </application>
 </manifest>

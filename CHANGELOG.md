@@ -5,7 +5,199 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.7.6] - 2026-08-07
+
+### Fixed
+- **Notification progress was suppressed by every song being reported as live.** `MediaItem.Builder` gives items a default live configuration, and `RadioTimeline` was copying it into each static song window. Media3 therefore published `PlaybackState.position=-1` and `speed=0`; timeline windows now explicitly clear `liveConfiguration`, command availability is initialized before session listeners attach, and the first real position triggers a full timeline snapshot. Verified on the Phone AVD with hardware GPU acceleration.
+
+## [1.7.5] - 2026-08-07
+
+### Fixed
+- **CI and release SDK setup now follows the Gradle compile SDK.** The workflows resolve the compile SDK from `gradle/libs.versions.toml` before installing the matching Android platform and Build Tools, preventing hard-coded SDK drift.
+- **Media-center progress refresh remains enabled.** The Media3 periodic position-update path and OEM notification refresh regression coverage remain part of this release.
+
+## [1.7.4] - 2026-08-07
+
+### Fixed
+- **Release workflow SDK alignment.** CI and release validation now install Android SDK 36 and Build Tools 36, matching the project's compile SDK and Media3 1.10.1 requirements.
+- **Media-center progress refresh.** Retained Media3 periodic position updates and the OEM notification refresh path so elapsed playback time stays current across platform media controls.
+
+## [1.7.3] - 2026-08-07
+
+### Fixed
+- **Media-center progress snapshots could remain stale on OEM media controls.**
+  The Media3 session now enables its supported periodic position-update path,
+  while retaining the adapter's throttled typed refresh for notification surfaces
+  that do not extrapolate elapsed time.
+
+## [1.7.2] - 2026-08-05
+
+### Fixed
+- **Notification media-player elapsed time remained at `00:00` while the lock-screen
+  progress worked.** Some OEM notification cards do not extrapolate the platform
+  playback position from its timestamp and speed. `RadioForwardingPlayer` now sends
+  a typed platform playback-state refresh once per elapsed second while playing.
+  The refresh is throttled from KordX's existing position stream and deliberately
+  omits aggregate player events, so Media3 does not rebuild the notification or
+  disturb artwork and transport controls on every update.
+
+## [1.7.1] - 2026-08-05
+
+### Fixed
+- **Notification progress bar had no usable range and remained at the start.** The
+  Media3 migration did not publish each song's duration through canonical
+  `MediaMetadata.durationMs` before decoder preparation, so Android's platform
+  media controls received an unknown duration. Playable song items now carry the
+  library duration, `RadioForwardingPlayer` uses it until the decoder reports a
+  live duration, and timeline windows and periods expose the same finite range.
+  Android can extrapolate the moving position from the published playback state
+  without synthetic 100 ms position-discontinuity events.
+
+## [1.7.0] - 2026-08-04
+
+### Fixed
+- **Notification Next / Previous did not change tracks.** `RadioForwardingPlayer`
+  ignored `mediaItemIndex` and treated every `seekTo()` call as a position seek, so
+  the notification's track-skip controls stayed on the current song. The adapter
+  now routes `mediaItemIndex == currentIndex + 1` to `radio.shorty.skip()` and
+  `mediaItemIndex == currentIndex - 1` to `radio.shorty.previous()`. Same-index
+  calls still seek within the current song.
+- **Notification progress bar was frozen at 00:00 while audio was playing.** Media3's
+  notification manager refreshes on playback-state events, not on position
+  discontinuities alone. Position ticks now also emit
+  `EVENT_PLAYBACK_STATE_CHANGED` so the live position and chronometer render
+  in the notification.
+- **Audio continued in the background after dismissing KordX from Recents.** The
+  Media3 foreground service and shared `Radio` engine kept playing while the
+  activity task was gone. `KordXMediaLibraryService.onTaskRemoved()` now
+  stops playback, clears the queue, releases audio focus and the wake lock,
+  removes the notification, and stops the service. Auto-resume on launch
+  remains enabled for the next app launch.
+- **Auto-resume on launch restarted from the beginning of the saved song.** A
+  `Queue.Modified` event was dispatched after the staged player was prepared at
+  the persisted position, so `syncPlayerPlaylist()` observed the temporary
+  `0` position and overwrote the restore. `RadioQueue.afterAdd()` now
+  dispatches the queue update before staging the new player.
+- **Detekt CI failure (metaphony-instrumented-test).** The pinned SHA for
+  `reactivecircus/android-emulator-runner` was removed from upstream, so the
+  job could not resolve the action. Updated to the current v2.38.0 commit
+  SHA.
+
+### Added
+- **Android Auto safe artwork URIs.** `ArtworkContentProvider` exposes cached
+  cover art through validated `content://` URIs (Android for Cars requires
+  `content://` or `android.resource://`; `file://` URIs into app-private
+  storage are not visible to the car surface).
+- **Bounded browse and search pagination.** `onGetChildren()` and
+  `onGetSearchResult()` now respect `page` and `pageSize` (default 50, max
+  100). Unexpected exceptions return `SessionError.ERROR_UNKNOWN` instead of
+  a successful empty list.
+- **Service-owned voice search.** A dedicated `MediaSearchActivity` handles
+  `MEDIA_PLAY_FROM_SEARCH` without launching the phone Compose UI and
+  retries briefly while the application graph is still initializing.
+- **Typed Media3 callbacks for shuffle, repeat, and playback parameters.**
+  These were previously delivered only through the aggregate `onEvents`
+  callback, so the Media3 session could show stale state for those controls.
+
+## [1.6.9] - 2026-08-04
+
+### Fixed
+- **Notification / system media player state synchronization.** The Media3 bridge now
+  forwards typed player callbacks (`onPlaybackStateChanged`, `onIsPlayingChanged`,
+  `onPlayWhenReadyChanged`, metadata, timeline, and position callbacks) in addition to
+  aggregate events. This keeps the Media3 session and notification synchronized with
+  the app's actual playback state.
+
+## [1.6.8] - 2026-08-04
+
+### Fixed
+- **Empty "Auto-resume on launch" Player settings label.** The `AutoResumePlayback`
+  i18n key existed in `Translation.g.kt` but was dropped from the TOML sources and
+  bundled JSON assets during the i18n migration. Restored `"Auto-resume on launch"`
+  across all 18 locales + a regression test.
+- **Notification / system media player out of sync (play ▶ + 00:00 while audio
+  plays).** The `RadioForwardingPlayer` never dispatched continuous position or
+  metadata events, and newly-attached Media3 listeners saw a stale state. It now
+  subscribes to `Radio.onPlaybackPositionUpdate` (dispatching
+  `EVENT_POSITION_DISCONTINUITY` per tick), sends an initial sync event to new
+  listeners, and adds `EVENT_MEDIA_METADATA_CHANGED` to queue events. See DS1/DS3.
+
+### Changed
+- **Suggested-songs tile unified with albums/artists.** `SongTile` now delegates to
+  `SquareGrooveTile` (same transparent card, padding, layout) and a shared
+  `PlayButtonOverlay` (white play arrow on a translucent black circular scrim)
+  keeps the play icon visible on light artwork. See DS2.
+
+## [1.6.7] - 2026-08-04
+
+### Removed
+- **AAOS support (Android Automotive OS).** User decision: Android Auto
+  projection is the only car target — no AAOS/TV placeholder. Deleted the
+  cross-process `ArtworkContentProvider` + `ArtworkUriProvider` (only needed
+  because AAOS runs a separate UI process), the `.Launcher` activity alias +
+  `KordXApplication.reconcileLauncherAlias()`, the
+  `androidx.car.app.launchable` meta-data, the AAOS `uses-feature` hardware
+  opt-outs, and the `specs/AAOS/` + `AAOS_HOME_MEDIA_LATEST.md` docs.
+  `MainActivity` regained a direct `MAIN`/`LAUNCHER` filter (one phone
+  launcher icon). Android Auto metadata (`com.google.android.gms.car.*`,
+  `TintableAttributionIcon`, `KordXCarTheme`) is retained — it serves the
+  Android Auto projection UI.
+- **Cross-process artwork provider.** `SongRepository.getArtworkUri()`
+  reverts to the in-process cached-cover URI (`artworkCache`), which Android
+  Auto resolves natively; `Media3ItemFactory` no longer carries `artworkData`
+  bytes.
+
+### Added
+- **AU1 — Android Auto artwork delivery.** Media3 song metadata carries
+  album artwork via the cached-cover URI (`SongRepository.getArtworkUri()`),
+  which Android Auto's projection UI can resolve. The in-process artwork
+  cache path is used so no cross-process provider is required.
+- **i18n `{x}` placeholder fix.** Added `String.substitutePlaceholders()` in
+  `CommonTranslation.kt`; generated `Translation.g.kt` helpers now use it instead
+  of Kotlin `String.format()`, which never replaced `{x}` / `{y}` placeholders.
+  The formatter binds by placeholder name (`{x}` → first arg, `{y}` → second)
+  so locales that reorder placeholders (Hindi/Telugu/Japanese) render correctly.
+  Unit tests guard substitution, reordering, and the leave-unknown-placeholders
+  failure mode.
+- **RV14 — Test-shape deepening.** Added JVM unit tests for the previously
+  untested `:core` and `:infra` modules: `RoomConvertorsTest` pins URI /
+  string-set / string-list / LocalDate serialization round-trips, and
+  `CacheDatabaseTest` exercises the real Room `RecentPlaysStore` DAO through
+  an in-memory database + Robolectric. Added `SettingsTest` as a state-holder
+  (ViewModel substitute) test that verifies boolean, enum, nullable-string,
+  and string-set entry persistence via SharedPreferences. Added a metaphony
+  androidTest skeleton (`AudioMetadataParserInstrumentedTest`) that parses
+  real audio assets through the native taglib bridge, and wired it into CI via
+  a new `metaphony-instrumented-test` emulator job.
+- **LG4 — Dynamic receiver audit.** Added `DynamicReceiverAuditTest`, a
+  source-level scan that asserts every `Context.registerReceiver` call in
+  `:app` passes an explicit `RECEIVER_EXPORTED` / `RECEIVER_NOT_EXPORTED` flag,
+  is guarded by `BuildConfig.DEBUG`, or lives in a legacy suppression branch.
+- **AX2 — Artist merge / alias map.** Added a persisted artist merge map
+  (`Settings.artistMergeMap`) that lets users merge duplicate artist profiles.
+  The artist detail screen now has a "Merge with…" overflow action; merged
+  source names appear as chips under the artist header and can be unmerged.
+  Mappings survive rescans and are applied during `ArtistRepository.onSong()`.
+  Immediate in-cache migration keeps the UI consistent right after a merge.
+  The merge dialog auto-suggests prefix/suffix matches such as "Tanvi" →
+  "Tanvi Shah". The default artist-tag separator list now includes `&`,
+  `feat.`, `featuring`, `ft.`, ` x `, and ` X ` so compound tags like
+  "Krish & Shruthi Hassan" are split into individual artist profiles.
+- **AX2b — Album-artist merge / alias map.** Mirrored the artist merge feature
+  for album-artist profiles (`Settings.albumArtistMergeMap`). Album-artist
+  detail screens and tile overflow menus now offer "Merge with…", show merged
+  source chips, and persist mappings across rescans. Album-artist tags are
+  split by the same expanded separator set as artist tags.
+- **PB11 — Auto-pause / auto-resume for short-form video.** Added
+  `pauseOnAudioFocusDuck` player setting (default on). When a short-form video
+  app (Reels / Shorts / TikTok) requests transient-may-duck audio focus,
+  KordX now pauses instead of ducking to 20% volume and resumes playback when
+  the focus returns. The behavior respects the existing `ignoreAudioFocusLoss`
+  setting.
+- New i18n keys across all 18 locales: `PauseOnAudioFocusDuck`, `MergeWith`,
+  `MergeArtists`, `MergeArtistsConfirmation`, `MergedArtists`,
+  `SuggestedMerges`.
+
 
 ## [1.6.6] - 2026-08-03
 
@@ -100,8 +292,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   workflow now runs unit tests + lintDebug + detekt before building signed APKs.
 - **Repo admin (RV12)** — closed stale PR #7; its docs-dependent test removal
   was cherry-picked onto main.
-- **AAOS doc path fix** — `AndroidManifest.xml` now points to
-  `specs/architecture/AAOS_HOME_MEDIA_LATEST.md` after the docs relocation.
+- **AAOS doc path fix** — `AndroidManifest.xml` no longer points to the
+  removed `specs/architecture/AAOS_HOME_MEDIA_LATEST.md`; the AAOS
+  investigation was retired when AAOS support was dropped (Android Auto
+  projection remains the only car target).
 
 ## [1.6.3] - 2026-08-02
 
@@ -153,8 +347,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   exact horizontal center (⏮ ⏪ ⏯ ⏩ ⏭), reachable from both sides; it is
   now the default layout (applies automatically unless you explicitly
   picked a layout before).
-- **Android Auto & Automotive README section** with an AAOS Car Launcher
-  screenshot, plus refreshed phone screenshots.
+- **Android Auto README section** with a refreshed car screenshot,
+  plus refreshed phone screenshots.
 
 ### Fixed
 - **White screen after a main-thread crash** — `ErrorActivity` is created
@@ -183,15 +377,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [1.6.0] - 2026-07-26
 
 ### Added
-- **AAOS Car Launcher discovery (P0)** — `KordXMediaLibraryService` now
-  declares the legacy `android.media.browse.MediaBrowserService` intent-filter
-  action, the `android.intent.action.MEDIA_BUTTON` action, and
-  `android:appCategory="audio"`. Five hardware features are explicitly opted
-  out (`touchscreen`, `screen.portrait`, `screen.landscape`, `wifi`,
-  `bluetooth`) so AAOS head units do not silently filter the app from the
-  launcher. Verified on the `Automotive_Ultrawide` emulator: KordX appears in
-  the Car Launcher media-source dock and on the home-screen media card.
-- **Android Auto / AAOS session activity** — `MediaLibrarySession.Builder` is
+- **Android Auto discovery** — `KordXMediaLibraryService` declares the
+  legacy `android.media.browse.MediaBrowserService` intent-filter action, the
+  `android.intent.action.MEDIA_BUTTON` action, and `android:appCategory="audio"`
+  so Android Auto can discover and surface KordX as a media source.
+- **Android Auto session activity** — `MediaLibrarySession.Builder` is
   now configured with `setSessionActivity()`, so tapping the Now Playing card
   or media notification opens KordX `MainActivity`.
 - **Content style hints** — every browsable and playable `MediaItem` produced
@@ -201,7 +391,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - **Attribution icon + car theme** — added
   `androidx.car.app.TintableAttributionIcon` and
   `com.google.android.gms.car.application.theme` meta-data to the manifest,
-  plus a new `KordXCarTheme` with a gold accent for Android Auto / AAOS
+  plus a new `KordXCarTheme` with a gold accent for Android Auto
   playback controls.
 - **New brand icon** — launcher foregrounds, monochrome adaptive icon, and
   placeholder artwork now use the `icon.svg` design: a blue (#4285F4) vertical
@@ -537,8 +727,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   `ubuntu-24.04`, Gradle dependency caching, all 4 modules in the build
   matrix, release + lint-release verification, detekt, explicit
   `GITHUB_TOKEN` permissions). Runs on every push to `main` and every PR.
-- A `MediaSearchActivity` alias forwarding path so the AAOS voice-search
-  button reaches the existing `RadioSession.handlePlayFromSearch` route
+- A `MediaSearchActivity` alias forwarding path so the Android Auto
+  voice-search button reaches the existing `RadioSession.handlePlayFromSearch` route
   (previously a dead code path). 15 source-based regression tests pin the
   contract.
 - A `Radio.play()` recursion guard for the stale-id path; the Slice 22

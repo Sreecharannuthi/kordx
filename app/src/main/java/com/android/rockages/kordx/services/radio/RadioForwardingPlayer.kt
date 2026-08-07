@@ -40,10 +40,14 @@ import java.util.concurrent.CopyOnWriteArrayList
  * / `ViewModel` / `Room` database.
  *
  * The adapter subscribes to [Radio.onUpdate] lazily on the first listener add and
- * unsubscribes in [release]. Events are dispatched to listeners via [playerListenerHandler]
- * (the main [Looper] by default) so the listener sees the same threading model as a regular
- * Media3 [Player]. The listener list is a [CopyOnWriteArrayList] so it is safe to iterate
- * while listeners are added/removed.
+ * unsubscribes in [release]. Android's lock-screen media state extrapolates progress from
+ * the last published position, playback speed, and update timestamp. Some OEM notification
+ * media cards do not extrapolate that state, so playback ticks publish a throttled typed
+ * playback-state callback once per elapsed second. The callback intentionally omits an
+ * aggregate playback-state event to avoid rebuilding the notification on every refresh.
+ * Other events are dispatched via [playerListenerHandler] (the main [Looper] by default),
+ * so listeners see the same threading model as a regular Media3 [Player]. The listener
+ * list is a [CopyOnWriteArrayList] so it is safe to iterate while listeners are added/removed.
  *
  * Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface.
  */
@@ -76,6 +80,12 @@ class RadioForwardingPlayer(
     @Volatile
     private var radioUnsubscribe: EventUnsubscribeFn? = null
 
+    @Volatile
+    private var positionUnsubscribe: EventUnsubscribeFn? = null
+
+    private val platformPositionRefreshGate = PlatformPositionRefreshGate()
+    private var hasPublishedInitialPosition = false
+
 
     // Player: addListener / removeListener (Player interface, not
     // provided by BasePlayer).
@@ -83,20 +93,40 @@ class RadioForwardingPlayer(
     override fun addListener(listener: Player.Listener) {
         if (realExoPlayer != null) {
             realExoPlayer.addListener(listener)
-        } else {
-            if (listeners.addIfAbsent(listener) && listeners.size == 1) {
-                subscribeToRadio()
-            }
+            return
         }
+        if (!listeners.addIfAbsent(listener)) return
+
+        // Lazy subscription on the first listener.
+        if (listeners.size == 1) {
+            subscribeToRadio()
+            subscribeToPositionUpdates()
+        }
+
+        // Sync the newly-added listener with the current state. Media3's
+        // PlayerWrapper / MediaLibrarySession attach their listeners after
+        // playback has already started; without this initial event they may
+        // observe a stale IDLE/PAUSED state until the next radio event fires.
+        dispatchPlayerEvents(
+            listOf(
+                Player.EVENT_TIMELINE_CHANGED,
+                Player.EVENT_MEDIA_ITEM_TRANSITION,
+                Player.EVENT_MEDIA_METADATA_CHANGED,
+                Player.EVENT_PLAYBACK_STATE_CHANGED,
+                Player.EVENT_PLAY_WHEN_READY_CHANGED,
+                Player.EVENT_IS_PLAYING_CHANGED,
+            )
+        )
     }
 
     override fun removeListener(listener: Player.Listener) {
         if (realExoPlayer != null) {
             realExoPlayer.removeListener(listener)
-        } else {
-            if (listeners.remove(listener) && listeners.isEmpty()) {
-                unsubscribeFromRadio()
-            }
+            return
+        }
+        if (listeners.remove(listener) && listeners.isEmpty()) {
+            unsubscribeFromRadio()
+            unsubscribeFromPositionUpdates()
         }
     }
 
@@ -108,6 +138,47 @@ class RadioForwardingPlayer(
     private fun unsubscribeFromRadio() {
         radioUnsubscribe?.invoke()
         radioUnsubscribe = null
+    }
+
+    private fun subscribeToPositionUpdates() {
+        if (positionUnsubscribe != null) return
+        positionUnsubscribe = radio.onPlaybackPositionUpdate.subscribe { position ->
+            if (!hasPublishedInitialPosition && position.played > 0L) {
+                hasPublishedInitialPosition = true
+                dispatchInitialPositionSnapshot()
+            }
+            if (platformPositionRefreshGate.shouldRefresh(position.played, radio.isPlaying)) {
+                dispatchPlatformPlaybackStateRefresh()
+            }
+        }
+    }
+
+    private fun unsubscribeFromPositionUpdates() {
+        positionUnsubscribe?.invoke()
+        positionUnsubscribe = null
+        platformPositionRefreshGate.reset()
+        hasPublishedInitialPosition = false
+    }
+
+    private fun dispatchInitialPositionSnapshot() {
+        if (listeners.isEmpty()) return
+        handler.post {
+            for (listener in listeners) {
+                listener.onTimelineChanged(
+                    getCurrentTimeline(),
+                    Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE,
+                )
+            }
+        }
+    }
+
+    private fun dispatchPlatformPlaybackStateRefresh() {
+        if (listeners.isEmpty()) return
+        handler.post {
+            for (listener in listeners) {
+                listener.onPlaybackStateChanged(getPlaybackState())
+            }
+        }
     }
 
 
@@ -144,6 +215,7 @@ class RadioForwardingPlayer(
         // stop listening. Don't release the shared instance.
         if (realExoPlayer == null) {
             unsubscribeFromRadio()
+            unsubscribeFromPositionUpdates()
             listeners.clear()
         }
     }
@@ -152,14 +224,24 @@ class RadioForwardingPlayer(
         if (realExoPlayer != null) {
             realExoPlayer.seekTo(positionMs)
         } else {
-            // The Media3 seekParameters + forcePosition arguments
-            // don't map onto the Radio's seek (which is an exact
-            // `MediaPlayer.seekTo(position)` under the hood). We just
-            // forward the position.
-            if (!radio.hasPlayer) {
-                return
+            // BasePlayer routes next/previous commands through this method.
+            // Handle adjacent media-item navigation separately from seeking;
+            // the old adapter ignored mediaItemIndex and treated it as a
+            // position, so notification next/previous controls stayed on the
+            // current track.
+            val currentIndex = getCurrentMediaItemIndex()
+            when {
+                mediaItemIndex > currentIndex && mediaItemIndex == currentIndex + 1 -> {
+                    radio.shorty.skip()
+                }
+                mediaItemIndex < currentIndex && mediaItemIndex == currentIndex - 1 -> {
+                    radio.shorty.previous()
+                }
+                mediaItemIndex == currentIndex && positionMs != C.TIME_UNSET -> {
+                    if (radio.hasPlayer) radio.seek(positionMs)
+                }
+                else -> return
             }
-            radio.seek(positionMs)
         }
     }
 
@@ -201,7 +283,7 @@ class RadioForwardingPlayer(
     // service dropped out of the foreground, and the next startForegroundService()
     // crashed with ForegroundServiceDidNotStartInTimeException. A staged queue
     // (currentSongId != null) is READY from the session's point of view; only an
-    // empty / stopped queue is IDLE. This also matches what AAOS expects on the Now
+    // empty / stopped queue is IDLE. This also matches what Auto expects on the Now
     // Playing card (PAUSED vs PLAYING is driven by getPlayWhenReady()).
     override fun getPlaybackState(): Int = when {
         radio.queue.currentSongId != null -> Player.STATE_READY
@@ -236,22 +318,28 @@ class RadioForwardingPlayer(
         val songId = radio.queue.currentSongId
         val mediaItem = songId?.let { songMediaItemResolver(it) }
         val metadata = mediaItem?.mediaMetadata
+        val liveDuration = radio.currentPlaybackPosition?.total?.takeIf { it > 0L }
         if (metadata != null && metadata !== MediaMetadata.EMPTY) {
-            return metadata
+            // Browse items carry duration in the extras for display, but the
+            // Media3 notification/legacy platform bridge reads the canonical
+            // MediaMetadata.durationMs field. Keep the item metadata and the
+            // live decoder duration aligned so the seek bar has a non-zero max.
+            return if (liveDuration != null && metadata.durationMs != liveDuration) {
+                metadata.buildUpon().setDurationMs(liveDuration).build()
+            } else {
+                metadata
+            }
         }
 
-        // Fallback: surface the live duration even when the
-        // resolver returns null. AAOS uses this to render the
-        // progress bar on the Now Playing card.
-        val position = radio.currentPlaybackPosition
-        val builder = MediaMetadata.Builder()
+        // Fallback: surface the live duration even when the resolver returns
+        // null. Auto and the phone media notification use this as the seek-bar
+        // range.
+        return MediaMetadata.Builder()
             .setIsPlayable(true)
             .setIsBrowsable(false)
             .setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
-        if (position != null && position.total > 0) {
-            builder.setDurationMs(position.total)
-        }
-        return builder.build()
+            .setDurationMs(liveDuration)
+            .build()
     }
 
     override fun getPlaylistMetadata(): MediaMetadata =
@@ -305,7 +393,13 @@ class RadioForwardingPlayer(
 
     override fun getCurrentPosition(): Long = radio.currentPlaybackPosition?.played ?: 0L
 
-    override fun getDuration(): Long = radio.currentPlaybackPosition?.total ?: 0L
+    override fun getDuration(): Long =
+        radio.currentPlaybackPosition?.total
+            ?: radio.queue.currentSongId
+                ?.let(songMediaItemResolver)
+                ?.mediaMetadata
+                ?.durationMs
+            ?: 0L
 
     override fun getBufferedPosition(): Long = getCurrentPosition()
 
@@ -505,7 +599,7 @@ class RadioForwardingPlayer(
     // defaults dispatch to `setMediaItems(List, boolean)` / `setMediaItems(List, int, long)`.
     // We implement them as no-ops on the radio (the radio manages its own queue via
     // `RadioShorty.playQueue` and `RadioQueue`); the Media3 session uses `Radio.onCustomCommand`
-    // to translate AAOS intents into radio operations.
+    // to translate Auto intents into radio operations.
 
     override fun setMediaItems(
         mediaItems: List<MediaItem>,
@@ -513,7 +607,7 @@ class RadioForwardingPlayer(
     ) {
 
         // Noop: the radio's queue is managed by [RadioShorty.playQueue]
-        // and [RadioQueue.add]. AAOS does not surface
+        // and [RadioQueue.add]. Auto does not surface
         // `setMediaItems` directly.
     }
 
@@ -531,7 +625,7 @@ class RadioForwardingPlayer(
     ) {
 
         // Noop: the radio's queue is managed by [RadioShorty.playQueue]
-        // and [RadioQueue.add]. AAOS does not surface
+        // and [RadioQueue.add]. Auto does not surface
         // `addMediaItems` directly.
     }
 
@@ -584,11 +678,16 @@ class RadioForwardingPlayer(
             Radio.Events.Player.Ended ->
                 listOf(Player.EVENT_PLAYBACK_STATE_CHANGED)
             Radio.Events.Player.Seeked ->
-                listOf(Player.EVENT_POSITION_DISCONTINUITY)
+                // The typed position callback updates MediaSession's cached
+                // PositionInfo. A state/timeline refresh here rebuilds the
+                // notification using that new position without resetting the
+                // playing chronometer during ordinary timer ticks.
+                listOf(Player.EVENT_POSITION_DISCONTINUITY, Player.EVENT_TIMELINE_CHANGED)
             is Radio.Events.Queue ->
                 listOf(
                     Player.EVENT_TIMELINE_CHANGED,
                     Player.EVENT_MEDIA_ITEM_TRANSITION,
+                    Player.EVENT_MEDIA_METADATA_CHANGED,
                 )
             Radio.Events.QueueOption.ShuffleModeChanged ->
                 listOf(Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED)
@@ -609,17 +708,91 @@ class RadioForwardingPlayer(
     private fun dispatchPlayerEvents(events: List<Int>) {
         if (listeners.isEmpty()) return
 
-        // Build a Player.Events from the individual flag constants. The
-        // Player.Events constructor takes a FlagSet, so we use
-        // FlagSet.Builder and add all flags at once.
+        // Media3 listeners have two notification paths: the aggregate
+        // onEvents callback and the individual typed callbacks. MediaSession's
+        // internal PlayerListener consumes the typed callbacks; sending only
+        // onEvents leaves its PlayerInfo/platform PlaybackState snapshot stale.
         val flagSetBuilder = androidx.media3.common.FlagSet.Builder()
         flagSetBuilder.addAll(*events.toIntArray())
         val playerEvents = Player.Events(flagSetBuilder.build())
         handler.post {
+            // Read the position on the listener looper, not before posting this
+            // callback. RadioPlayer.seek() is also posted to the main looper;
+            // capturing here used the pre-seek position and caused the system
+            // media slider to be rebuilt at 00:00. Reading immediately before
+            // the typed callback makes MediaSession and the notification see
+            // the position that RadioPlayer has actually applied.
+            val positionInfo = if (Player.EVENT_POSITION_DISCONTINUITY in events) {
+                createCurrentPositionInfo()
+            } else {
+                null
+            }
             for (listener in listeners) {
+                // Update MediaSession's cached position before any notification
+                // refresh event. Media3 coalesces PlayerInfo updates, so the
+                // position callback must run first or a rebuild can observe 0 ms.
+                if (positionInfo != null) {
+                    listener.onPositionDiscontinuity(
+                        positionInfo,
+                        positionInfo,
+                        Player.DISCONTINUITY_REASON_SEEK,
+                    )
+                }
+                if (Player.EVENT_TIMELINE_CHANGED in events) {
+                    listener.onTimelineChanged(getCurrentTimeline(), Player.TIMELINE_CHANGE_REASON_SOURCE_UPDATE)
+                }
+                if (Player.EVENT_MEDIA_ITEM_TRANSITION in events) {
+                    listener.onMediaItemTransition(
+                        getCurrentMediaItem(),
+                        Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED,
+                    )
+                }
+                if (Player.EVENT_MEDIA_METADATA_CHANGED in events) {
+                    listener.onMediaMetadataChanged(getMediaMetadata())
+                }
+                if (Player.EVENT_PLAYBACK_STATE_CHANGED in events) {
+                    listener.onPlaybackStateChanged(getPlaybackState())
+                }
+                if (Player.EVENT_PLAY_WHEN_READY_CHANGED in events) {
+                    listener.onPlayWhenReadyChanged(
+                        getPlayWhenReady(),
+                        Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST,
+                    )
+                }
+                if (Player.EVENT_IS_PLAYING_CHANGED in events) {
+                    listener.onIsPlayingChanged(isPlaying)
+                }
+                if (Player.EVENT_SHUFFLE_MODE_ENABLED_CHANGED in events) {
+                    listener.onShuffleModeEnabledChanged(getShuffleModeEnabled())
+                }
+                if (Player.EVENT_REPEAT_MODE_CHANGED in events) {
+                    listener.onRepeatModeChanged(getRepeatMode())
+                }
+                if (Player.EVENT_PLAYBACK_PARAMETERS_CHANGED in events) {
+                    listener.onPlaybackParametersChanged(getPlaybackParameters())
+                }
+                // Keep the aggregate callback too. Client listeners commonly
+                // use it, and Media3's event contract promises both forms.
                 listener.onEvents(this, playerEvents)
             }
         }
+    }
+
+    private fun createCurrentPositionInfo(): Player.PositionInfo {
+        val mediaItem = getCurrentMediaItem()
+        val index = getCurrentMediaItemIndex()
+        val position = getCurrentPosition()
+        return Player.PositionInfo(
+            /* windowUid = */ index,
+            /* windowIndex = */ index,
+            /* mediaItem = */ mediaItem,
+            /* periodUid = */ index,
+            /* periodIndex = */ getCurrentPeriodIndex(),
+            /* positionMs = */ position,
+            /* contentPositionMs = */ position,
+            /* adGroupIndex = */ C.INDEX_UNSET,
+            /* adIndexInAdGroup = */ C.INDEX_UNSET,
+        )
     }
 
     companion object {
@@ -632,7 +805,7 @@ class RadioForwardingPlayer(
         const val MAX_SEEK_TO_PREVIOUS_POSITION_MS: Long = 3_000L
 
 
-        private val AVAILABLE_COMMANDS: Player.Commands by lazy {
+        private val AVAILABLE_COMMANDS: Player.Commands =
             Player.Commands.Builder()
                 .addAll(
                     Player.COMMAND_PLAY_PAUSE,
@@ -657,7 +830,31 @@ class RadioForwardingPlayer(
                     Player.COMMAND_GET_DEVICE_VOLUME,
                 )
                 .build()
+    }
+}
+
+internal class PlatformPositionRefreshGate {
+    private var lastPublishedSecond: Long? = null
+
+    fun shouldRefresh(positionMs: Long, isPlaying: Boolean): Boolean {
+        val shouldRefresh = if (isPlaying) {
+            val currentSecond = positionMs.coerceAtLeast(0L) / MILLIS_PER_SECOND
+            (currentSecond != lastPublishedSecond).also { isNewSecond ->
+                if (isNewSecond) lastPublishedSecond = currentSecond
+            }
+        } else {
+            reset()
+            false
         }
+        return shouldRefresh
+    }
+
+    fun reset() {
+        lastPublishedSecond = null
+    }
+
+    private companion object {
+        const val MILLIS_PER_SECOND = 1_000L
     }
 }
 
@@ -687,7 +884,7 @@ private class RadioTimeline(
             /* elapsedRealtimeEpochOffsetMs = */ C.TIME_UNSET,
             /* isSeekable = */ true,
             /* isDynamic = */ false,
-            /* liveConfiguration = */ mediaItem.liveConfiguration,
+            /* liveConfiguration = */ null,
             /* defaultPositionUs = */ 0L,
             /* durationUs = */ durationUs,
             /* firstPeriodIndex = */ windowIndex,
@@ -700,11 +897,13 @@ private class RadioTimeline(
 
     override fun getPeriod(periodIndex: Int, period: Timeline.Period, setIds: Boolean): Timeline.Period {
         val songId = radio.queue.currentQueue.getOrNull(periodIndex)
+        val mediaItem = songId?.let(songMediaItemResolver)
+        val durationUs = mediaItem?.mediaMetadata?.durationMs?.let(C::msToUs) ?: C.TIME_UNSET
         return period.set(
             /* id = */ songId ?: "empty-$periodIndex",
             /* uid = */ songId ?: "empty-$periodIndex",
             /* windowIndex = */ periodIndex,
-            /* durationUs = */ C.TIME_UNSET,
+            /* durationUs = */ durationUs,
             /* positionInWindowUs = */ 0L,
         )
     }

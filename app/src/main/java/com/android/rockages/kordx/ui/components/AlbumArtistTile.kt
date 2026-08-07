@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import com.android.rockages.kordx.services.groove.*
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
+import androidx.compose.material.icons.filled.Merge
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -28,122 +29,145 @@ import com.android.rockages.kordx.ui.view.AlbumArtistViewRoute
 
 @Composable
 fun AlbumArtistTile(context: ViewContext, albumArtist: AlbumArtist) {
- SquareGrooveTile(
- image = albumArtist.createArtworkImageRequest(context.kordx).build(),
- options = { expanded, onDismissRequest ->
- AlbumArtistDropdownMenu(
- context,
- albumArtist,
- expanded = expanded,
- onDismissRequest = onDismissRequest,
- )
- },
- content = {
- Text(
- albumArtist.name,
- style = MaterialTheme.typography.bodyMedium,
- textAlign = TextAlign.Center,
- maxLines = 2,
- overflow = TextOverflow.Ellipsis,
- )
- },
- onPlay = {
- context.kordx.radio.shorty.playQueue(albumArtist.getSortedSongIds(context.kordx))
- },
- onClick = {
- context.navController.navigate(AlbumArtistViewRoute(albumArtist.name))
- }
- )
+    SquareGrooveTile(
+        image = albumArtist.createArtworkImageRequest(context.kordx).build(),
+        options = { expanded, onDismissRequest ->
+            AlbumArtistDropdownMenu(
+                context,
+                albumArtist,
+                expanded = expanded,
+                onDismissRequest = onDismissRequest,
+            )
+        },
+        content = {
+            Text(
+                albumArtist.name,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        onPlay = {
+            context.kordx.radio.shorty.playQueue(albumArtist.getSortedSongIds(context.kordx))
+        },
+        onClick = {
+            context.navController.navigate(AlbumArtistViewRoute(albumArtist.name))
+        }
+    )
 }
 
 @Composable
 fun AlbumArtistDropdownMenu(
- context: ViewContext,
- albumArtist: AlbumArtist,
- expanded: Boolean,
- onDismissRequest: () -> Unit,
+    context: ViewContext,
+    albumArtist: AlbumArtist,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
 ) {
- var showAddToPlaylistDialog by remember { mutableStateOf(false) }
+    var showAddToPlaylistDialog by remember { mutableStateOf(false) }
+    var showMergeDialog by remember { mutableStateOf(false) }
 
- DropdownMenu(
- expanded = expanded,
- onDismissRequest = onDismissRequest,
- containerColor = MaterialTheme.colorScheme.background,
- shape = RoundedCornerShape(12.dp),
- shadowElevation = 12.dp,
- offset = DpOffset((-4).dp, (-4).dp),
- ) {
- DropdownMenuItem(
- modifier = Modifier.height(48.dp),
- contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
- leadingIcon = {
- Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
- },
- text = {
- Text(context.kordx.t.ShufflePlay)
- },
- onClick = {
- onDismissRequest()
- context.kordx.radio.shorty.playQueue(
- albumArtist.getSortedSongIds(context.kordx),
- shuffle = true,
- )
- }
- )
- DropdownMenuItem(
- modifier = Modifier.height(48.dp),
- contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
- leadingIcon = {
- Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
- },
- text = {
- Text(context.kordx.t.PlayNext)
- },
- onClick = {
- onDismissRequest()
- context.kordx.radio.queue.add(
- albumArtist.getSortedSongIds(context.kordx),
- context.kordx.radio.queue.currentSongIndex + 1
- )
- }
- )
- DropdownMenuItem(
- modifier = Modifier.height(48.dp),
- contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
- leadingIcon = {
- Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
- },
- text = {
- Text(context.kordx.t.AddToQueue)
- },
- onClick = {
- onDismissRequest()
- context.kordx.radio.queue.add(albumArtist.getSortedSongIds(context.kordx))
- }
- )
- DropdownMenuItem(
- modifier = Modifier.height(48.dp),
- contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
- leadingIcon = {
- Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null)
- },
- text = {
- Text(context.kordx.t.AddToPlaylist)
- },
- onClick = {
- onDismissRequest()
- showAddToPlaylistDialog = true
- }
- )
- }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        containerColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(12.dp),
+        shadowElevation = 12.dp,
+        offset = DpOffset((-4).dp, (-4).dp),
+    ) {
+        DropdownMenuItem(
+            modifier = Modifier.height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            leadingIcon = {
+                Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
+            },
+            text = {
+                Text(context.kordx.t.ShufflePlay)
+            },
+            onClick = {
+                onDismissRequest()
+                context.kordx.radio.shorty.playQueue(
+                    albumArtist.getSortedSongIds(context.kordx),
+                    shuffle = true,
+                )
+            }
+        )
+        DropdownMenuItem(
+            modifier = Modifier.height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            leadingIcon = {
+                Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
+            },
+            text = {
+                Text(context.kordx.t.PlayNext)
+            },
+            onClick = {
+                onDismissRequest()
+                context.kordx.radio.queue.add(
+                    albumArtist.getSortedSongIds(context.kordx),
+                    context.kordx.radio.queue.currentSongIndex + 1
+                )
+            }
+        )
+        DropdownMenuItem(
+            modifier = Modifier.height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            leadingIcon = {
+                Icon(Icons.AutoMirrored.Filled.PlaylistPlay, null)
+            },
+            text = {
+                Text(context.kordx.t.AddToQueue)
+            },
+            onClick = {
+                onDismissRequest()
+                context.kordx.radio.queue.add(albumArtist.getSortedSongIds(context.kordx))
+            }
+        )
+        DropdownMenuItem(
+            modifier = Modifier.height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            leadingIcon = {
+                Icon(Icons.AutoMirrored.Filled.PlaylistAdd, null)
+            },
+            text = {
+                Text(context.kordx.t.AddToPlaylist)
+            },
+            onClick = {
+                onDismissRequest()
+                showAddToPlaylistDialog = true
+            }
+        )
+        DropdownMenuItem(
+            modifier = Modifier.height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            leadingIcon = {
+                Icon(Icons.Filled.Merge, null)
+            },
+            text = {
+                Text(context.kordx.t.MergeWith)
+            },
+            onClick = {
+                onDismissRequest()
+                showMergeDialog = true
+            }
+        )
+    }
 
- if (showAddToPlaylistDialog) {
- AddToPlaylistDialog(
- context,
- songIds = albumArtist.getSongIds(context.kordx),
- onDismissRequest = {
- showAddToPlaylistDialog = false
- }
- )
- }
+    if (showAddToPlaylistDialog) {
+        AddToPlaylistDialog(
+            context,
+            songIds = albumArtist.getSongIds(context.kordx),
+            onDismissRequest = {
+                showAddToPlaylistDialog = false
+            }
+        )
+    }
+
+    if (showMergeDialog) {
+        AlbumArtistMergeDialog(
+            context = context,
+            sourceName = albumArtist.name,
+            onDismissRequest = { showMergeDialog = false },
+        )
+    }
 }

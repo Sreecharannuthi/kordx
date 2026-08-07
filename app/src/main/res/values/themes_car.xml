@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-         Car theme used by Android Auto / AAOS for attribution and playback controls.
+         Car theme used by Android Auto projection for attribution and playback controls.
          The accent color matches the gold play triangle from icon.svg so the car UI
          feels like the KordX brand without clashing with the blue primary.
     -->

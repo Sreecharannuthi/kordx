@@ -1,8 +1,8 @@
 package com.android.rockages.kordx.services.groove.repositories
 
 import android.net.Uri
-import androidx.core.net.toUri
 import com.android.rockages.kordx.KordX
+import com.android.rockages.kordx.services.radio.ArtworkContentProvider
 import com.android.rockages.kordx.core.groove.Song
 import com.android.rockages.kordx.ui.helpers.Assets
 import com.android.rockages.kordx.ui.helpers.createHandyImageRequest
@@ -144,7 +144,10 @@ class SongRepository(private val kordx: KordX) {
  fun get(ids: List<String>) = ids.mapNotNull { get(it) }
 
  fun getArtworkUri(songId: String): Uri = get(songId)?.coverFile
- ?.let { kordx.database.artworkCache.get(it) }?.toUri()
+ ?.let { cover ->
+ val file = kordx.database.artworkCache.get(cover)
+ if (file.isFile) ArtworkContentProvider.uriFor(file.name) else null
+ }
  ?: getDefaultArtworkUri()
 
  fun getDefaultArtworkUri() = Assets.getPlaceholderUri(kordx)

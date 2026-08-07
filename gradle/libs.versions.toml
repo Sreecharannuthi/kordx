@@ -9,7 +9,9 @@ core = "1.15.0"
 core-splashscreen = "1.0.1"
 fuzzywuzzy = "1.4.0"
 junit-jupiter = "5.11.3"
+kotlinx-coroutines-test = "1.9.0"
 kotlinx-serialization-json = "1.5.1"
+mockk = "1.13.12"
 detekt = "1.23.6"
 kover = "0.8.3"
 lifecycle-runtime = "2.8.7"
@@ -17,6 +19,7 @@ media = "1.7.0"
 okhttp3 = "4.12.0"
 media3 = "1.10.1"
 room = "2.6.1"
+robolectric = "4.13"
 
 android-gradle-plugin = "8.10.0"
 kotlin-gradle-plugin = "2.1.0"
@@ -28,6 +31,7 @@ min-sdk = "31"
 target-sdk = "35"
 junit = "4.13.2"
 junit-version = "1.2.1"
+test-core = "1.6.1"
 espresso-core = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
@@ -46,7 +50,10 @@ core = { group = "androidx.core", name = "core-ktx", version.ref = "core" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 fuzzywuzzy = { group = "me.xdrop", name = "fuzzywuzzy", version.ref = "fuzzywuzzy" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit-jupiter" }
+junit-vintage = { group = "org.junit.vintage", name = "junit-vintage-engine", version.ref = "junit-jupiter" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-test" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose" }
 lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime" }
 media = { group = "androidx.media", name = "media", version.ref = "media" }
@@ -57,8 +64,10 @@ media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", versi
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
+test-core = { group = "androidx.test", name = "core", version.ref = "test-core" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

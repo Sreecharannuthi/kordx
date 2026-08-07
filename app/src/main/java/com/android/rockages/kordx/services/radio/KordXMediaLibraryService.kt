@@ -26,6 +26,7 @@ import com.android.rockages.kordx.KordX
 import com.android.rockages.kordx.R
 import com.android.rockages.kordx.MainActivity
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
+import com.android.rockages.kordx.core.utils.Eventer
 import com.android.rockages.kordx.core.utils.Logger
 import com.android.rockages.kordx.services.groove.getSongIds
 import com.google.common.collect.ImmutableList
@@ -40,7 +41,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  /**
  * The [MediaLibrarySession] built in [onCreate] and released in
- * [onDestroy]. Exposed to the AAOS / Auto framework via
+ * [onDestroy]. Exposed to the Android Auto framework via
  * [onGetSession] (which returns it). `null` between construction
  * (e.g. before [onCreate] has run) and [onDestroy] (after release).
  */
@@ -114,7 +115,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  // Context). It wires the session into the service's lifecycle so
  // `onGetSession` will be called by the framework on bind.
  //
- // `setSessionActivity` gives the AAOS / Auto framework a PendingIntent to
+ // `setSessionActivity` gives the Android Auto framework a PendingIntent to
  // launch when the user taps the Now Playing card / media notification. Use
  // FLAG_ACTIVITY_SINGLE_TOP | FLAG_ACTIVITY_CLEAR_TOP so an existing
  // MainActivity is brought to the foreground rather than creating a new task.
@@ -131,6 +132,11 @@ class KordXMediaLibraryService : MediaLibraryService() {
  )
  mediaSession = MediaLibrarySession.Builder(this, player, callback)
  .setSessionActivity(sessionActivity)
+ // Keep platform controllers' playback position snapshots fresh. This is
+ // the Media3-supported path for notification/lock-screen progress updates;
+ // the adapter's typed callbacks remain useful for OEM surfaces that do not
+ // extrapolate between snapshots.
+ .setPeriodicPositionUpdateEnabled(true)
  .build()
  Log.i(
  LOG_TAG,
@@ -139,7 +145,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  )
 
  // Publish the 2 root-level custom browse actions (SHUFFLE_ALL + SEARCH)
- // via `setCustomLayout`. AAOS surfaces these buttons at the root of the browse tree
+ // via `setCustomLayout`. Auto surfaces these buttons at the root of the browse tree
  // (vs. the Now Playing card, which uses `setMediaButtonPreferences`). The Now Playing
  // card actions are refreshed by [BrowseTreeCallback.publishCurrentPlaybackButtons] in
  // response to player events and custom commands, so no hardcoded initial publish is needed.
@@ -173,6 +179,17 @@ class KordXMediaLibraryService : MediaLibraryService() {
  if (BuildConfig.DEBUG) {
  registerDebugReceivers()
  }
+ }
+
+ override fun onTaskRemoved(rootIntent: Intent?) {
+ // The user explicitly removed KordX from Recents. Do not keep the
+ // shared Radio/ExoPlayer alive behind a notification: this app opts
+ // out of persistent background playback when its task is dismissed.
+ Log.i(LOG_TAG, "onTaskRemoved: stopping playback and service")
+ KordX.instance?.radio?.onTaskRemoved()
+ stopForeground(STOP_FOREGROUND_REMOVE)
+ stopSelf()
+ super.onTaskRemoved(rootIntent)
  }
 
  override fun onDestroy() {
@@ -468,7 +485,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
 
  // Store the most recent search query per controller so the framework's later
- // `onGetSearchResult` calls can look up which query to execute. AAOS issues one
+ // `onGetSearchResult` calls can look up which query to execute. Auto issues one
  // `onSearch` per "search initiated by the user" gesture, then any number of
  // `onGetSearchResult` calls (for paging, refresh, etc.). One inflight search per
  // controller is the Media3 contract.
@@ -483,7 +500,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * [MediaSession.ConnectionResult.accept] uses the
  * [MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS]
  * command set, which includes `SESSION_COMMAND_SEARCH` — so
- * the AAOS surface shows the search affordance on the root
+ * the Auto surface shows the search affordance on the root
  * without the new service having to opt in explicitly. The
  * `onSearch` implementation is the actual handler.
  */
@@ -497,7 +514,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  /**
  * Return the root [MediaItem] of the library tree. The root
- * is a non-content placeholder (no title — AAOS renders the
+ * is a non-content placeholder (no title — Auto renders the
  * root as a special "browse" surface, not as a row); its only
  * purpose is to give the framework a `mediaId` ("root") to
  * use as the `parentId` argument of [onGetChildren] when it
@@ -559,7 +576,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * `coroutineScope` (which is `Dispatchers.Default` per
  * `Groove.kt`) and the result is delivered via a
  * [SettableFuture] — the caller returns immediately
- * (the AAOS framework awaits the future on the controller
+ * (the Auto framework awaits the future on the controller
  * side). Empty / scan / error placeholders are deferred to the
  * placeholder builders.
  */
@@ -580,10 +597,11 @@ class KordXMediaLibraryService : MediaLibraryService() {
  val future = SettableFuture.create<LibraryResult<ImmutableList<MediaItem>>>()
  app.groove.coroutineScope.launch {
  val items = try {
- buildChildren(parentId)
+ pageItems(buildChildren(parentId), page, pageSize)
  } catch (err: Exception) {
  Logger.error(LOG_TAG, "onGetChildren failed for $parentId", err)
- emptyList<MediaItem>()
+ future.set(LibraryResult.ofError(SessionError.ERROR_UNKNOWN))
+ return@launch
  }
  Logger.warn(
  LOG_TAG,
@@ -633,7 +651,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * "Get `app.groove.song.all.value`. Call [KordXSearch.search] with the lookup callback.
  * Map each result id to a [MediaItem] via [Media3ItemFactory.playableSongItem]."
  *
- * The pending query is looked up from [pendingSearches]; if AAOS calls
+ * The pending query is looked up from [pendingSearches]; if Auto calls
  * `onGetSearchResult` without a prior `onSearch` (the framework should never do this,
  * but the contract is loose), we fall back to the query passed in via the `query`
  * parameter.
@@ -676,9 +694,10 @@ class KordXMediaLibraryService : MediaLibraryService() {
  "onGetSearchResult failed for query='$effectiveQuery'",
  err,
  )
- emptyList<MediaItem>()
+ future.set(LibraryResult.ofError(SessionError.ERROR_UNKNOWN))
+ return@launch
  }
- future.set(LibraryResult.ofItemList(ImmutableList.copyOf(items), params))
+ future.set(LibraryResult.ofItemList(ImmutableList.copyOf(pageItems(items, page, pageSize)), params))
  }
  return future
  }
@@ -732,7 +751,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  Log.i(
  LOG_TAG,
  "BrowseTreeCallback.onCustomCommand: SEARCH received, " +
- "letting AAOS show its native search bar"
+ "letting Auto show its native search bar"
  )
  return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
  }
@@ -769,7 +788,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  // The 3 Now Playing card action handlers mirror the legacy `RadioSession.handleCustomAction`
  // contract for `ACTION_SHUFFLE` / `ACTION_REPEAT` / `ACTION_FAVORITE`. Each handler
  // delegates to the live `app.radio` / `app.groove` state and republishes the Now Playing
- // card buttons via `refreshNowPlayingButtons` so the AAOS surface reflects the new state immediately.
+ // card buttons via `refreshNowPlayingButtons` so the Auto surface reflects the new state immediately.
 
  private fun handleShuffleToggle() {
  val before = app.radio.queue.currentShuffleMode
@@ -844,7 +863,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  /**
  * Re-publish the 3 Now Playing card custom actions using the *current* `app.radio` /
  * `app.groove` state. Called by the 5 custom-action handlers after they mutate the state,
- * so AAOS / Auto sees the updated shuffle / loop / favorite icons immediately. Inlined
+ * so Android Auto sees the updated shuffle / loop / favorite icons immediately. Inlined
  * here (vs. delegating to the outer's [refreshNowPlayingButtons]) because [BrowseTreeCallback]
  * is a nested class (not an `inner` class) — it has no implicit reference to the outer
  * `KordXMediaLibraryService` instance. The `mediaSession` reference is the one field that
@@ -886,6 +905,14 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * Dispatch the 6 root tabs + 5 drill-downs based on [parentId]. Empty / scan / error
  * placeholders are handled by the placeholder helper below.
  */
+ private fun pageItems(items: List<MediaItem>, page: Int, pageSize: Int): List<MediaItem> {
+ val safePage = page.coerceAtLeast(0)
+ val safePageSize = (if (pageSize > 0) pageSize else DEFAULT_PAGE_SIZE).coerceAtMost(MAX_PAGE_SIZE)
+ val start = (safePage.toLong() * safePageSize).coerceAtMost(items.size.toLong()).toInt()
+ val end = (start + safePageSize).coerceAtMost(items.size)
+ return items.subList(start, end)
+ }
+
  private fun buildChildren(parentId: String): List<MediaItem> {
  return when {
  parentId == KordXMediaSessionConstants.ID_ROOT -> buildRootTabs()
@@ -986,7 +1013,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  private fun buildSongsTab(): List<MediaItem> {
 
  // Short-circuit to a single `nonPlayableItem(EMPTY_REASON_SCANNING, ...)` when a scan is in
- // progress (`app.groove.song.isUpdating.value` is true). AAOS shows the live count via the
+ // progress (`app.groove.song.isUpdating.value` is true). Auto shows the live count via the
  // `EXTRA_KEY_SCAN_COUNT` int on the placeholder's extras. Mirrors the legacy
  // legacy MediaBrowserServiceCompat.buildSongsTab behavior.
  if (app.groove.song.isUpdating.value) {
@@ -1066,7 +1093,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * limit). Each surviving song id is mapped to a playable
  * `MediaItem` with the Song display contract plus
  * a `PLAYED_AT` extra carrying the per-row timestamp so
- * AAOS can render an "X minutes ago" hint.
+ * Auto can render an "X minutes ago" hint.
  *
  * The empty-cache path (no plays yet) is handled by the placeholder helper below.
  */
@@ -1182,7 +1209,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * The Media3 `MediaItem` is non-browsable / non-playable
  * (info-only — see [Media3ItemFactory.nonPlayable]) so the
  * user can't tap it to drill in, and tapping it doesn't
- * start playback. AAOS renders it as a non-actionable
+ * start playback. Auto renders it as a non-actionable
  * list row, with the [subtitle] providing the
  * explanation.
  */
@@ -1478,6 +1505,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  override val currentSpeed: Float = 1f
  override val currentPitch: Float = 1f
  override val audioSessionId: Int? = null
+ override val onPlaybackPositionUpdate: Eventer<RadioPlayer.PlaybackPosition> = Eventer()
  override val queue: RadioQueueAdapterTarget = NoOpRadioQueueAdapterTarget()
  override val shorty: RadioShortyAdapterTarget = NoOpRadioShortyAdapterTarget()
 
@@ -1525,6 +1553,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * tag limit doesn't apply to this project (the `minSdk` is 29), but staying within the
  * convention makes the logcat output homogeneous.
  */
+ private const val DEFAULT_PAGE_SIZE = 50
+ private const val MAX_PAGE_SIZE = 100
  private const val LOG_TAG = "KordXMediaLibraryService"
 
  /**

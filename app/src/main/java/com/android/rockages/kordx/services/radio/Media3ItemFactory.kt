@@ -34,7 +34,7 @@ import com.android.rockages.kordx.core.utils.DurationUtils
 internal object Media3ItemFactory {
 
 
- // Content style hints surfaced to Android Auto / AAOS via Media3 MediaMetadata extras.
+ // Content style hints surfaced to Android Auto via Media3 MediaMetadata extras.
  // The DESCRIPTION_* keys live on each MediaItem and tell the car/phone UI how to render
  // the item (playable) or its children (browsable).
 
@@ -72,7 +72,7 @@ internal object Media3ItemFactory {
  * [key] -> [value] appended to the `longEntries` map. Used to layer the `PLAYED_AT`
  * timestamp extra on top of the standard [songExtras] so the recently-played row carries
  * the per-entity display contract *plus* the play-time hint for the "X minutes ago" style
- * label AAOS can render.
+ * label Android Auto can render.
  */
  fun withLong(key: String, value: Long): Extras =
  copy(longEntries = longEntries + (key to value))
@@ -134,7 +134,7 @@ internal object Media3ItemFactory {
  * searchability hint at the description-extras level. The
  * Media3 `MediaItem` does not expose `setSearchable(true)`
  * directly (that lives on the framework
- * `android.media.browse.MediaItem` since API 27), so the AAOS
+ * `android.media.browse.MediaItem` since API 27), so the Android Auto
  * browse contract is approximated by the int-extra convention
  * (`"android.media.browse.SEARCH_SUPPORTED" → 1`). On the
  * framework `android.media.browse.MediaItem` the same intent
@@ -326,7 +326,7 @@ internal object Media3ItemFactory {
 
  /**
  * Browsable folder MediaItem. The framework renders it as a
- * navigable row in the AAOS browse surface; the row's children
+ * navigable row in the Android Auto browse surface; the row's children
  * come from `onGetChildren(item.mediaId, ...)`. The `mediaType`
  * defaults to [MediaMetadata.MEDIA_TYPE_FOLDER_MIXED] for
  * generic folders (the root) but callers should pass
@@ -334,7 +334,7 @@ internal object Media3ItemFactory {
  * [MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS] /
  * [MediaMetadata.MEDIA_TYPE_FOLDER_GENRES] /
  * [MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS] for the
- * 4 corresponding tabs so AAOS can pick the right icon and
+ * 4 corresponding tabs so Android Auto can pick the right icon and
  * content style.
  */
  fun browsable(
@@ -382,8 +382,11 @@ internal object Media3ItemFactory {
  title: CharSequence,
  subtitle: CharSequence? = null,
  description: CharSequence? = null,
+ artist: CharSequence? = null,
+ album: CharSequence? = null,
  iconUri: Uri? = null,
  mediaType: Int = MediaMetadata.MEDIA_TYPE_MUSIC,
+ durationMs: Long? = null,
  extras: Extras = Extras.EMPTY,
  ): MediaItem {
  // Playable items default to list-row presentation; callers can override via [extras].
@@ -394,8 +397,11 @@ internal object Media3ItemFactory {
  .setIsPlayable(true)
  .setMediaType(mediaType)
  .also { builder ->
+ durationMs?.takeIf { it > 0L }?.let { builder.setDurationMs(it) }
  subtitle?.let { builder.setSubtitle(it) }
  description?.let { builder.setDescription(it) }
+ artist?.let { builder.setArtist(it) }
+ album?.let { builder.setAlbumTitle(it) }
  iconUri?.let { builder.setArtworkUri(it) }
  if (resolvedExtras != Extras.EMPTY) {
  builder.setExtras(resolvedExtras.toBundle())
@@ -453,7 +459,7 @@ internal object Media3ItemFactory {
  /**
  * Browsable tab MediaItem for the 6 root tabs (Songs / Albums /
  * Artists / Genres / Playlists / Recently played). The
- * `mediaType` and `extras` are tab-specific so AAOS can pick
+ * `mediaType` and `extras` are tab-specific so Android Auto can pick
  * the right icon + content style.
  */
  fun browsableTab(
@@ -579,13 +585,18 @@ internal object Media3ItemFactory {
  val resolvedExtras = extras ?: songExtras(song, albumId)
  val subtitle = songSubtitle(song).ifEmpty { null }
  val description = descriptionForSong(song).ifEmpty { null }
+ val artist = song.artists.joinToStringIfNotEmpty()
+ val album = song.album?.takeIf { it.isNotBlank() }
  return playable(
  id = KordXMediaSessionConstants.PREFIX_SONG + song.id,
  title = song.title,
  subtitle = subtitle,
  description = description,
+ artist = artist,
+ album = album,
  iconUri = iconUri,
  mediaType = MediaMetadata.MEDIA_TYPE_MUSIC,
+ durationMs = song.duration,
  extras = resolvedExtras,
  )
  }

@@ -1,8 +1,10 @@
 package com.android.rockages.kordx.services.radio
 
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
+import com.android.rockages.kordx.core.utils.Eventer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -15,8 +17,16 @@ class RadioForwardingPlayerTest {
  private lateinit var radio: FakeRadio
  private lateinit var queue: FakeQueue
  private lateinit var shorty: FakeShorty
+ private val songDurations = mutableMapOf<String, Long>()
  private val songMediaItemResolver: (String) -> MediaItem? = { id ->
- MediaItem.Builder().setMediaId(id).build()
+ MediaItem.Builder()
+ .setMediaId(id)
+ .setMediaMetadata(
+ androidx.media3.common.MediaMetadata.Builder()
+ .setDurationMs(songDurations[id])
+ .build()
+ )
+ .build()
  }
  private lateinit var player: RadioForwardingPlayer
 
@@ -159,10 +169,15 @@ class RadioForwardingPlayerTest {
  queue.currentSongIndex = -1
  queue.currentQueue = emptyList()
 
- // When the queue is empty, `BasePlayer.getCurrentMediaItem()`; looks up `getCurrentMediaItemIndex()` (1) in the; timeline, which is outofbounds for an empty; timeline. The result is `null` (not a MediaItem.EMPTY).
+ // When the queue is empty, `BasePlayer.getCurrentMediaItem()` looks up
+ // `getCurrentMediaItemIndex()` (1) in the timeline, which is out-of-bounds
+ // for an empty timeline. The result is `null` (not a MediaItem.EMPTY).
  val item = player.getCurrentMediaItem()
 
- // Emptyqueue is the legitimate "nothing playing" state; AAOS renders this as no Now Playing card. We assert; null (or, on the test classpath, an empty MediaItem; with mediaId "" if BasePlayer's getWindow returns a; zerocount window). Either is acceptable.
+ // Empty queue is the legitimate "nothing playing" state; Auto renders this
+ // as no Now Playing card. We assert null (or, on the test classpath, an
+ // empty MediaItem with mediaId "" if BasePlayer's getWindow returns a
+ // zero-count window). Either is acceptable.
  if (item != null) {
  assertEquals("", item.mediaId)
  }
@@ -185,6 +200,40 @@ class RadioForwardingPlayerTest {
  assertEquals(0L, player.getDuration())
  }
 
+ @Test
+ fun duration_isAvailableBeforeDecoderReportsPlaybackPosition() {
+ val durationMs = 240_000L
+ songDurations["song-1"] = durationMs
+ queue.currentSongId = "song-1"
+ queue.currentSongIndex = 0
+ queue.currentQueue = listOf("song-1")
+ radio.currentPlaybackPosition = null
+
+ assertEquals(durationMs, player.getDuration())
+ assertEquals(durationMs, player.getMediaMetadata().durationMs)
+
+ val window = player.currentTimeline.getWindow(0, androidx.media3.common.Timeline.Window())
+ val period = player.currentTimeline.getPeriod(0, androidx.media3.common.Timeline.Period())
+ assertTrue(window.isSeekable, "notification timeline must advertise seeking")
+ assertEquals(false, window.isLive, "local song windows must not be reported as live")
+ assertEquals(false, player.isCurrentMediaItemLive(), "local songs must expose a non-live session window")
+ assertEquals(C.msToUs(durationMs), window.durationUs)
+ assertEquals(C.msToUs(durationMs), period.durationUs)
+ }
+
+ @Test
+ fun liveDecoderDuration_overridesLibraryDuration() {
+ songDurations["song-1"] = 200_000L
+ queue.currentSongId = "song-1"
+ queue.currentSongIndex = 0
+ queue.currentQueue = listOf("song-1")
+ radio.currentPlaybackPosition =
+ RadioPlayer.PlaybackPosition(played = 12_345L, total = 240_000L)
+
+ assertEquals(240_000L, player.getDuration())
+ assertEquals(240_000L, player.getMediaMetadata().durationMs)
+ }
+
  // ---- 9. instanceof Player.
 
  @Test
@@ -199,7 +248,7 @@ class RadioForwardingPlayerTest {
  @Test
  fun canAdvertiseSession_isTrue() {
 
- // BasePlayer.canAdvertiseSession() is final and returns; true; we don't override it. This is the AAOS; "sessionadvertisable" check.
+ // BasePlayer.canAdvertiseSession() is final and returns; true; we don't override it. This is the Auto; "sessionadvertisable" check.
  assertTrue(player.canAdvertiseSession())
  }
 
@@ -213,19 +262,6 @@ class RadioForwardingPlayerTest {
  // Player.getApplicationLooper() is abstract; we return; the listener handler's looper. The Handler class; doesn't have a mocked `getLooper` on the JVM unittest; classpath, so this assertion is deferred to the AVD; validation gate (26l) where the real Android runtime; is available.
  val looper = player.getApplicationLooper()
  assertNotNull(looper)
- }
-
- @Test
- @org.junit.jupiter.api.Disabled(
- "Player.Commands.Builder.add touches android.util.SparseBooleanArray.append " +
- "which is not mocked on the JVM unit-test classpath. " +
- "Commands-contents assertions are deferred to the AVD validation gate (26l)."
- )
- fun getAvailableCommands_returnsNonNull() {
-
- // `Player.Commands.Builder.add` touches; `android.util.SparseBooleanArray.append` which is not; mocked on the JVM unittest classpath. We can't; assert the contents of the commands snapshot here; that assertion lives in the AVD validation gate; (26l) where the real Android runtime is available.; We just assert that the getter is callable and; returns a nonnull `Player.Commands` (the lazy; initializer would throw before this point, failing; the test cleanly if `Player.Commands.Builder`; becomes broken).
- val commands = player.getAvailableCommands()
- assertNotNull(commands)
  }
 
  @Test
@@ -333,6 +369,57 @@ class RadioForwardingPlayerTest {
  assertNull(radio.lastSubscriber, "removeListener of last listener should unsubscribe from radio")
  }
 
+ @Test
+ fun addListener_subscribesToPositionUpdates() {
+ val positionEventer = radio.onPlaybackPositionUpdate as RecordingEventer
+ assertEquals(0, positionEventer.subscriberCount)
+ player.addListener(RecordingListener())
+ assertEquals(1, positionEventer.subscriberCount)
+ }
+
+ @Test
+ fun removeListener_unsubscribesFromPositionUpdates() {
+ val positionEventer = radio.onPlaybackPositionUpdate as RecordingEventer
+ val listener = RecordingListener()
+ player.addListener(listener)
+ assertEquals(1, positionEventer.subscriberCount)
+ player.removeListener(listener)
+ assertEquals(0, positionEventer.subscriberCount)
+ }
+
+ @Test
+ fun release_unsubscribesFromRadioAndPositionUpdates() {
+ val positionEventer = radio.onPlaybackPositionUpdate as RecordingEventer
+ player.addListener(RecordingListener())
+ assertNotNull(radio.lastSubscriber)
+ assertEquals(1, positionEventer.subscriberCount)
+ player.release()
+ assertNull(radio.lastSubscriber, "release should unsubscribe from radio events")
+ assertEquals(0, positionEventer.subscriberCount)
+ }
+
+ @Test
+ fun platformPositionRefreshGate_throttlesToElapsedSeconds() {
+ val gate = PlatformPositionRefreshGate()
+
+ assertTrue(gate.shouldRefresh(positionMs = 0L, isPlaying = true))
+ assertEquals(false, gate.shouldRefresh(positionMs = 100L, isPlaying = true))
+ assertEquals(false, gate.shouldRefresh(positionMs = 999L, isPlaying = true))
+ assertTrue(gate.shouldRefresh(positionMs = 1_000L, isPlaying = true))
+ assertEquals(false, gate.shouldRefresh(positionMs = 1_999L, isPlaying = true))
+ assertTrue(gate.shouldRefresh(positionMs = 2_000L, isPlaying = true))
+ }
+
+ @Test
+ fun platformPositionRefreshGate_ignoresPausedTicksAndResetsForResume() {
+ val gate = PlatformPositionRefreshGate()
+
+ assertTrue(gate.shouldRefresh(positionMs = 5_000L, isPlaying = true))
+ assertEquals(false, gate.shouldRefresh(positionMs = 5_500L, isPlaying = false))
+ assertEquals(false, gate.shouldRefresh(positionMs = 6_000L, isPlaying = false))
+ assertTrue(gate.shouldRefresh(positionMs = 6_000L, isPlaying = true))
+ }
+
  // ---- Helpers: test doubles.
 
  /**
@@ -348,6 +435,7 @@ class RadioForwardingPlayerTest {
  override val currentSpeed: Float = 1f
  override val currentPitch: Float = 1f
  override val audioSessionId: Int? = 0
+ override val onPlaybackPositionUpdate: Eventer<RadioPlayer.PlaybackPosition> = RecordingEventer()
  override var queue: RadioQueueAdapterTarget = FakeQueue()
  override var shorty: RadioShortyAdapterTarget = FakeShorty()
 
@@ -441,9 +529,25 @@ class RadioForwardingPlayerTest {
  private class RecordingListener : Player.Listener {
  var eventCount: Int = 0
  private set
-
  override fun onEvents(player: Player, events: Player.Events) {
  eventCount++
  }
  }
+
+ /**
+ * [Eventer] that tracks how many active subscribers it has.
+ */
+ private class RecordingEventer<T> : Eventer<T>() {
+ var subscriberCount: Int = 0
+ private set
+
+ override fun subscribe(subscriber: (T) -> Unit): EventUnsubscribeFn {
+ subscriberCount++
+ val unsubscribe = super.subscribe(subscriber)
+ return {
+ subscriberCount--
+  unsubscribe()
+  }
+  }
+  }
 }

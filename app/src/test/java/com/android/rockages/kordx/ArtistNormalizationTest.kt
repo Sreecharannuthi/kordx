@@ -108,4 +108,28 @@ class ArtistNormalizationTest {
  val key = Song.normalizeArtistKey("50 Cent")
  assertEquals("50 cent", key)
  }
+
+ // --- Multi-value artist tag separators ---
+
+ @Test
+ fun ampersandSeparatorSplitsCollaborations() {
+ val regex = Song.makeSeparatorsRegex(setOf("&"))
+ val result = Song.parseMultiValue("Krish & Shruthi Hassan", regex)
+ assertEquals(setOf("Krish", "Shruthi Hassan"), result)
+ }
+
+ @Test
+ fun featuredArtistSeparatorsSplitCorrectly() {
+ val regex = Song.makeSeparatorsRegex(setOf("feat.", "featuring", "ft."))
+ assertEquals(setOf("A", "B"), Song.parseMultiValue("A feat. B", regex))
+ assertEquals(setOf("A", "B"), Song.parseMultiValue("A featuring B", regex))
+ assertEquals(setOf("A", "B"), Song.parseMultiValue("A ft. B", regex))
+ }
+
+ @Test
+ fun crossSeparatorSplitsCollaborations() {
+ val regex = Song.makeSeparatorsRegex(setOf(" x ", " X "))
+ assertEquals(setOf("A", "B"), Song.parseMultiValue("A x B", regex))
+ assertEquals(setOf("A", "B"), Song.parseMultiValue("A X B", regex))
+ }
 }

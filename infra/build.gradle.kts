@@ -41,6 +41,13 @@ android {
         buildConfig = true
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
+
     room {
         schemaDirectory("$projectDir/room-schemas")
     }
@@ -54,4 +61,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.vintage)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.test.core)
 }

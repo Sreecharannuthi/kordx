@@ -48,6 +48,7 @@ fun PlayerSettingsView(context: ViewContext) {
  val fadePlaybackDuration by context.kordx.settings.fadePlaybackDuration.flow.collectAsState()
  val requireAudioFocus by context.kordx.settings.requireAudioFocus.flow.collectAsState()
  val ignoreAudioFocusLoss by context.kordx.settings.ignoreAudioFocusLoss.flow.collectAsState()
+ val pauseOnAudioFocusDuck by context.kordx.settings.pauseOnAudioFocusDuck.flow.collectAsState()
  val playOnHeadphonesConnect by context.kordx.settings.playOnHeadphonesConnect.flow.collectAsState()
  val pauseOnHeadphonesDisconnect by context.kordx.settings.pauseOnHeadphonesDisconnect.flow.collectAsState()
  val seekBackDuration by context.kordx.settings.seekBackDuration.flow.collectAsState()
@@ -154,6 +155,19 @@ fun PlayerSettingsView(context: ViewContext) {
  value = ignoreAudioFocusLoss,
  onChange = { value ->
  context.kordx.settings.ignoreAudioFocusLoss.setValue(value)
+ }
+ )
+ HorizontalDivider()
+ SettingsSwitchTile(
+ icon = {
+ Icon(Icons.Filled.CenterFocusWeak, null)
+ },
+ title = {
+ Text(context.kordx.t.PauseOnAudioFocusDuck)
+ },
+ value = pauseOnAudioFocusDuck,
+ onChange = { value ->
+ context.kordx.settings.pauseOnAudioFocusDuck.setValue(value)
  }
  )
  HorizontalDivider()

@@ -1,17 +1,7 @@
 locale = "de"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Hallo!"
 IntroductoryMessage = """
-Danke, dass du Teil der KordX Open-Beta bist. Falls du auf irgendwelche Fehler stößt oder du Verbesserungsvorschläge hast, dann öffne gerne ein Issue in unserem Github Repository.
-
-Tritt unserer Discord und Reddit Community bei, um dein Feedback mitzuteilen und um auf dem aktuellsten Stand der Entwicklung zu bleiben.
-
-KordX ist komplett kostenlos und wird ausschließlich von Beiträgen anderer Menschen unterstützt. Jeder Beitrag und Unterstützung wird sehr geschätzt. 
-
-Nochmals, danke dass du KordX ausprobierst!
-"""
 Songs = "Lieder"
 Artists = "Künstler"
 Albums = "Alben"
@@ -232,7 +222,13 @@ Rose = "Rose"
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

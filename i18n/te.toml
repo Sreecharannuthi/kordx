@@ -1,17 +1,7 @@
 locale = "te"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "నమస్కారం!"
 IntroductoryMessage = """
-KordX ఓపెన్-బీటాలో భాగమైనందుకు ధన్యవాదాలు. మీకు ఏవైనా బగ్‌లు కనిపిస్తే లేదా మెరుగుదలలు సూచించాలనుకుంటే, దయచేసి మా Github రిపోజిటరీలో ఒక ఇష్యూ తెరవండి.
-
-మీ ఫీడ్‌బ్యాక్‌ను పంచుకోవడానికి మరియు డెవలప్‌మెంట్‌తో అప్‌డేట్‌గా ఉండటానికి మా Discord మరియు Reddit కమ్యూనిటీలో చేరండి.
-
-KordX పూర్తిగా ఉచితం మరియు దయగల వ్యక్తుల విరాళాల ద్వారా పూర్తిగా మద్దతు పొందుతుంది. ఏదైనా విరాళం ఎంతో అభినందనీయం.
-
-మరోసారి, KordX ప్రయత్నించినందుకు ధన్యవాదాలు!
-"""
 Songs = "పాటలు"
 Artists = "కళాకారులు"
 Albums = "ఆల్బమ్‌లు"
@@ -266,3 +256,10 @@ NothingPlayedYetSubtitle = "ఇక్కడ చూడటానికి KordXల
 NoMusicYet = "ఇంకా సంగీతం లేదు"
 AddMediaFolders = "KordX యాప్ సెట్టింగ్‌లలో మీడియా ఫోల్డర్‌లను జోడించండి"
 Scanning = "స్కాన్ చేస్తోంది…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * JVM unit tests for the pure Android Auto / AAOS Now Playing card builders
+ * JVM unit tests for the pure Android Auto / Auto Now Playing card builders
  * in [RadioSessionState]: queue items and the three custom actions
  * (shuffle / repeat / favorite). The builders are pure data — no `KordX`,
  * no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat` — so the
@@ -143,11 +143,6 @@ class RadioSessionStateTest {
  assertEquals(30_000L, RadioSessionState.SKIP_FORWARD_MS)
  }
 
- @Test
- fun queueTitleIsUpNext() {
- assertEquals("Up next", RadioSessionState.QUEUE_TITLE)
- }
-
  // ---- Action strings are unique and stable (regression guard).
 
  @Test
@@ -238,7 +233,7 @@ class RadioSessionStateTest {
  * resource name when shuffle is on. The active state is
  * `ic_shuffle_active` (vs. `ic_shuffle` for the off state) —
  * the service layer resolves this to a different drawable
- * than the off state, giving AAOS / Auto a visual cue that
+ * than the off state, giving Android Auto a visual cue that
  * shuffle is enabled.
  */
  @Test
@@ -310,7 +305,7 @@ class RadioSessionStateTest {
  * 26g — verifies the `displayName` on each button matches the
  * visible label the legacy [RadioSessionState.shuffleAction] /
  * [RadioSessionState.repeatAction] / [RadioSessionState.favoriteAction]
- * build. AAOS / Auto renders this on the Now Playing card
+ * build. Android Auto renders this on the Now Playing card
  * below the icon. The test pins the 3 default labels (off
  * state for each action).
  */
@@ -377,7 +372,7 @@ class RadioSessionStateTest {
  * carries the same `ACTION_*` custom-action string the legacy
  * `rootCustomActions` builder uses. This is the 
  * 26 deliverable — the 2 root actions are now exposed at the
- * root of the AAOS browse tree via the Media3
+ * root of the Auto browse tree via the Media3
  * `setCustomLayout(List<CommandButton>)` API.
  */
  @Test
@@ -426,7 +421,7 @@ class RadioSessionStateTest {
  /**
  * 26h — verifies the `displayName` on each button matches the
  * visible label the legacy `shuffleAllAction` / `searchAction`
- * build. AAOS / Auto renders this at the root of the browse
+ * build. Android Auto renders this at the root of the browse
  * tree below the icon. The test pins the 2 default labels.
  */
  @Test

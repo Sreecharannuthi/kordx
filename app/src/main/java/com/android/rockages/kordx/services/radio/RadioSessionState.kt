@@ -16,7 +16,6 @@ internal object RadioSessionState {
 
  const val SKIP_BACK_MS = 30_000L
  const val SKIP_FORWARD_MS = 30_000L
- const val QUEUE_TITLE = "Up next"
 
  /**
  * A `MediaSessionCompat.QueueItem` worth of data, kept as plain data so
@@ -132,7 +131,7 @@ internal object RadioSessionState {
  *
  * Builds the 3 [CommandButton]s the new
  * [androidx.media3.session.MediaLibrarySession] publishes to
- * AAOS / Auto via
+ * Android Auto via
  * `MediaLibrarySession.setMediaButtonPreferences(List<CommandButton>)`
  * so the Now Playing card renders the same 3 actions (shuffle /
  * repeat / favorite) the legacy `legacy MediaBrowserServiceCompat` shows
@@ -213,13 +212,13 @@ internal object RadioSessionState {
  )
 
  /**
- * The "Search" root-level custom browse action. AAOS handles the actual
+ * The "Search" root-level custom browse action. Auto handles the actual
  * voice / text input (this is what the plancalls "delegates to
  * the same code path as `onSearch`"); the action handler in
- * [RadioSession.handleCustomAction] just logs the receipt and lets AAOS
+ * [RadioSession.handleCustomAction] just logs the receipt and lets Auto
  * show its native search bar. We expose the action so the root browse
  * layout has a visible "Search" affordance, mirroring the standard
- * AAOS music-app pattern.
+ * Auto music-app pattern.
  */
  fun searchAction(): RadioCustomAction =
  RadioCustomAction(
@@ -247,7 +246,7 @@ internal object RadioSessionState {
  *
  * Builds the 2 [CommandButton]s the new
  * [androidx.media3.session.MediaLibrarySession] publishes to
- * AAOS / Auto via
+ * Android Auto via
  * `MediaLibrarySession.setCustomLayout(List<CommandButton>)` so
  * the root of the browse tree renders the same 2 actions
  * ("Shuffle all songs" + "Search") the legacy

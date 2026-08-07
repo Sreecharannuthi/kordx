@@ -1,17 +1,7 @@
 locale = "uk"
-
-[keys]
 UnknownSymbol = "?"
 HelloThere = "Вітаю!"
 IntroductoryMessage = """
-Дякуємо вам за участь у відкритому бета-тестуванні KordX. Якщо ви зіткнулися з будь-якими помилками або хочете запропонувати покращення, будь ласка, відкрийте проблему в нашому репозиторії Github.
-
-Приєднуйтесь до нашої спільноти Discord та Reddit, щоб ділитися своїми відгуками і бути в курсі розробки.
-
-KordX повністю підтримується пожертвуваннями через Github Sponsors, Ko-fi та Patreon.
-
-Ще раз дякую, що спробували KordX!
-"""
 Songs = "Треки"
 Artists = "Виконавці"
 Albums = "Альбоми"
@@ -226,11 +216,16 @@ Purple = "Пурпурний"
 Fuchsia = "Фуксія"
 Pink = "Рожевий"
 Rose = "Троянда"
-
 RecentlyPlayed = "Recently played"
 NothingPlayedYet = "Nothing played yet"
 NothingPlayedYetSubtitle = "Play a song in KordX to see it here"
-
 NoMusicYet = "No music yet"
 AddMediaFolders = "Add media folders in KordX app settings"
 Scanning = "Scanning…"
+PauseOnAudioFocusDuck = "Pause on audio focus duck"
+MergeWith = "Merge with..."
+MergeArtists = "Merge artists"
+MergeArtistsConfirmation = "Merge "{source}" into "{target}"? Songs and albums from the source will appear under the target artist."
+MergedArtists = "Merged artists"
+SuggestedMerges = "Suggested merges"
+AutoResumePlayback = "Auto-resume on launch"
