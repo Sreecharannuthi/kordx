@@ -5,6 +5,13 @@ All notable changes to KordX are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-08-07
+
+### Changed
+- Updated the first-launch welcome dialog with useful media-folder guidance and a close button.
+- Changed the default Home tabs to For You, Songs, Albums, and Playlists; Artists remains available as an optional tab.
+- Set the default For You section order to Suggested songs, Suggested albums, and Suggested artists.
+
 ## [1.7.6] - 2026-08-07
 
 ### Fixed

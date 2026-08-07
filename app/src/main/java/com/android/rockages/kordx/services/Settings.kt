@@ -295,7 +295,6 @@ class Settings(private val kordx: KordX) {
  HomePage.ForYou,
  HomePage.Songs,
  HomePage.Albums,
- HomePage.Artists,
  HomePage.Playlists,
  ),
  )
@@ -307,7 +306,7 @@ class Settings(private val kordx: KordX) {
  val forYouContents = EnumListEntry(
  "for_you_contents",
  enumEntries<ForYou>(),
- listOf(ForYou.Albums, ForYou.Artists),
+ listOf(ForYou.Songs, ForYou.Albums, ForYou.Artists),
  )
  val blacklistFolders = StringSetEntry("blacklist_folders", emptySet())
  val whitelistFolders = StringSetEntry("whitelist_folders", emptySet())

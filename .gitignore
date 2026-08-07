@@ -32,6 +32,7 @@ secrets
 # local test audio (not part of the build)
 /sample
 /kordx-music
+/songs
 
 # release verification scratch files
 /release_build.log
