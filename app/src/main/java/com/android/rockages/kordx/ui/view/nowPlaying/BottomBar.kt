@@ -50,7 +50,6 @@ import com.android.rockages.kordx.services.radio.RadioQueue
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.ui.view.LyricsViewRoute
 import com.android.rockages.kordx.ui.view.NowPlayingData
-import com.android.rockages.kordx.ui.view.NowPlayingDefaults
 import com.android.rockages.kordx.ui.view.NowPlayingLyricsLayout
 import com.android.rockages.kordx.ui.view.NowPlayingStates
 import com.android.rockages.kordx.ui.view.QueueViewRoute
@@ -82,7 +81,7 @@ fun NowPlayingBodyBottomBar(
  .padding(
  start = 8.dp,
  end = 8.dp,
- bottom = 4.dp,
+ bottom = 8.dp,
  ),
  verticalAlignment = Alignment.CenterVertically,
  ) {
@@ -115,7 +114,7 @@ fun NowPlayingBodyBottomBar(
  NowPlayingLyricsLayout.ReplaceArtwork -> {
  val nShowLyrics = !showLyricsState.value
  showLyricsState.value = nShowLyrics
- NowPlayingDefaults.showLyrics = nShowLyrics
+ context.kordx.settings.showLyrics.setValue(nShowLyrics)
  }
 
  NowPlayingLyricsLayout.SeparatePage -> {
@@ -127,7 +126,8 @@ fun NowPlayingBodyBottomBar(
  Icon(
  Icons.AutoMirrored.Outlined.Article,
 
- // `contentDescription` so TalkBack /; the a11y tree can identify this IconButton.
+ // `contentDescription` so TalkBack /
+ // the a11y tree can identify this IconButton.
  context.kordx.t.Lyrics,
  tint = when {
  showLyrics -> MaterialTheme.colorScheme.primary
@@ -147,7 +147,8 @@ fun NowPlayingBodyBottomBar(
  else -> Icons.Filled.Repeat
  },
 
- // `contentDescription` so TalkBack /; the a11y tree can identify this IconButton.
+ // `contentDescription` so TalkBack /
+ // the a11y tree can identify this IconButton.
  context.kordx.t.Repeat,
  tint = when (currentLoopMode) {
  RadioQueue.LoopMode.None -> LocalContentColor.current
@@ -163,7 +164,8 @@ fun NowPlayingBodyBottomBar(
  Icon(
  Icons.Filled.Shuffle,
 
- // `contentDescription` so TalkBack /; the a11y tree can identify this IconButton.
+ // `contentDescription` so TalkBack /
+ // the a11y tree can identify this IconButton.
  context.kordx.t.Shuffle,
  tint = when {
  currentShuffleMode -> MaterialTheme.colorScheme.primary
@@ -179,7 +181,8 @@ fun NowPlayingBodyBottomBar(
  Icon(
  Icons.Outlined.MoreHoriz,
 
- // `contentDescription` so TalkBack /; the a11y tree can identify this IconButton.
+ // `contentDescription` so TalkBack /
+ // the a11y tree can identify this IconButton.
  context.kordx.t.More,
  )
  }

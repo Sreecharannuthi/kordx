@@ -33,7 +33,7 @@ object ThemeColors {
  val Teal = Color(0xFF14B8A6)
  val Cyan = Color(0xFF06B6D4)
  val Sky = Color(0xFF0EA5E9)
- val Blue = Color(0xFF3B82F6)
+ val Blue = Color(0xFF4285F4)
  val Indigo = Color(0xFF6366f1)
  val Violet = Color(0xFF8B5CF6)
  val Purple = Color(0xFFA855F7)
@@ -47,7 +47,7 @@ object ThemeColors {
  val Neutral800 = Color(0xFF262626)
  val Neutral900 = Color(0xFF171717)
 
- val DefaultPrimaryColor = PrimaryThemeColor.Purple
+ val DefaultPrimaryColor = PrimaryThemeColor.Blue
  val PrimaryColorsMap = mapOf(
  PrimaryThemeColor.Red to Red,
  PrimaryThemeColor.Orange to Orange,

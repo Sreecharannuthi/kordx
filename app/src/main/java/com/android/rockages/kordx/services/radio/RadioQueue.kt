@@ -16,7 +16,11 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
 
  val originalQueue = concurrentListOf<String>()
 
- // `currentQueue` is overridden from [RadioQueueAdapterTarget]; with a covariant return type (MutableList<String> is a; List<String>). The internal code continues to use the; MutableList<String> API (`add`, `clear`, etc.); the; adapterfacing surface sees it as List<String>.
+ // `currentQueue` is overridden from [RadioQueueAdapterTarget]
+ // with a covariant return type (MutableList<String> is a
+ // List<String>). The internal code continues to use the
+ // MutableList<String> API (`add`, `clear`, etc.); the
+ // adapter-facing surface sees it as List<String>.
  override val currentQueue: MutableList<String> = concurrentListOf()
 
  override var currentSongIndex = -1
@@ -129,6 +133,19 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  }
 
  /**
+ * Removes songs by [songIds] (id-based removal). Looks up all
+ * matching indices and delegates to [remove] by index.
+ */
+ fun removeByIds(songIds: List<String>) {
+ val indices = songIds.flatMap { id ->
+ currentQueue.indices.filter { currentQueue[it] == id }
+ }.sortedDescending().distinct()
+ if (indices.isNotEmpty()) {
+ remove(indices)
+ }
+ }
+
+ /**
  * Removes the song at [index] from both queues and adjusts
  * [currentSongIndex], but does NOT trigger playback. Used by
  * [Radio.play] when it discovers a stale song id at the requested
@@ -148,7 +165,9 @@ class RadioQueue(private val kordx: KordX) : RadioQueueAdapterTarget {
  override fun setLoopMode(loopMode: LoopMode) {
  currentLoopMode = loopMode
 
- // Persist loop mode so the user's choice survives an app restart.; write) and is fired from the foreground UI / Media3; `setRepeatMode` adapter path, not on a hot loop.
+ // Persist loop mode so the user's choice survives an app restart. The
+ // write happens from the foreground UI / Media3 `setRepeatMode` adapter
+ // path, not on a hot loop.
  if (kordx.settings.lastLoopMode.value != loopMode) {
  kordx.settings.lastLoopMode.setValue(loopMode)
  }

@@ -13,6 +13,7 @@ fun SettingsSimpleTile(
 ) {
  Card(
  colors = SettingsTileDefaults.cardColors(),
+ shape = SettingsTileDefaults.cardShape(),
  onClick = onClick
  ) {
  ListItem(

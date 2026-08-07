@@ -1,6 +1,5 @@
 package com.android.rockages.kordx.services.radio
 
-import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaConstants
 import com.android.rockages.kordx.core.groove.Album
@@ -195,35 +194,56 @@ class Media3ItemFactoryTest {
  // ================================================================; Tablevel extras (delegated to MediaItemFactory).; ================================================================
 
  @Test
- fun songsTabExtrasAreEmpty() {
+ fun songsTabExtrasUseListContentStyle() {
  val ex = Media3ItemFactory.songsTabExtras()
  assertTrue(ex.stringEntries.isEmpty())
  assertTrue(ex.longEntries.isEmpty())
- assertTrue(ex.intEntries.isEmpty())
- }
-
- @Test
- fun albumsTabExtrasOverrideToGrid() {
-
- // Mirrors MediaItemFactoryTest.albumsTabExtrasOverrideToGrid; — the Media3 factory delegates the data to the legacy; factory, so the perentity extras are identical.
- val ex = Media3ItemFactory.albumsTabExtras()
  assertEquals(
- MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
  ex.intEntries[MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE],
+ "Songs tab children are playable songs and should render as list items"
  )
  }
 
  @Test
- fun artistsGenresPlaylistsTabExtrasAreEmpty() {
- assertTrue(Media3ItemFactory.artistsTabExtras().intEntries.isEmpty())
- assertTrue(Media3ItemFactory.genresTabExtras().intEntries.isEmpty())
- assertTrue(Media3ItemFactory.playlistsTabExtras().intEntries.isEmpty())
+ fun albumsTabExtrasOverrideToGrid() {
+ val ex = Media3ItemFactory.albumsTabExtras()
+ assertEquals(
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ex.intEntries[MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE],
+ "Albums tab children are browsable albums and should render as grid items"
+ )
  }
 
  @Test
- fun recentTabExtrasCarrySearchabilityHint() {
+ fun artistsGenresPlaylistsTabExtrasUseGridContentStyle() {
+ listOf(
+ Media3ItemFactory.artistsTabExtras(),
+ Media3ItemFactory.genresTabExtras(),
+ Media3ItemFactory.playlistsTabExtras(),
+ ).forEachIndexed { index, ex ->
+ val label = when (index) {
+ 0 -> "Artists"
+ 1 -> "Genres"
+ else -> "Playlists"
+ }
+ assertEquals(
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ex.intEntries[MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE],
+ "$label tab children are browsable folders and should render as grid items"
+ )
+ }
+ }
+
+ @Test
+ fun recentTabExtrasCarrySearchabilityHintAndListStyle() {
  val ex = Media3ItemFactory.recentTabExtras()
  assertEquals(1, ex.intEntries["android.media.browse.SEARCH_SUPPORTED"])
+ assertEquals(
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ex.intEntries[MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE],
+ "Recently played tab children are playable songs and should render as list items"
+ )
  }
 
 

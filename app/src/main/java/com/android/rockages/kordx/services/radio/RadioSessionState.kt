@@ -135,7 +135,7 @@ internal object RadioSessionState {
  * AAOS / Auto via
  * `MediaLibrarySession.setMediaButtonPreferences(List<CommandButton>)`
  * so the Now Playing card renders the same 3 actions (shuffle /
- * repeat / favorite) the legacy `KordXMediaBrowserService` shows
+ * repeat / favorite) the legacy `legacy MediaBrowserServiceCompat` shows
  * via `PlaybackStateCompat.CustomAction`.
  *
  * The [iconResolver] is a `(iconName: String) -> Int` lambda
@@ -169,7 +169,14 @@ internal object RadioSessionState {
  val repeat = repeatAction(loopMode)
  val favorite = favoriteAction(isFavorite)
 
- // Use `Bundle()` (not `Bundle.EMPTY`) for JVM testability: the; static `Bundle.EMPTY` field is `null` in the unittest; android.jar (the stub's static initializers don't run unless; something explicitly triggers them), and Media3's; `SessionCommand(String, Bundle)` constructor does; `new Bundle(checkNotNull(bundle))` which NPEs on a null; input. `Bundle()` is the noarg constructor that the stub; jar mocks to return a default empty Bundle.
+ // Use `Bundle()` (not `Bundle.EMPTY`) for JVM testability: the
+ // static `Bundle.EMPTY` field is `null` in the unit-test
+ // android.jar (the stub's static initializers don't run unless
+ // something explicitly triggers them), and Media3's
+ // `SessionCommand(String, Bundle)` constructor does
+ // `new Bundle(checkNotNull(bundle))` which NPEs on a null
+ // input. `Bundle()` is the no-arg constructor that the stub
+ // jar mocks to return a default empty Bundle.
  val emptyExtras = Bundle()
  return listOf(
  CommandButton.Builder()
@@ -226,7 +233,7 @@ internal object RadioSessionState {
  * [allCustomActions] these don't depend on any live state — they're a
  * fixed list the [RadioSession] publishes once at media-session
  * activation. The AVD validation gate's
- * `adb logcat -d | grep "KordXMediaBrowserService.*(custom|shuffle_all|search)"`
+ * `adb logcat -d | grep "legacy MediaBrowserServiceCompat.*(custom|shuffle_all|search)"`
  * looks for the "custom browse actions: shuffle_all, search" log line
  * emitted right after the call to `MediaSession.setCustomLayout()`.
  */
@@ -244,7 +251,7 @@ internal object RadioSessionState {
  * `MediaLibrarySession.setCustomLayout(List<CommandButton>)` so
  * the root of the browse tree renders the same 2 actions
  * ("Shuffle all songs" + "Search") the legacy
- * `KordXMediaBrowserService` shows via
+ * `legacy MediaBrowserServiceCompat` shows via
  * `MediaSessionCompat.setCustomLayout()`. The 2 buttons are
  * static (no live state — both "Shuffle all" and "Search" are
  * always available regardless of playback state).
@@ -277,7 +284,11 @@ internal object RadioSessionState {
  val shuffleAll = shuffleAllAction()
  val search = searchAction()
 
- // Use `Bundle()` (not `Bundle.EMPTY`) for JVM testability; (the same reason as [nowPlayingCardCustomActions] — the; static `Bundle.EMPTY` is `null` in the unittest; android.jar, and the `SessionCommand(String, Bundle)`; constructor NPEs on a null input).
+ // Use `Bundle()` (not `Bundle.EMPTY`) for JVM testability
+ // (the same reason as [nowPlayingCardCustomActions] — the
+ // static `Bundle.EMPTY` is `null` in the unit-test
+ // android.jar, and the `SessionCommand(String, Bundle)`
+ // constructor NPEs on a null input).
  val emptyExtras = Bundle()
  return listOf(
  CommandButton.Builder()

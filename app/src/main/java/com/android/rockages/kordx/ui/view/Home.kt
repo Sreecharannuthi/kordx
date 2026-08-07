@@ -363,7 +363,7 @@ fun HomeView(context: ViewContext) {
  if (showTabsSheet) {
  val sheetState = rememberModalBottomSheetState()
  val orderedTabs = remember {
- setOf<HomePage>(*tabs.toTypedArray(), *HomePage.entries.toTypedArray())
+ (tabs + (HomePage.entries - tabs.toSet())).distinct()
  }
 
  ModalBottomSheet(
@@ -379,7 +379,7 @@ fun HomeView(context: ViewContext) {
  horizontalArrangement = Arrangement.SpaceBetween,
  verticalArrangement = Arrangement.spacedBy(8.dp),
  ) {
- items(orderedTabs.toList(), key = { it.ordinal }) { x ->
+ items(orderedTabs, key = { it.ordinal }) { x ->
  val isSelected = x == currentTab
  val label = x.label(context)
 

@@ -33,10 +33,11 @@ fun SettingsTextInputTile(
  onReset: (() -> Unit)? = null,
  onChange: (String) -> Unit,
 ) {
- var isOpen by remember { mutableStateOf(false) }
+ var isOpen by rememberDebounceState()
 
  Card(
  colors = SettingsTileDefaults.cardColors(),
+ shape = SettingsTileDefaults.cardShape(),
  onClick = { isOpen = !isOpen }
  ) {
  ListItem(

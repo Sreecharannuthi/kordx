@@ -210,7 +210,7 @@ private fun FoldersGrid(
  else -> ResponsiveGrid(gridColumns) {
  itemsIndexed(
  sortedFolderNames,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.ARTIST }
  ) { _, folderName ->
  folders[folderName]?.let { folder ->

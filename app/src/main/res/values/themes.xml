@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- KordX Sonic Lite Theme -->
+    <!-- KordX theme: blue primary + gold accent, aligned with icon.svg. -->
     <style name="Theme.KordX" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowLayoutInDisplayCutoutMode">default</item>
-        <item name="android:colorPrimary">#00696F</item>
-        <item name="android:colorPrimaryDark">#004F54</item>
-        <item name="android:colorAccent">#00F0FF</item>
+        <item name="android:colorPrimary">#4285F4</item>
+        <item name="android:colorPrimaryDark">#1967D2</item>
+        <item name="android:colorAccent">#FBBC05</item>
         <item name="android:windowBackground">#F7F9FB</item>
         <item name="android:statusBarColor">#F7F9FB</item>
         <item name="android:windowLightStatusBar">true</item>

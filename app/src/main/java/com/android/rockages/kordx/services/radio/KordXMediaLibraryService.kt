@@ -1,9 +1,17 @@
 package com.android.rockages.kordx.services.radio
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.annotation.VisibleForTesting
 import androidx.media3.common.MediaItem
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -15,6 +23,8 @@ import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import com.android.rockages.kordx.BuildConfig
 import com.android.rockages.kordx.KordX
+import com.android.rockages.kordx.R
+import com.android.rockages.kordx.MainActivity
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import com.android.rockages.kordx.core.utils.Logger
 import com.android.rockages.kordx.services.groove.getSongIds
@@ -37,7 +47,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  private var mediaSession: MediaLibrarySession? = null
 
 
- // 26i: the 2 debug receivers (DEBUG_ACTION_SCAN +; DEBUG_ACTION_SONG_LIST) ported from the legacy; `KordXMediaBrowserService`. The receivers are registered; in [onCreate] and unregistered in [onDestroy]. They; drive the AVD validation gate for the 26f placeholders; (the "scanning" + "no_songs" + "nothing_recent" rows; exercise the receiverdriven librarystate changes).; The plan calls out reregistration in 26k; the; 26i cutover does it here so the legacy service can be; deleted without losing the AVD validation path.; The 2 receivers (scan + songlist) cover the 26f; placeholder shortcircuits. The 8 other `DEBUG_ACTION_*`; receivers (shuffle / repeat / favorite / shuffle_all /; search / recent_play / playback_error / root_search); land in 26k (they drive the 1822 AVD validation; gates; the new service's handlers are wired in 26i for; shuffle / repeat / favorite / shuffle_all / search via; [BrowseTreeCallback.onCustomCommand], and 26k adds the; broadcastdriven debug entry points).
+ // Debug receivers for AVD validation placeholders (scanning / no_songs / nothing_recent).
  private val debugScanReceiver = object : android.content.BroadcastReceiver() {
  override fun onReceive(context: android.content.Context?, intent: android.content.Intent?) {
  val updating = intent?.getBooleanExtra(KordXMediaSessionConstants.EXTRA_DEBUG_UPDATING, true) ?: true
@@ -70,6 +80,32 @@ class KordXMediaLibraryService : MediaLibraryService() {
  override fun onCreate() {
  super.onCreate()
  Log.i(LOG_TAG, "onCreate: building MediaLibrarySession (browse tree + playback)")
+
+ // Configure the Media3 notification provider for the phone surface. This replaces the
+ // legacy RadioNotification/RadioNotificationService stack and gives us a single stable
+ // notification id and a dedicated channel id.
+ setMediaNotificationProvider(
+ DefaultMediaNotificationProvider.Builder(this)
+ .setChannelId(NOTIFICATION_CHANNEL_ID)
+ .setChannelName(R.string.app_name)
+ .setNotificationId(NOTIFICATION_ID)
+ .build()
+ )
+ Log.i(
+ LOG_TAG,
+ "onCreate: configured DefaultMediaNotificationProvider " +
+ "(id=$NOTIFICATION_ID, channel=$NOTIFICATION_CHANNEL_ID)"
+ )
+
+ // Android 12+ requires startForeground() to be called very soon after
+ // startForegroundService(). Media3's provider posts the real notification
+ // asynchronously once its internal MediaController connects. To avoid a
+ // ForegroundServiceDidNotStartInTimeException when Radio starts this service
+ // after playback has already begun, post a minimal placeholder notification
+ // immediately and let the provider replace it with the real media notification
+ // as soon as the controller connects.
+ startForegroundWithPlaceholder()
+
  val player = createPlayer()
  val callback = createCallback()
 
@@ -77,21 +113,36 @@ class KordXMediaLibraryService : MediaLibraryService() {
  // constructor that takes the owning service (instead of a bare
  // Context). It wires the session into the service's lifecycle so
  // `onGetSession` will be called by the framework on bind.
- mediaSession = MediaLibrarySession.Builder(this, player, callback).build()
+ //
+ // `setSessionActivity` gives the AAOS / Auto framework a PendingIntent to
+ // launch when the user taps the Now Playing card / media notification. Use
+ // FLAG_ACTIVITY_SINGLE_TOP | FLAG_ACTIVITY_CLEAR_TOP so an existing
+ // MainActivity is brought to the foreground rather than creating a new task.
+ val sessionActivityIntent = Intent(this, MainActivity::class.java).apply {
+ action = Intent.ACTION_MAIN
+ addCategory(Intent.CATEGORY_LAUNCHER)
+ flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+ }
+ val sessionActivity = PendingIntent.getActivity(
+ this,
+ 0,
+ sessionActivityIntent,
+ PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+ )
+ mediaSession = MediaLibrarySession.Builder(this, player, callback)
+ .setSessionActivity(sessionActivity)
+ .build()
  Log.i(
  LOG_TAG,
  "onCreate: MediaLibrarySession built (player=$player, " +
  "callback=${callback::class.java.simpleName}, session=$mediaSession)"
  )
 
- // 26h — publish the 2 root-level custom browse actions
- // (SHUFFLE_ALL + SEARCH) via `setCustomLayout`. AAOS
- // surfaces these buttons at the root of the browse tree
- // (vs. the Now Playing card, which uses
- // `setMediaButtonPreferences`). The Now Playing card actions
- // are refreshed by [BrowseTreeCallback.publishCurrentPlaybackButtons]
- // in response to player events and custom commands, so no
- // hardcoded initial publish is needed.
+ // Publish the 2 root-level custom browse actions (SHUFFLE_ALL + SEARCH)
+ // via `setCustomLayout`. AAOS surfaces these buttons at the root of the browse tree
+ // (vs. the Now Playing card, which uses `setMediaButtonPreferences`). The Now Playing
+ // card actions are refreshed by [BrowseTreeCallback.publishCurrentPlaybackButtons] in
+ // response to player events and custom commands, so no hardcoded initial publish is needed.
  mediaSession?.setCustomLayout(
  RadioSessionState.rootCustomButtons(iconResolver = ::resolveDrawable)
  )
@@ -100,9 +151,25 @@ class KordXMediaLibraryService : MediaLibraryService() {
  "onCreate: published 2 root custom actions (SHUFFLE_ALL, SEARCH)"
  )
 
- // 26i — register the 2 debug receivers (DEBUG_ACTION_SCAN +
- // DEBUG_ACTION_SONG_LIST) so the AVD validation gate can
- // exercise the 26f placeholders under the new service.
+ // Register the session with the service. MediaLibrarySession.Builder does NOT do
+ // this automatically: MediaSessionService.addSession() is otherwise only called
+ // when an external controller binds, and without it the MediaNotificationManager
+ // never learns about the session — its internal notification controller is never
+ // created and the real media notification never posts (the placeholder would
+ // linger forever). addSession() is idempotent for the same session instance.
+ mediaSession?.let { session ->
+ addSession(session)
+ val player = session.player
+ Log.i(
+ LOG_TAG,
+ "onCreate: session registered; playbackState=${player.playbackState}, " +
+ "playWhenReady=${player.playWhenReady}, " +
+ "timelineWindows=${player.currentTimeline.windowCount}"
+ )
+ }
+
+ // Register the 2 debug receivers (DEBUG_ACTION_SCAN + DEBUG_ACTION_SONG_LIST) so the AVD
+ // validation gate can exercise the placeholders under the new service.
  if (BuildConfig.DEBUG) {
  registerDebugReceivers()
  }
@@ -119,11 +186,53 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26i — register the 2 debug receivers that drive the AVD
- * validation gate for the 26f placeholders. Uses the
- * `RECEIVER_EXPORTED` flag on API 33+ (Tiramisu) per the
- * platform requirement for non-system broadcasts; falls back to
- * the legacy unspecified flag on older APIs.
+ * Android 12+ pairs every `startForegroundService()` with a mandatory
+ * `startForeground()` within a few seconds. Radio starts this service directly
+ * (`Radio.startMediaLibraryService`) on every Player.Started/Resumed event —
+ * including when the service is already running, in which case [onCreate] is NOT
+ * re-invoked. Media3's MediaNotificationManager also starts the service with its
+ * own self intent when it is about to post the real media notification; that path
+ * is followed immediately by its own `startForeground()` with the real
+ * notification, so it must be left alone.
+ *
+ * For every other start (Radio-initiated or a system media-button start), post the
+ * placeholder foreground notification right away. Media3's internal listener then
+ * replaces it with the real media notification on the same notification id as soon
+ * as the player reports a staged queue (which is the case for every
+ * Radio-triggered start, since Started/Resumed implies a current song).
+ */
+ override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+ if (intent?.hasExtra(MEDIA3_SELF_INTENT_UID_KEY) != true &&
+ !hasActiveMedia3Notification()
+ ) {
+ startForegroundWithPlaceholder()
+ }
+ return super.onStartCommand(intent, flags, startId)
+ }
+
+ /**
+ * True when notification [NOTIFICATION_ID] is currently posted by Media3 (the real
+ * media notification). Media3's MediaNotificationManager always attaches the
+ * framework session token as [android.app.Notification.EXTRA_MEDIA_SESSION] when it
+ * posts; the placeholder never has that extra. When the real notification is active,
+ * Media3's internal controller is alive and will refresh it on the same player event
+ * that triggered this service start — re-posting the placeholder would clobber the
+ * real notification (and its actions) until the next Media3 update.
+ */
+ private fun hasActiveMedia3Notification(): Boolean {
+ val notificationManager =
+ getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+ return notificationManager.activeNotifications.any {
+ it.id == NOTIFICATION_ID &&
+ it.notification.extras.containsKey(android.app.Notification.EXTRA_MEDIA_SESSION)
+ }
+ }
+
+ /**
+ * Register the 2 debug receivers that drive the AVD validation gate for the
+ * placeholders. Uses the `RECEIVER_EXPORTED` flag on API 33+ (Tiramisu) per the
+ * platform requirement for non-system broadcasts; falls back to the legacy
+ * unspecified flag on older APIs.
  */
  private fun registerDebugReceivers() {
  val ctx = applicationContext
@@ -170,12 +279,46 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26g — rebuild + republish the 3 Now Playing card custom actions
- * (shuffle / repeat / favorite) via
- * `MediaLibrarySession.setMediaButtonPreferences(List<CommandButton>)`.
- * Called once in [onCreate] (initial publish) and on every
- * relevant `Player.Listener` event during the 26i+ cutover.
- * Safe to call when [mediaSession] is `null` (no-op).
+ * Post a minimal placeholder notification and call [startForeground] with the same
+ * [NOTIFICATION_ID] used by [DefaultMediaNotificationProvider]. This guarantees the
+ * foreground-service requirement is satisfied in [onCreate] before the Media3 internal
+ * [androidx.media3.session.MediaController] connects and the provider swaps in the real
+ * media notification. The placeholder uses the same low-importance channel and transport
+ * category so the transition is transparent to the user.
+ */
+ private fun startForegroundWithPlaceholder() {
+ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+ val channel = NotificationChannel(
+ NOTIFICATION_CHANNEL_ID,
+ getString(R.string.app_name),
+ NotificationManager.IMPORTANCE_LOW,
+ ).apply {
+ setSound(null, null)
+ enableLights(false)
+ enableVibration(false)
+ }
+ val notificationManager =
+ getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+ notificationManager.createNotificationChannel(channel)
+ }
+
+ val notification = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+ .setContentTitle(getString(R.string.app_name))
+ .setSmallIcon(R.drawable.material_icon_music_note)
+ .setOngoing(true)
+ .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+ .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+ .build()
+
+ startForeground(NOTIFICATION_ID, notification)
+ Log.i(LOG_TAG, "startForegroundWithPlaceholder: placeholder notification posted")
+ }
+
+ /**
+ * Rebuild + republish the 3 Now Playing card custom actions (shuffle / repeat / favorite)
+ * via `MediaLibrarySession.setMediaButtonPreferences(List<CommandButton>)`. Called once in
+ * [onCreate] (initial publish) and on every relevant `Player.Listener` event. Safe to call when
+ * [mediaSession] is `null` (no-op).
  */
  private fun refreshNowPlayingButtons(
  shuffleOn: Boolean,
@@ -198,13 +341,12 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26g — resolve a drawable resource name (e.g. `"ic_shuffle"`)
- * to a `@DrawableRes Int` via `Resources.getIdentifier(name,
- * "drawable", packageName)`. Returns `0` (the "no resource"
- * sentinel) if the name doesn't map to a drawable, mirroring the
- * legacy `RadioSession.resolveDrawable` behavior. The icon
- * resolver is passed to [RadioSessionState.nowPlayingCardCustomActions]
- * so the builder stays pure (no `Context` dependency).
+ * Resolve a drawable resource name (e.g. `"ic_shuffle"`) to a `@DrawableRes Int` via
+ * `Resources.getIdentifier(name, "drawable", packageName)`. Returns `0` (the "no resource"
+ * sentinel) if the name doesn't map to a drawable, mirroring the legacy
+ * `RadioSession.resolveDrawable` behavior. The icon resolver is passed to
+ * [RadioSessionState.nowPlayingCardCustomActions] so the builder stays pure (no `Context`
+ * dependency).
  */
  private fun resolveDrawable(name: String): Int =
  resources.getIdentifier(name, "drawable", packageName)
@@ -227,6 +369,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  *
  * A defensive no-op fallback is kept for the theoretical case
  * where [KordX.instance] is null at service creation time; in
+ * practice [KordXApplication] creates the graph during
  * practice [KordXApplication] creates the graph during
  * `Application.onCreate`, so this path should never be hit.
  */
@@ -259,6 +402,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  },
  seekBackDurationMs = app.settings.seekBackDuration.value?.toLong() ?: SEEK_BACK_MS,
  seekForwardDurationMs = app.settings.seekForwardDuration.value?.toLong() ?: SEEK_FORWARD_MS,
+ audioManager = app.applicationContext.getSystemService(android.content.Context.AUDIO_SERVICE)
+                as? android.media.AudioManager,
  )
  }
 
@@ -267,10 +412,10 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * implementations of the 4 browse-tree callbacks
  * ([BrowseTreeCallback.onConnect] / [BrowseTreeCallback.onGetLibraryRoot] /
  * [BrowseTreeCallback.onGetItem] / [BrowseTreeCallback.onGetChildren])
- * and 26c stub defaults for [BrowseTreeCallback.onSearch] (26e)
- * and [BrowseTreeCallback.onCustomCommand] (26h). Falls back to a
+ * and stub defaults for [BrowseTreeCallback.onSearch]
+ * and [BrowseTreeCallback.onCustomCommand]. Falls back to a
  * minimal error-only callback if [KordX.instance] is `null` at
- * `onCreate` time (defensive guard — theramework should bind
+ * `onCreate` time (defensive guard — the framework should bind
  * to the service only after the Application is created and
  * `KordX.instance` is populated, so this path is theoretical).
  */
@@ -301,42 +446,46 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // ====================================================================; BrowseTreeCallback — theeal 26d MediaLibrarySession.Callback; implementation. Owns the 4 browsetree callbacks (real) + 2; stubs (onSearch for 26e, onCustomCommand for 26h) + the; 6 tab builders + 5 drilldown builders + the mediaItemForId; lookup.; ====================================================================
+ // ====================================================================
+ // BrowseTreeCallback — the real MediaLibrarySession.Callback implementation.
+ // Owns the 4 browse-tree callbacks + 2 stubs (onSearch + onCustomCommand) + the
+ // 6 tab builders + 5 drilldown builders + the mediaItemForId lookup.
+ // ====================================================================
 
  /**
- * The real [MediaLibrarySession.Callback] for 26d. Implements the
- * 4 browse-tree callbacks by porting the legacy
- * [KordXMediaBrowserService] tab / drill-down builders to Media3
- * `MediaItem` instances via [Media3ItemFactory]. The 2 remaining
- * callbacks ([onSearch] and [onCustomCommand]) keep their 26c
- * skeleton defaults — 26e and 26h fill them in respectively.
+ * The real [MediaLibrarySession.Callback]. Implements the 4 browse-tree callbacks
+ * by porting the legacy legacy MediaBrowserServiceCompat tab / drill-down builders to Media3
+ * `MediaItem` instances via [Media3ItemFactory]. The 2 remaining callbacks
+ * ([onSearch] and [onCustomCommand]) keep their skeleton defaults for now.
  *
- * The class is `internal` so the test can instantiate it and
- * assert on its behavior. The class is `public` via the `internal`
- * modifier — `MediaLibrarySession.Builder` is in the same module
- * so it accepts `internal` callbacks.
+ * The class is `internal` so the test can instantiate it and assert on its behavior.
+ * The class is `public` via the `internal` modifier — `MediaLibrarySession.Builder` is in
+ * the same module so it accepts `internal` callbacks.
  */
  internal inner class BrowseTreeCallback(
  private val app: KordX,
  ) : MediaLibrarySession.Callback {
 
 
- // 26e: store the most recent search query per; controller so the framework's later; `onGetSearchResult` calls can look up which query to; execute. AAOS issues one `onSearch` per "search; initiated by the user" gesture, then any number of; `onGetSearchResult` calls (for paging, refresh,; etc.). One inflight search per controller is the; Media3 contract.
+ // Store the most recent search query per controller so the framework's later
+ // `onGetSearchResult` calls can look up which query to execute. AAOS issues one
+ // `onSearch` per "search initiated by the user" gesture, then any number of
+ // `onGetSearchResult` calls (for paging, refresh, etc.). One inflight search per
+ // controller is the Media3 contract.
 
  private val pendingSearches: MutableMap<MediaSession.ControllerInfo, String> =
  java.util.concurrent.ConcurrentHashMap()
 
- // ---- 26d: real implementations of the 4 browse-tree callbacks.
+ // ---- Real implementations of the 4 browse-tree callbacks.
 
  /**
- * Accept every connection. The plan: "no per-connection
- * custom layout yet — that's 26h." The default
+ * Accept every connection. The default
  * [MediaSession.ConnectionResult.accept] uses the
  * [MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS]
  * command set, which includes `SESSION_COMMAND_SEARCH` — so
  * the AAOS surface shows the search affordance on the root
  * without the new service having to opt in explicitly. The
- * 26e `onSearch` implementation is the actual handler.
+ * `onSearch` implementation is the actual handler.
  */
  override fun onConnect(
  session: MediaSession,
@@ -400,7 +549,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  /**
  * Return the children of a browsable `parentId`. The
- * implementation matches the legacy [KordXMediaBrowserService]'s
+ * implementation matches the legacy legacy MediaBrowserServiceCompat's
  * `onLoadChildren` 1:1 — the 6 root tabs under
  * [KordXMediaSessionConstants.ID_ROOT] + the 5 drill-downs
  * (album / albumArtist / artist / genre / playlist → songs)
@@ -409,10 +558,10 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * The work is dispatched on [KordX.groove]'s
  * `coroutineScope` (which is `Dispatchers.Default` per
  * `Groove.kt`) and the result is delivered via a
- * [SettableFuture] — theinder call returns immediately
+ * [SettableFuture] — the caller returns immediately
  * (the AAOS framework awaits the future on the controller
- * side). Empty / scan / error placeholders are deferred to
- * 26f.
+ * side). Empty / scan / error placeholders are deferred to the
+ * placeholder builders.
  */
  override fun onGetChildren(
  session: MediaLibrarySession,
@@ -424,7 +573,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
  Log.i(
  LOG_TAG,
- "BrowseTreeCallback.onGetChildren (26d browse tree): " +
+ "BrowseTreeCallback.onGetChildren (browse tree): " +
  "controllerInfo=$controllerInfo, parentId=$parentId, " +
  "page=$page, pageSize=$pageSize, params=$params"
  )
@@ -446,15 +595,13 @@ class KordXMediaLibraryService : MediaLibraryService() {
  return future
  }
 
- // ---- 26e: real onSearch + onGetSearchResult.
+ // ---- Real onSearch + onGetSearchResult.
 
  /**
- * 26e — Media3 1.7.1's `onSearch` is the "acknowledge the
- * query" callback. It returns `LibraryResult<Void>` (NOT a
- * list of results; the results come from
- * [onGetSearchResult] below). The implementation records
- * the in-flight search in [pendingSearches] so the
- * framework's later `onGetSearchResult` calls can look up
+ * Media3 1.7.1's `onSearch` is the "acknowledge the query" callback. It returns
+ * `LibraryResult<Void>` (NOT a list of results; the results come from
+ * [onGetSearchResult] below). The implementation records the in-flight search in
+ * [pendingSearches] so the framework's later `onGetSearchResult` calls can look up
  * the query to execute.
  */
  override fun onSearch(
@@ -469,32 +616,27 @@ class KordXMediaLibraryService : MediaLibraryService() {
  "query='$query', params=$params"
  )
 
- // Atomically replace any prior query from the same; controller (the framework guarantees one inflight; search per controller at a time).
+ // Atomically replace any prior query from the same controller (the framework
+ // guarantees one in-flight search per controller at a time).
  pendingSearches[controllerInfo] = query
  return Futures.immediateFuture(LibraryResult.ofVoid())
  }
 
  /**
- * 26e — thectual search results callback. The framework
- * calls this after [onSearch] has acknowledged the query, and
- * may call it again for paging / refresh. The matching logic
- * is delegated to the pure [KordXSearch.search] helper so
- * the routing logic (empty → random sample, non-empty →
- * fuzzy top-N, no-match → empty list) is the same as the
- * legacy [KordXMediaBrowserService.onSearch] path.
+ * The actual search results callback. The framework calls this after [onSearch] has
+ * acknowledged the query, and may call it again for paging / refresh. The matching
+ * logic is delegated to the pure [KordXSearch.search] helper so the routing logic
+ * (empty → random sample, non-empty → fuzzy top-N, no-match → empty list) is the same
+ * as the legacy legacy MediaBrowserServiceCompat.onSearch path.
  *
- * Returned via [SettableFuture] resolved on
- * [KordX.groove]'s coroutine scope. The plan:
- * "Get `app.groove.song.all.value`. Call
- * [KordXSearch.search] with the lookup callback. Map each
- * result id to a [MediaItem] via
- * [Media3ItemFactory.playableSongItem]."
+ * Returned via [SettableFuture] resolved on [KordX.groove]'s coroutine scope. The plan:
+ * "Get `app.groove.song.all.value`. Call [KordXSearch.search] with the lookup callback.
+ * Map each result id to a [MediaItem] via [Media3ItemFactory.playableSongItem]."
  *
- * The pending query is looked up from [pendingSearches]; if
- * AAOS calls `onGetSearchResult` without a prior
- * `onSearch` (the framework should never do this, but the
- * contract is loose), we fall back to the query passed in
- * via the `query` parameter.
+ * The pending query is looked up from [pendingSearches]; if AAOS calls
+ * `onGetSearchResult` without a prior `onSearch` (the framework should never do this,
+ * but the contract is loose), we fall back to the query passed in via the `query`
+ * parameter.
  */
  override fun onGetSearchResult(
  session: MediaLibrarySession,
@@ -542,19 +684,14 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26e — build a Media3 playable [MediaItem] for a single
- * song id returned by [KordXSearch.search]. Mirrors the
- * legacy [KordXMediaBrowserService.buildSearchResultItem]
- * helper: subtitle is the per-entity `songSubtitle`, the
- * description is the per-entity `descriptionForSong`, the
- * iconUri comes from the artwork cache, and the extras
- * follow the Song display contract
- * (`DURATION_MS` / `TRACK_NUMBER` / `YEAR` / `ALBUM_ID` /
- * `ARTIST`).
+ * Build a Media3 playable [MediaItem] for a single song id returned by [KordXSearch.search].
+ * Mirrors the legacy legacy MediaBrowserServiceCompat.buildSearchResultItem helper: subtitle is
+ * the per-entity `songSubtitle`, the description is the per-entity `descriptionForSong`,
+ * the iconUri comes from the artwork cache, and the extras follow the Song display contract
+ * (`DURATION_MS` / `TRACK_NUMBER` / `YEAR` / `ALBUM_ID` / `ARTIST`).
  *
- * Returns `null` when the id no longer maps to a Song
- * (race against a parallel library update); the caller
- * filters via `mapNotNull`.
+ * Returns `null` when the id no longer maps to a Song (race against a parallel library
+ * update); the caller filters via `mapNotNull`.
  */
  private fun buildSearchResultItem(id: String): MediaItem? {
  val song = app.groove.song.get(id) ?: return null
@@ -568,7 +705,11 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // 26h/26i: onCustomCommand — theeal SHUFFLE_ALL + SEARCH; customcommand dispatch (plus SHUFFLE / REPEAT / FAVORITE; dispatched from the Now Playing card actions wired in; 26g). The action strings are the same `RadioSessionState.ACTION_*`; constants the legacy `RadioSession.handleCustomAction`; uses; the dispatch logic mirrors the legacy handler; 1:1, with the radio state mutation delegated to the; real `KordX.radio` instance (26i cutover — the 26h; version had stub handlers; the 26i cutover wires; the live `app.radio` / `app.groove` state).
+ // onCustomCommand — the real SHUFFLE_ALL + SEARCH custom-command dispatch (plus
+ // SHUFFLE / REPEAT / FAVORITE dispatched from the Now Playing card actions wired above).
+ // The action strings are the same `RadioSessionState.ACTION_*` constants the legacy
+ // `RadioSession.handleCustomAction` uses; the dispatch logic mirrors the legacy handler
+ // 1:1, with the radio state mutation delegated to the live `KordX.radio` instance.
 
  override fun onCustomCommand(
  session: MediaSession,
@@ -596,7 +737,9 @@ class KordXMediaLibraryService : MediaLibraryService() {
  return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
  }
 
- // The 3 Now Playing card actions (26g) are also; routed here in the Media3 model — the; `setMediaButtonPreferences` buttons dispatch through; the same `onCustomCommand` path. The handlers; match the legacy `RadioSession.handleCustomAction`; contract 1:1.
+ // The 3 Now Playing card actions are also routed here in the Media3 model — the
+ // `setMediaButtonPreferences` buttons dispatch through the same `onCustomCommand` path.
+ // The handlers match the legacy `RadioSession.handleCustomAction` contract 1:1.
  RadioSessionState.ACTION_SHUFFLE -> {
  handleShuffleToggle()
  return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
@@ -623,7 +766,10 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // 26i: the 3 Now Playing card action handlers (mirror; the legacy `RadioSession.handleCustomAction` contract; for the 3 `RadioSessionState.ACTION_SHUFFLE` /; `ACTION_REPEAT` / `ACTION_FAVORITE` actions). Each; handler delegates to the live `app.radio` /; `app.groove` state and republishes the Now Playing; card buttons via `refreshNowPlayingButtons` so the; AAOS surface reflects the new state immediately.
+ // The 3 Now Playing card action handlers mirror the legacy `RadioSession.handleCustomAction`
+ // contract for `ACTION_SHUFFLE` / `ACTION_REPEAT` / `ACTION_FAVORITE`. Each handler
+ // delegates to the live `app.radio` / `app.groove` state and republishes the Now Playing
+ // card buttons via `refreshNowPlayingButtons` so the AAOS surface reflects the new state immediately.
 
  private fun handleShuffleToggle() {
  val before = app.radio.queue.currentShuffleMode
@@ -696,19 +842,15 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * 26i — re-publish the 3 Now Playing card custom actions
- * using the *current* `app.radio` / `app.groove` state.
- * Called by the 5 custom-action handlers after they mutate
- * the state, so AAOS / Auto sees the updated shuffle /
- * loop / favorite icons immediately. Inlined here (vs.
- * delegating to the outer's [refreshNowPlayingButtons])
- * because [BrowseTreeCallback] is a nested class (not an
- * `inner` class) — it has no implicit reference to the
- * outer `KordXMediaLibraryService` instance. The
- * `mediaSession` reference is the one field that the inner
- * class needs but the outer's `mediaSession` is private;
- * the [KordXMediaLibraryService.getMediaSessionForCallback]
- * helper exposes it (read-only).
+ * Re-publish the 3 Now Playing card custom actions using the *current* `app.radio` /
+ * `app.groove` state. Called by the 5 custom-action handlers after they mutate the state,
+ * so AAOS / Auto sees the updated shuffle / loop / favorite icons immediately. Inlined
+ * here (vs. delegating to the outer's [refreshNowPlayingButtons]) because [BrowseTreeCallback]
+ * is a nested class (not an `inner` class) — it has no implicit reference to the outer
+ * `KordXMediaLibraryService` instance. The `mediaSession` reference is the one field that
+ * the inner class needs but the outer's `mediaSession` is private; the
+ * [KordXMediaLibraryService.getMediaSessionForCallback] helper exposes it (read-only).
+ * [KordXMediaLibraryService.getMediaSessionForCallback] helper exposes it (read-only).
  */
  private fun publishCurrentPlaybackButtons() {
  val songId = app.radio.queue.currentSongId
@@ -721,7 +863,9 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // ====================================================================; Browse tree builders — ported from KordXMediaBrowserService.; ====================================================================
+ // ====================================================================
+ // Browse tree builders — ported from the legacy MediaBrowserServiceCompat.
+ // ====================================================================
 
  /**
  * Build the root [MediaItem] (synchronous — used by
@@ -739,9 +883,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  )
 
  /**
- * Dispatch the 6 root tabs + 5 drill-downs based on
- * [parentId]. Empty / scan / error placeholders are
- * deferred to 26f (per the plan.
+ * Dispatch the 6 root tabs + 5 drill-downs based on [parentId]. Empty / scan / error
+ * placeholders are handled by the placeholder helper below.
  */
  private fun buildChildren(parentId: String): List<MediaItem> {
  return when {
@@ -777,7 +920,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  private fun buildRootTabs(): List<MediaItem> {
 
- // 26f — shortcircuit to a single; `nonPlayableItem(EMPTY_REASON_NO_SONGS, ...)` when the; library has zero songs. Mirrors the legacy; [KordXMediaBrowserService.buildRootTabs] behavior.
+ // Short-circuit to a single `nonPlayableItem(EMPTY_REASON_NO_SONGS, ...)` when the
+ // library has zero songs. Mirrors the legacy legacy MediaBrowserServiceCompat.buildRootTabs behavior.
  if (app.groove.song.count() == 0) {
  Logger.warn(
  LOG_TAG,
@@ -841,7 +985,10 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  private fun buildSongsTab(): List<MediaItem> {
 
- // 26f — shortcircuit to a single; `nonPlayableItem(EMPTY_REASON_SCANNING, ...)` when a; scan is in progress (`app.groove.song.isUpdating.value`; is true). AAOS shows the live count via the; `EXTRA_KEY_SCAN_COUNT` int on the placeholder's; extras. Mirrors the legacy; [KordXMediaBrowserService.buildSongsTab] behavior.
+ // Short-circuit to a single `nonPlayableItem(EMPTY_REASON_SCANNING, ...)` when a scan is in
+ // progress (`app.groove.song.isUpdating.value` is true). AAOS shows the live count via the
+ // `EXTRA_KEY_SCAN_COUNT` int on the placeholder's extras. Mirrors the legacy
+ // legacy MediaBrowserServiceCompat.buildSongsTab behavior.
  if (app.groove.song.isUpdating.value) {
  val count = app.groove.song.count.value
  Logger.warn(
@@ -912,7 +1059,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  /**
  * The "Recently played" root tab. Mirrors the legacy
- * [KordXMediaBrowserService.buildRecentPlaysTab] .
+ * legacy MediaBrowserServiceCompat.buildRecentPlaysTab .
  * Reads the in-memory cache from
  * [com.android.rockages.kordx.services.groove.repositories.RecentPlaysRepository]
  * (most-recent-first, capped at the repository's default
@@ -921,13 +1068,13 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * a `PLAYED_AT` extra carrying the per-row timestamp so
  * AAOS can render an "X minutes ago" hint.
  *
- * The empty-cache path (no plays yet) is deferred to 26f
- * (the plan 26f is the placeholders; the
- * "nothing played yet" row is one of them).
+ * The empty-cache path (no plays yet) is handled by the placeholder helper below.
  */
  private fun buildRecentPlaysTab(): List<MediaItem> {
 
- // 26f — also shortcircuit to a single; `nonPlayableItem("Nothing played yet", ...)` when the; recentlyplayed cache is empty (no plays yet, or; post `pm clear`). Mirrors the legacy; [KordXMediaBrowserService.buildRecentPlaysTab] behavior.
+ // Short-circuit to a single `nonPlayableItem("Nothing played yet", ...)` when the recently-played
+ // cache is empty (no plays yet, or post `pm clear`). Mirrors the legacy
+ // legacy MediaBrowserServiceCompat.buildRecentPlaysTab behavior.
  if (app.groove.song.count() == 0) {
  Logger.warn(
  LOG_TAG,
@@ -1004,32 +1151,23 @@ class KordXMediaLibraryService : MediaLibraryService() {
  return songIdsToPlayableItems(songIds)
  }
 
- // ---------- Placeholder helper (26f).
+ // ---------- Placeholder helper ----------
 
  /**
- * 26f — build a non-browsable / non-playable placeholder
- * [MediaItem] (info-only — neither browsable nor
- * playable) whose [title] / [subtitle] / [extras] describe
- * a transient state of the library or the playback. Three
- * reasons are surfaced (per the plan+ the legacy
- * [KordXMediaBrowserService.placeholderItem] contract):
+ * Build a non-browsable / non-playable placeholder [MediaItem] (info-only — neither browsable
+ * nor playable) whose [title] / [subtitle] / [extras] describe a transient state of the library
+ * or the playback. Three reasons are surfaced (per the legacy
+ * legacy MediaBrowserServiceCompat.placeholderItem contract):
  *
- * - [KordXMediaSessionConstants.EMPTY_REASON_NO_SONGS]
- * (`"no_songs"`): the library has zero songs. Subtitle
- * is the "Add media folders in KordX app settings"
- * hint. Used by [buildRootTabs] when
- * `app.groove.song.count() == 0` and by
- * [buildRecentPlaysTab] when the library is empty.
- * - [KordXMediaSessionConstants.EMPTY_REASON_SCANNING]
- * (`"scanning"`): a scan is in progress. Subtitle is
- * the "X songs so far" live count. Used by
- * [buildSongsTab] when `app.groove.song.isUpdating` is
- * `true`. The `count` argument is layered onto the
- * extras as an `Int` under
- * [KordXMediaSessionConstants.EXTRA_KEY_SCAN_COUNT].
- * - [KordXMediaSessionConstants.EMPTY_REASON_ERROR] (`"error"`):
- * a playback error happened. The `count` argument is
- * ignored for this reason.
+ * - [KordXMediaSessionConstants.EMPTY_REASON_NO_SONGS] (`"no_songs"`): the library has zero songs.
+ *   Subtitle is the "Add media folders in KordX app settings" hint. Used by [buildRootTabs] when
+ *   `app.groove.song.count() == 0` and by [buildRecentPlaysTab] when the library is empty.
+ * - [KordXMediaSessionConstants.EMPTY_REASON_SCANNING] (`"scanning"`): a scan is in progress. Subtitle
+ *   is the "X songs so far" live count. Used by [buildSongsTab] when `app.groove.song.isUpdating` is
+ *   `true`. The `count` argument is layered onto the extras as an `Int` under
+ *   [KordXMediaSessionConstants.EXTRA_KEY_SCAN_COUNT].
+ * - [KordXMediaSessionConstants.EMPTY_REASON_ERROR] (`"error"`): a playback error happened. The `count`
+ *   argument is ignored for this reason.
  * - `"nothing_recent"`: a custom reason used by
  * [buildRecentPlaysTab] for the "Nothing played yet"
  * hint (no plays yet, or post `pm clear`). Not in the
@@ -1039,7 +1177,7 @@ class KordXMediaLibraryService : MediaLibraryService() {
  * helper accepts any reason string and layers it onto
  * the [KordXMediaSessionConstants.EXTRA_KEY_EMPTY_REASON] extras
  * entry. The 4th reason is consistent with the legacy
- * `KordXMediaBrowserService` behavior.
+ * `legacy MediaBrowserServiceCompat` behavior.
  *
  * The Media3 `MediaItem` is non-browsable / non-playable
  * (info-only — see [Media3ItemFactory.nonPlayable]) so the
@@ -1073,7 +1211,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // Shared helper (port of the legacy; KordXMediaBrowserService.songIdsToPlayableItems,; but producing Media3 MediaItem instances).
+ // Shared helper (port of the legacy legacy MediaBrowserServiceCompat.songIdsToPlayableItems,
+ // but producing Media3 MediaItem instances).
 
  /**
  * Map a list of song ids to the corresponding playable
@@ -1234,7 +1373,12 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // ====================================================================; ErrorOnlyCallback — defensive fallback for the (theoretical) case; where KordX.instance is null at onCreate time. The 26d browse tree; builder depends on KordX state; this callback returns errors for; every method so the framework can still bind to the service (it; just sees "not supported" responses for everything).; ====================================================================
+ // ====================================================================
+ // ErrorOnlyCallback — defensive fallback for the (theoretical) case where
+ // KordX.instance is null at onCreate time. The browse-tree builder depends on KordX
+ // state; this callback returns errors for every method so the framework can still bind
+ // to the service (it just sees "not supported" responses for everything).
+ // ====================================================================
 
  /**
  * Defensive fallback callback used by [createCallback] when
@@ -1310,19 +1454,22 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
 
- // ====================================================================; NoOpRadioAdapterTarget + NoOpRadioQueueAdapterTarget +; NoOpRadioShortyAdapterTarget — unchanged from 26c. Kept as private; inner classes (the 26c KordXMediaLibraryService nested them; under SkeletonCallback; for 26d they're lifted out so the; toplevel createPlayer() can reference them without going; through SkeletonCallback — SkeletonCallback is removed in 26d).; ====================================================================
+ // ====================================================================
+ // NoOpRadioAdapterTarget + NoOpRadioQueueAdapterTarget + NoOpRadioShortyAdapterTarget.
+ // Kept as private inner classes so the toplevel createPlayer() can reference them
+ // without going through SkeletonCallback (the old skeleton callback is removed in this
+ // implementation).
+ // ====================================================================
 
  /**
- * No-op [RadioAdapterTarget] used to construct a real
- * [RadioForwardingPlayer] for the 26d browse-tree
- * [MediaLibrarySession].
+ * No-op [RadioAdapterTarget] used to construct a real [RadioForwardingPlayer] for the
+ * browse-tree [MediaLibraryService].
  *
- * 26d does not yet wire the new service into `KordX.radio`
- * (that lands in 26i). The no-op target returns empty /
- * default values for every read and ignores every write —
- * the player will report `STATE_IDLE` and an empty queue
- * until 26i wires in the real [Radio] (the same instance
- * that `RadioSession` uses).
+ * This implementation does not wire the new service into `KordX.radio`; it returns empty /
+ * default values for every read and ignores every write — the player will report
+ * default values for every read and ignores every write — the player will report
+ * `STATE_IDLE` and an empty queue. The real [Radio] instance (the same one `RadioSession`
+ * uses) is wired in later.
  */
  private class NoOpRadioAdapterTarget : RadioAdapterTarget {
  override val hasPlayer: Boolean = false
@@ -1336,7 +1483,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  override fun subscribeToEvents(subscriber: (Radio.Events) -> Unit): EventUnsubscribeFn =
 
- // Noop unsubscribe. The player never fires an event because; the underlying "radio" is a noop.
+ // Noop unsubscribe. The player never fires an event because the underlying
+ // "radio" is a noop.
  { /* no-op */ }
 
  override fun seek(positionMs: Long) { /* no-op */ }
@@ -1346,9 +1494,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * No-op [RadioQueueAdapterTarget] for the 26d skeleton. Returns
- * "no queue, no shuffle, no loop" — thelayer reports an empty
- * timeline and a `STATE_IDLE` playback state.
+ * No-op [RadioQueueAdapterTarget] for the skeleton. Returns "no queue, no shuffle, no
+ * loop" — the player reports an empty timeline and a `STATE_IDLE` playback state.
  */
  private class NoOpRadioQueueAdapterTarget : RadioQueueAdapterTarget {
  override val currentShuffleMode: Boolean = false
@@ -1361,9 +1508,8 @@ class KordXMediaLibraryService : MediaLibraryService() {
  }
 
  /**
- * No-op [RadioShortyAdapterTarget] for the 26d skeleton. Every
- * transport command is a no-op — thelayer never advances, never
- * pauses, never seeks.
+ * No-op [RadioShortyAdapterTarget] for the skeleton. Every transport command is a
+ * no-op — the player never advances, never pauses, never seeks.
  */
  private class NoOpRadioShortyAdapterTarget : RadioShortyAdapterTarget {
  override fun playPause() { /* no-op */ }
@@ -1374,24 +1520,42 @@ class KordXMediaLibraryService : MediaLibraryService() {
 
  companion object {
  /**
- * Logcat tag for the 26d browse-tree [MediaLibraryService].
- * Matches the 24-char convention used by [KordXMediaBrowserService]
- * and the 26c skeleton. The pre-API-24 23-char logcat tag limit
- * doesn't apply to this project (the `minSdk` is 29), but
- * staying within the convention makes the logcat output
- * homogeneous.
+ * Logcat tag for the browse-tree [MediaLibraryService]. Matches the 24-char convention
+ * used by legacy MediaBrowserServiceCompat and the old skeleton. The pre-API-24 23-char logcat
+ * tag limit doesn't apply to this project (the `minSdk` is 29), but staying within the
+ * convention makes the logcat output homogeneous.
  */
  private const val LOG_TAG = "KordXMediaLibraryService"
 
  /**
- * Default seek-back / seek-forward increments passed to the
- * [RadioForwardingPlayer]. These match the -era
- * `kordx.settings.seekBackDuration` (15s) /
- * `kordx.settings.seekForwardDuration` (30s) defaults — the
- * 26i cutover will read the real user
- * values from `KordX.radio.settings` and pass them through.
+ * Default seek-back / seek-forward increments passed to the [RadioForwardingPlayer].
+ * These match the legacy `kordx.settings.seekBackDuration` (15s) /
+ * `kordx.settings.seekForwardDuration` (30s) defaults — the real user values from
+ * `KordX.radio.settings` are read and passed through at runtime.
  */
  private const val SEEK_BACK_MS = 15_000L
  private const val SEEK_FORWARD_MS = 30_000L
+
+ /**
+ * Stable notification id for the Media3 media notification. Keeping this stable lets
+ * the system treat updates as the same notification across service restarts.
+ */
+ private const val NOTIFICATION_ID = 1001
+
+ /**
+ * Stable channel id for the Media3 media notification. Distinct from the legacy
+ * RadioNotification channel so the old channel can be left to die with the removed
+ * service (no user-facing impact; the old channel just becomes empty).
+ */
+ private const val NOTIFICATION_CHANNEL_ID = "KordX_media_notification"
+
+ /**
+ * Extras key Media3's MediaNotificationManager puts on its internal start-self
+ * intent (`MediaNotificationManager.SELF_INTENT_UID_KEY` — package-private in
+ * media3, so the literal is duplicated here). [onStartCommand] skips the
+ * placeholder for those self-starts because Media3 immediately calls
+ * `startForeground()` with the real media notification on that path.
+ */
+ private const val MEDIA3_SELF_INTENT_UID_KEY = "androidx.media3.session.intent.uid"
  }
 }

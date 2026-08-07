@@ -11,13 +11,42 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.Tracks
+import androidx.media3.common.DeviceInfo
 import androidx.media3.common.VideoSize
 import androidx.media3.common.text.CueGroup
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import java.util.concurrent.CopyOnWriteArrayList
-import androidx.media3.common.util.UnstableApi
 
-/** AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine. This is the "heart" of the [androidx.media3.session.MediaLibraryService] migration: every other  a [Player] that the new `MediaLibrarySession` can wrap.  Why this class exists KordX has a custom playback engine ([Radio], [RadioQueue], [RadioShorty], [RadioPlayer]) with a non-Media3 event surface ([Radio.Events.Player.*], [Radio.Events.Queue.*], [Radio.Events.QueueOption.*]). AndroidX Media3's `MediaLibraryService` / `MediaLibrarySession` only know about the [Player] interface and [Player.Listener] events. This adapter translates one surface to the other.  Design The class extends [BasePlayer] rather than implementing [Player] directly because [BasePlayer] provides the `final` default-implementations of the ~50 media-item / navigation methods (e.g. `setMediaItem`, `addMediaItem`, `removeMediaItem`, `clearMediaItems`, `next`, `previous`, `seekToDefaultPosition`, `seekBack`, `seekForward`, `hasPreviousMediaItem`, etc.). Those defaults delegate to a small set of abstract getters (`getCurrentTimeline()`, `getMediaItemCount()`, `getMediaItemAt(i)`, `getCurrentMediaItemIndex()`) and the single protected abstract [seekTo] (which we wire to [Radio.seek]). The remaining ~30 [Player] methods are implemented below to map cleanly to the [Radio] / [RadioShorty] / [RadioQueue] public surface.  Concurrency The adapter does not own playback threads. The [Radio] engine is driven by the `KordXMediaLibraryService`   which calls `addListener` / `removeListener` from the Media3 session's callback thread. The adapter subscribes to [Radio.onUpdate] in [subscribeToRadio] (lazy, on first listener add) and unsubscribes in [unsubscribeFromRadio] (called from [release]); events are dispatched to listeners via [playerListenerHandler] (the main [Looper] by default) so the listener sees the same threading model as a regular Media3 [Player].  Interface-driven testability The constructor takes [RadioAdapterTarget] (and the smaller [RadioQueueAdapterTarget] / [RadioShortyAdapterTarget]) rather than a concrete [Radio] / `KordX`. The concrete [Radio], [RadioQueue], and [RadioShorty] classes explicitly implement these interfaces in their class headers. Tests provide hand-rolled fakes. This keeps the adapter JVM-testable without instantiating an `Application` / `ViewModel` / `Room` database.  Event mapping Each [Radio.Events] subevent is translated to the corresponding [Player] event-flag(s) and a `Player.Events` is built (the `onEvents(player, events)` batched-listener callback is the preferred listener entry point in Media3 1.4+): | [Radio.Events] | [Player] event flags | |---------------------------------------------|---------------------------------------------------------------| | `Player.Staged` / `Started` / `Resumed` | `EVENT_PLAY_WHEN_READY_CHANGED`, `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Paused` | `EVENT_PLAY_WHEN_READY_CHANGED`, `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Stopped` | `EVENT_IS_PLAYING_CHANGED`, `EVENT_PLAYBACK_STATE_CHANGED` | | `Player.Ended` | `EVENT_PLAYBACK_STATE_CHANGED` (state = `STATE_ENDED`) | | `Player.Seeked` | `EVENT_POSITION_DISCONTINUITY` | | `Queue.Modified` / `Cleared` / `IndexChanged` | `EVENT_TIMELINE_CHANGED`, `EVENT_MEDIA_ITEM_TRANSITION` | | `QueueOption.ShuffleModeChanged` | `EVENT_SHUFFLE_MODE_ENABLED_CHANGED` | | `QueueOption.LoopModeChanged` | `EVENT_REPEAT_MODE_CHANGED` | See [handleRadioEvent] for the actual mapping.  Thread-safety The listener list is a [CopyOnWriteArrayList] (safe to iterate while listeners are being added/removed). The unsubscribe function is stored in [radioUnsubscribe] and called from [release]. The [Radio] engine itself is not thread-safe — all access goes through the Media3 session's main thread callback.  UnstableApi Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade will be handled */
+/**
+ * AndroidX Media3 [Player] adapter for KordX's custom [Radio] engine.
+ *
+ * This is the bridge between KordX's playback engine ([Radio], [RadioQueue],
+ * [RadioShorty], [RadioPlayer]) and Media3's [Player] interface. Media3's
+ * `MediaLibraryService` / `MediaLibrarySession` only understand the [Player] surface, so
+ * this adapter translates KordX's events into Media3 events.
+ *
+ * The class extends [BasePlayer], which provides final default implementations for the
+ * ~50 media-item / navigation methods. Those defaults delegate to a small set of
+ * abstract getters (`getCurrentTimeline()`, `getMediaItemCount()`, `getMediaItemAt(i)`,
+ * `getCurrentMediaItemIndex()`) and the single protected abstract [seekTo] (wired to
+ * [Radio.seek]). The remaining [Player] methods are implemented below to map cleanly to
+ * the [Radio] / [RadioShorty] / [RadioQueue] public surface.
+ *
+ * The constructor takes [RadioAdapterTarget] (and the smaller [RadioQueueAdapterTarget] /
+ * [RadioShortyAdapterTarget]) rather than a concrete [Radio]. The concrete classes
+ * implement these interfaces, so tests can provide hand-rolled fakes without an `Application`
+ * / `ViewModel` / `Room` database.
+ *
+ * The adapter subscribes to [Radio.onUpdate] lazily on the first listener add and
+ * unsubscribes in [release]. Events are dispatched to listeners via [playerListenerHandler]
+ * (the main [Looper] by default) so the listener sees the same threading model as a regular
+ * Media3 [Player]. The listener list is a [CopyOnWriteArrayList] so it is safe to iterate
+ * while listeners are added/removed.
+ *
+ * Marked `@UnstableApi` because [BasePlayer] is part of Media3's unstable surface.
+ */
 @Suppress("MaxLineLength", "SpreadOperator")
 @UnstableApi
 class RadioForwardingPlayer(
@@ -26,10 +55,17 @@ class RadioForwardingPlayer(
     private val seekBackDurationMs: Long,
     private val seekForwardDurationMs: Long,
     private val playerListenerHandler: Handler? = null,
+    private val realExoPlayer: ExoPlayer? = null,
+    private val audioManager: android.media.AudioManager? = null,
 ) : BasePlayer() {
 
 
-    // Resolved handler used to dispatch `Player.Listener.onEvents`; calls. Defaults to the main `Looper` for production; (where the [KordXMediaLibraryService] ( ); creates the adapter from the main thread); tests pass; a handler on a nonmain looper to avoid the; `Looper.getMainLooper` "not mocked" runtime error on the; JVM unittest classpath.
+    // Resolved handler used to dispatch `Player.Listener.onEvents` calls.
+    // Defaults to the main `Looper` for production (where the
+    // [KordXMediaLibraryService] creates the adapter from the main thread);
+    // tests pass a handler on a non-main looper to avoid the
+    // `Looper.getMainLooper` "not mocked" runtime error on the JVM
+    // unit-test classpath.
     private val handler: Handler = playerListenerHandler
         ?: Handler(Looper.getMainLooper())
 
@@ -41,17 +77,26 @@ class RadioForwardingPlayer(
     private var radioUnsubscribe: EventUnsubscribeFn? = null
 
 
-    // Player: addListener / removeListener (Player interface, not; provided by BasePlayer).
+    // Player: addListener / removeListener (Player interface, not
+    // provided by BasePlayer).
 
     override fun addListener(listener: Player.Listener) {
-        if (listeners.addIfAbsent(listener) && listeners.size == 1) {
-            subscribeToRadio()
+        if (realExoPlayer != null) {
+            realExoPlayer.addListener(listener)
+        } else {
+            if (listeners.addIfAbsent(listener) && listeners.size == 1) {
+                subscribeToRadio()
+            }
         }
     }
 
     override fun removeListener(listener: Player.Listener) {
-        if (listeners.remove(listener) && listeners.isEmpty()) {
-            unsubscribeFromRadio()
+        if (realExoPlayer != null) {
+            realExoPlayer.removeListener(listener)
+        } else {
+            if (listeners.remove(listener) && listeners.isEmpty()) {
+                unsubscribeFromRadio()
+            }
         }
     }
 
@@ -66,57 +111,101 @@ class RadioForwardingPlayer(
     }
 
 
-    // Player: transport controls. Note: `play()` and `pause()`; are `final` on BasePlayer and dispatch to; `setPlayWhenReady(true)` / `setPlayWhenReady(false)`.; We implement [setPlayWhenReady] below; the `play` /; `pause` dispatch chain handles the rest.
+    // Player: transport controls. Note: `play()` and `pause()`
+    // are `final` on BasePlayer and dispatch to
+    // `setPlayWhenReady(true)` / `setPlayWhenReady(false)`.
+    // We implement [setPlayWhenReady] below; the `play` /
+    // `pause` dispatch chain handles the rest.
 
     override fun prepare() {
 
-        // Noop: Radio has no separate prepare phase.; RadioPlayer.prepare() is internal; the player is staged; by `Radio.play(PlayOptions)`. Auto will issue `play()`; once a queue exists.
+        // Noop: Radio has no separate prepare phase. RadioPlayer.prepare()
+        // is internal; the player is staged by `Radio.play(PlayOptions)`.
+        // Auto will issue `play()` once a queue exists.
     }
 
 
-    // The Player interface declares `stop()` (no args); the; [RadioAdapterTarget] interface declares `stop()` (no args,; defaults to `ended = true` at the radio side). The noarg; override is the Media3 contract; the radio's; `stop(ended: Boolean)` is a separate method on the; concrete class, not on the interface.
+    // The Player interface declares `stop()` (no args); the
+    // [RadioAdapterTarget] interface declares `stop()` (no args,
+    // defaults to `ended = true` at the radio side). The no-arg
+    // override is the Media3 contract; the radio's
+    // `stop(ended: Boolean)` is a separate method on the
+    // concrete class, not on the interface.
     override fun stop() {
-        radio.stop()
+        if (realExoPlayer != null) {
+            realExoPlayer.stop()
+        } else {
+            radio.stop()
+        }
     }
 
     override fun release() {
-
-        // The Player contract: after release() the player should; not emit any more events. Unsubscribe from the radio so; we stop forwarding.
-        unsubscribeFromRadio()
-        listeners.clear()
+        // Real ExoPlayer lifecycle is managed by Radio; just
+        // stop listening. Don't release the shared instance.
+        if (realExoPlayer == null) {
+            unsubscribeFromRadio()
+            listeners.clear()
+        }
     }
 
     override fun seekTo(mediaItemIndex: Int, positionMs: Long, seekParameters: Int, forcePosition: Boolean) {
-
-        // The Media3 seekParameters + forcePosition arguments; don't map onto the Radio's seek (which is an exact; `MediaPlayer.seekTo(position)` under the hood). We just; forward the position.
-        if (!radio.hasPlayer) {
-            return
+        if (realExoPlayer != null) {
+            realExoPlayer.seekTo(positionMs)
+        } else {
+            // The Media3 seekParameters + forcePosition arguments
+            // don't map onto the Radio's seek (which is an exact
+            // `MediaPlayer.seekTo(position)` under the hood). We just
+            // forward the position.
+            if (!radio.hasPlayer) {
+                return
+            }
+            radio.seek(positionMs)
         }
-        radio.seek(positionMs)
     }
 
 
-    // [setPlayWhenReady] is abstract on BasePlayer. BasePlayer's; `play()` calls this with `true`; its `pause()` calls it with; `false`. We delegate to the radio's playPause() in both; cases — theadio is the source of truth for play state.
+    // [setPlayWhenReady] is abstract on BasePlayer. BasePlayer's
+    // `play()` calls this with `true`; its `pause()` calls it with
+    // `false`. We delegate to the radio's playPause() in both
+    // cases — the radio is the source of truth for play state.
     override fun setPlayWhenReady(playWhenReady: Boolean) {
-
-        // Mirror `isPlaying` to `playWhenReady`. We don't filter; by the current state — Radio is the source of truth.
-        if (playWhenReady && !radio.isPlaying) {
-            radio.shorty.playPause()
-        } else if (!playWhenReady && radio.isPlaying) {
-            radio.shorty.playPause()
+        if (realExoPlayer != null) {
+            realExoPlayer.playWhenReady = playWhenReady
+        } else {
+            // Mirror `isPlaying` to `playWhenReady`. We don't filter
+            // by the current state — Radio is the source of truth.
+            if (playWhenReady && !radio.isPlaying) {
+                radio.shorty.playPause()
+            } else if (!playWhenReady && radio.isPlaying) {
+                radio.shorty.playPause()
+            }
         }
     }
 
     // ---- Player: state queries.
 
 
-    // `isPlaying()` is `final` on BasePlayer; it returns; `getPlaybackState() == STATE_READY && getPlayWhenReady()`. So; we don't override it directly — we just implement; `getPlaybackState()` (returns STATE_READY when there's a; player) and `getPlayWhenReady()` (returns `radio.isPlaying`).
+    // `isPlaying()` is `final` on BasePlayer; it returns
+    // `getPlaybackState() == STATE_READY && getPlayWhenReady()`. So
+    // we don't override it directly — we just implement
+    // `getPlaybackState()` (READY whenever a song is staged in the
+    // queue) and `getPlayWhenReady()` (returns `radio.isPlaying`).
 
     override fun isLoading(): Boolean = false
 
+    // Media3's MediaNotificationManager only shows the media notification (and keeps
+    // the service in the foreground) when the playback state is NOT STATE_IDLE.
+    // `radio.hasPlayer` is false while RadioPlayer is still preparing — and
+    // `radio.isPlaying` can already be true in that window — which made the session
+    // report STATE_IDLE during real playback: the notification never posted, the
+    // service dropped out of the foreground, and the next startForegroundService()
+    // crashed with ForegroundServiceDidNotStartInTimeException. A staged queue
+    // (currentSongId != null) is READY from the session's point of view; only an
+    // empty / stopped queue is IDLE. This also matches what AAOS expects on the Now
+    // Playing card (PAUSED vs PLAYING is driven by getPlayWhenReady()).
     override fun getPlaybackState(): Int = when {
-        !radio.hasPlayer -> Player.STATE_IDLE
-        else -> Player.STATE_READY
+        radio.queue.currentSongId != null -> Player.STATE_READY
+        else -> Player.STATE_IDLE
     }
 
     override fun getPlaybackSuppressionReason(): Int =
@@ -130,12 +219,18 @@ class RadioForwardingPlayer(
 
     override fun getCurrentTimeline(): Timeline = RadioTimeline(radio, songMediaItemResolver)
 
-    override fun getCurrentMediaItemIndex(): Int = radio.queue.currentSongIndex
+    // Media3's PlayerWrapper.createPositionInfo() requires these indices to be
+    // non-negative when the player is attached to a MediaSession. currentSongIndex
+    // is -1 when the queue is empty or no song has been selected; fall back to 0
+    // in that case. The period index must match the media-item index because
+    // RadioTimeline maps one period per window.
+    override fun getCurrentMediaItemIndex(): Int {
+        val index = radio.queue.currentSongIndex
+        val queueSize = radio.queue.currentQueue.size
+        return if (index in 0 until queueSize) index else 0
+    }
 
-
-    // [RadioQueue.currentSongIndex] is exposed through; [RadioQueueAdapterTarget.currentSongIndex]. The interface; declaration lives in the same file as the adapter.
-
-    override fun getCurrentPeriodIndex(): Int = 0
+    override fun getCurrentPeriodIndex(): Int = getCurrentMediaItemIndex()
 
     override fun getMediaMetadata(): MediaMetadata {
         val songId = radio.queue.currentSongId
@@ -145,7 +240,9 @@ class RadioForwardingPlayer(
             return metadata
         }
 
-        // Fallback: surface the live duration even when the; resolver returns null. AAOS uses this to render the; progress bar on the Now Playing card.
+        // Fallback: surface the live duration even when the
+        // resolver returns null. AAOS uses this to render the
+        // progress bar on the Now Playing card.
         val position = radio.currentPlaybackPosition
         val builder = MediaMetadata.Builder()
             .setIsPlayable(true)
@@ -166,7 +263,8 @@ class RadioForwardingPlayer(
 
     override fun setPlaylistMetadata(mediaMetadata: MediaMetadata) {
 
-        // Noop: the radio manages its own playlist metadata via; the queue.
+        // Noop: the radio manages its own playlist metadata via
+        // the queue.
     }
 
     override fun getCurrentTracks(): Tracks = Tracks.EMPTY
@@ -176,7 +274,8 @@ class RadioForwardingPlayer(
 
     override fun setTrackSelectionParameters(parameters: androidx.media3.common.TrackSelectionParameters) {
 
-        // Noop: track selection is owned by the underlying; MediaPlayer; the adapter does not surface it.
+        // Noop: track selection is owned by the underlying
+        // MediaPlayer; the adapter does not surface it.
     }
 
     // ---- Player: repeat / shuffle.
@@ -247,10 +346,23 @@ class RadioForwardingPlayer(
 
     override fun setVolume(volume: Float) {
 
-        // The Radio's fade / ducking logic is internal to; RadioPlayer. The Media3 setVolume contract is that 1.0; = full and 0.0 = muted. We do not propagate to the; player because the radio manages its own volume; envelope.
+        // The Radio's fade / ducking logic is internal to
+        // RadioPlayer. The Media3 setVolume contract is that 1.0
+        // = full and 0.0 = muted. We do not propagate to the
+        // player because the radio manages its own volume
+        // envelope.
     }
 
     override fun getVolume(): Float = 1f
+
+    override fun mute() {
+        // KordX's internal fade/ducking logic lives in RadioPlayer; Media3's mute
+        // command is intentionally a no-op here (the radio handles audio envelope).
+    }
+
+    override fun unmute() {
+        // See mute() — no-op because RadioPlayer owns the real audio envelope.
+    }
 
     // ---- Player: video surface (no-op — KordX is audio-only).
 
@@ -274,18 +386,84 @@ class RadioForwardingPlayer(
     override fun getCurrentCues(): CueGroup = CueGroup.EMPTY_TIME_ZERO
 
 
-    // Player: device volume (noop — KordX doesn't surface; system volume through the player).
+    // Player: device volume (noop — KordX doesn't surface
+    // system volume through the player).
 
-    override fun getDeviceInfo() = androidx.media3.common.DeviceInfo.UNKNOWN
-    override fun getDeviceVolume(): Int = 0
-    override fun isDeviceMuted(): Boolean = false
-    override fun setDeviceVolume(volume: Int) {}
-    override fun setDeviceVolume(volume: Int, flags: Int) {}
-    override fun increaseDeviceVolume() {}
-    override fun increaseDeviceVolume(flags: Int) {}
-    override fun decreaseDeviceVolume() {}
-    override fun decreaseDeviceVolume(flags: Int) {}
-    override fun setDeviceMuted(muted: Boolean) {}
+    override fun getDeviceInfo(): DeviceInfo =
+        if (audioManager != null) {
+            DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_LOCAL)
+                .setMaxVolume(audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC))
+                .build()
+        } else {
+            DeviceInfo.UNKNOWN
+        }
+
+    override fun getDeviceVolume(): Int =
+        audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: 0
+
+    override fun isDeviceMuted(): Boolean =
+        audioManager?.isStreamMute(android.media.AudioManager.STREAM_MUSIC) ?: false
+
+    override fun setDeviceVolume(volume: Int) {
+        audioManager?.setStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            volume,
+            0,
+        )
+    }
+
+    override fun setDeviceVolume(volume: Int, flags: Int) {
+        audioManager?.setStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            volume,
+            flags,
+        )
+    }
+
+    override fun increaseDeviceVolume() {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_RAISE,
+            0,
+        )
+    }
+
+    override fun increaseDeviceVolume(flags: Int) {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_RAISE,
+            flags,
+        )
+    }
+
+    override fun decreaseDeviceVolume() {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_LOWER,
+            0,
+        )
+    }
+
+    override fun decreaseDeviceVolume(flags: Int) {
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            android.media.AudioManager.ADJUST_LOWER,
+            flags,
+        )
+    }
+
+    override fun setDeviceMuted(muted: Boolean) {
+        val direction = if (muted) {
+            android.media.AudioManager.ADJUST_MUTE
+        } else {
+            android.media.AudioManager.ADJUST_UNMUTE
+        }
+        audioManager?.adjustStreamVolume(
+            android.media.AudioManager.STREAM_MUSIC,
+            direction,
+            0,
+        )
+    }
     override fun setDeviceMuted(muted: Boolean, flags: Int) {}
 
     // ---- Player: audio attributes (KordX always uses music playback).
@@ -314,20 +492,29 @@ class RadioForwardingPlayer(
     // `canAdvertiseSession()` is `final` on BasePlayer and returns; `true` by default. We don't override it.
 
 
-    // Player: application looper (used by Media3 session to; dispatch listener events). Returns the looper of the; handler we use to dispatch events, so all listener; callbacks land on the same thread.
+    // Player: application looper (used by Media3 session to
+    // dispatch listener events). Returns the looper of the
+    // handler we use to dispatch events, so all listener
+    // callbacks land on the same thread.
 
     override fun getApplicationLooper(): android.os.Looper =
         handler.looper
 
 
-    // Player: playlist bulk operations. These are abstract on; BasePlayer (inherited from Player) because BasePlayer's; default `setMediaItem` / `addMediaItem` / `removeMediaItem`; etc. dispatch to `setMediaItems(List, boolean)` /; `setMediaItems(List, int, long)`. We implement them as; noops on the radio (the radio manages its own queue via; `RadioShorty.playQueue` and `RadioQueue`); the Media3; session will use `Radio.onCustomCommand` (in 26c) to; translate AAOS intents into radio operations.
+    // Player: playlist bulk operations. These are abstract on BasePlayer because its
+    // defaults dispatch to `setMediaItems(List, boolean)` / `setMediaItems(List, int, long)`.
+    // We implement them as no-ops on the radio (the radio manages its own queue via
+    // `RadioShorty.playQueue` and `RadioQueue`); the Media3 session uses `Radio.onCustomCommand`
+    // to translate AAOS intents into radio operations.
 
     override fun setMediaItems(
         mediaItems: List<MediaItem>,
         resetPosition: Boolean,
     ) {
 
-        // Noop: the radio's queue is managed by [RadioShorty.playQueue]; and [RadioQueue.add]. AAOS does not surface; `setMediaItems` directly.
+        // Noop: the radio's queue is managed by [RadioShorty.playQueue]
+        // and [RadioQueue.add]. AAOS does not surface
+        // `setMediaItems` directly.
     }
 
     override fun setMediaItems(
@@ -343,7 +530,9 @@ class RadioForwardingPlayer(
         mediaItems: List<MediaItem>,
     ) {
 
-        // Noop: the radio's queue is managed by [RadioShorty.playQueue]; and [RadioQueue.add]. AAOS does not surface; `addMediaItems` directly.
+        // Noop: the radio's queue is managed by [RadioShorty.playQueue]
+        // and [RadioQueue.add]. AAOS does not surface
+        // `addMediaItems` directly.
     }
 
     override fun moveMediaItems(
@@ -435,33 +624,38 @@ class RadioForwardingPlayer(
 
     companion object {
 
-        // The Media3 Player contract: the maximum position for; which `seekToPrevious` will seek back within the current; item rather than skipping to the previous one. Matches; `RadioShorty.previous()` which uses 3000ms as the; "rewind from the start of the current song" threshold.
+        // The Media3 Player contract: the maximum position for
+        // which `seekToPrevious` will seek back within the current
+        // item rather than skipping to the previous one. Matches
+        // `RadioShorty.previous()` which uses 3000ms as the
+        // "rewind from the start of the current song" threshold.
         const val MAX_SEEK_TO_PREVIOUS_POSITION_MS: Long = 3_000L
 
 
         private val AVAILABLE_COMMANDS: Player.Commands by lazy {
             Player.Commands.Builder()
-                .add(Player.COMMAND_PLAY_PAUSE)
-                .add(Player.COMMAND_PREPARE)
-                .add(Player.COMMAND_STOP)
-                .add(Player.COMMAND_SEEK_TO_DEFAULT_POSITION)
-                .add(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
-                .add(Player.COMMAND_SEEK_TO_PREVIOUS)
-                .add(Player.COMMAND_SEEK_TO_NEXT)
-                .add(Player.COMMAND_SEEK_BACK)
-                .add(Player.COMMAND_SEEK_FORWARD)
-                .add(Player.COMMAND_SET_SPEED_AND_PITCH)
-                .add(Player.COMMAND_SET_SHUFFLE_MODE)
-                .add(Player.COMMAND_SET_REPEAT_MODE)
-                .add(Player.COMMAND_GET_CURRENT_MEDIA_ITEM)
-                .add(Player.COMMAND_GET_TIMELINE)
-                .add(Player.COMMAND_GET_MEDIA_ITEMS_METADATA)
-                .add(Player.COMMAND_GET_METADATA)
-                .add(Player.COMMAND_GET_VOLUME)
-                .add(Player.COMMAND_GET_AUDIO_ATTRIBUTES)
-                .add(Player.COMMAND_GET_DEVICE_VOLUME)
+                .addAll(
+                    Player.COMMAND_PLAY_PAUSE,
+                    Player.COMMAND_PREPARE,
+                    Player.COMMAND_STOP,
+                    Player.COMMAND_SEEK_TO_DEFAULT_POSITION,
+                    Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM,
+                    Player.COMMAND_SEEK_TO_PREVIOUS,
+                    Player.COMMAND_SEEK_TO_NEXT,
+                    Player.COMMAND_SEEK_BACK,
+                    Player.COMMAND_SEEK_FORWARD,
+                    Player.COMMAND_SET_SPEED_AND_PITCH,
+                    Player.COMMAND_SET_SHUFFLE_MODE,
+                    Player.COMMAND_SET_REPEAT_MODE,
+                    Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
+                    Player.COMMAND_GET_TIMELINE,
+                    Player.COMMAND_GET_METADATA,
+                    Player.COMMAND_GET_VOLUME,
+                    Player.COMMAND_GET_AUDIO_ATTRIBUTES,
+                    Player.COMMAND_GET_DEVICE_VOLUME,
+                )
                 .build()
         }
     }
@@ -522,5 +716,3 @@ private class RadioTimeline(
         radio.queue.currentQueue.getOrNull(periodIndex) ?: "empty-$periodIndex"
 }
 
-
-// The adapter target interfaces ([RadioAdapterTarget],; [RadioQueueAdapterTarget], [RadioShortyAdapterTarget]) live in; a separate file ([RadioAdapterTarget.kt]) so the compilation; order doesn't matter — Kotlin compiles files in; alphabetical order, and `Radio.kt` is compiled before; `RadioForwardingPlayer.kt`.

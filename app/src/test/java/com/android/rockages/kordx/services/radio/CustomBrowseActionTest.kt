@@ -5,7 +5,27 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-/** JVM unit tests for the root-level custom browse actions built by [RadioSessionState.shuffleAllAction], [RadioSessionState.searchAction], and [RadioSessionState.rootCustomActions]. The builders are pure data — no `KordX`, no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat` — so the whole surface is testable on the JVM without an emulator. The tests pin: - The 2 `ACTION_*` constants match the namespaced values. - The `shuffleAllAction()` builder returns the right `action` / icon / label. - The `searchAction()` builder returns the right `action` / icon / label. - The `rootCustomActions()` list is exactly `[shuffleAll, search]` in that order, and is deterministic (same input → same output). - The hide/show audit: no `KordXMediaLibraryService` source-file path contains the banned terms (Settings, About, Equalizer, Sleep timer, Crossfade, Discord, Reddit, GitHub issue, Update check, Onboarding, Theme picker, Language picker, Cast, Bluetooth picker). The test greps the source file for each banned term and asserts zero matches. */
+/**
+ * JVM unit tests for the root-level custom browse actions built by
+ * [RadioSessionState.shuffleAllAction], [RadioSessionState.searchAction],
+ * and [RadioSessionState.rootCustomActions]. The builders are pure data —
+ * no `KordX`, no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat`
+ * — so the whole surface is testable on the JVM without an emulator. After
+ * LG2 the legacy `MediaSessionCompat` adapter was removed; the
+ * [KordXMediaLibraryService] consumes these builders and exposes them as
+ * Media3 `CommandButton` instances.
+ *
+ * The tests pin:
+ * - The 2 `ACTION_*` constants match the namespaced values.
+ * - The `shuffleAllAction()` builder returns the right `action` / icon / label.
+ * - The `searchAction()` builder returns the right `action` / icon / label.
+ * - The `rootCustomActions()` list is exactly `[shuffleAll, search]` in that
+ *   order, and is deterministic (same input → same output).
+ * - The hide/show audit: no `KordXMediaLibraryService` source-file path
+ *   contains the banned terms (Settings, About, Equalizer, Sleep timer,
+ *   Crossfade, Discord, Reddit, GitHub issue, Update check, Onboarding,
+ *   Theme picker, Language picker, Cast, Bluetooth picker).
+ */
 class CustomBrowseActionTest {
 
  // ---- Action constant pinning.
@@ -88,7 +108,15 @@ class CustomBrowseActionTest {
  @Test
  fun browserServiceSourceContainsNoBannedTerms() {
 
- // The plan: "No MediaItem in the browse tree exposes:; Settings, About, Equalizer, Sleep timer, Crossfade,; Community links (Discord / Reddit / GitHub reportissue),; Update check, Onboarding / help, Theme picker, Language; picker, Cast / Bluetooth picker." This test greps the; active mediabrowser service source for the banned; terms and asserts zero matches. As of 26i the active; service is the AndroidX Media3; `KordXMediaLibraryService` (the legacy; `KordXMediaBrowserService` was deleted in the 26i; cutover). The grep is casesensitive on the term; itself but tolerates surrounding word characters; (e.g. "SettingsActivity" is still a match — theanned; term is the substring "Settings").
+ // The AAOS browse tree must not expose non-music UI surfaces. The banned
+ // terms are: Settings, About, Equalizer, Sleep timer, Crossfade, Discord,
+ // Reddit, GitHub report-issue, Update check, Onboarding, Theme picker,
+ // Language picker, Cast, Bluetooth picker. The test greps the active
+ // media-browser service source for these terms and asserts zero matches.
+ // As of the 26i cutover the active service is the AndroidX Media3
+ // `KordXMediaLibraryService` (the legacy `MediaBrowserServiceCompat` was
+ // deleted). The grep is case-sensitive but tolerates surrounding word
+ // characters (e.g. "SettingsActivity" still matches "Settings").
  //
 
  // The test reads the source file from disk because the; JVM unittest classpath doesn't include the; `app/src/main/` source tree as compiled classes. JVM; tests run with the working directory as the module root; (i.e. `app/`), so the relative path is `src/main/...`.

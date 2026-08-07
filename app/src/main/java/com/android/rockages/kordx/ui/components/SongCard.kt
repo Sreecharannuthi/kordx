@@ -88,7 +88,7 @@ fun SongCard(
  colors = CardDefaults.cardColors(containerColor = Color.Transparent),
  onClick = onClick
  ) {
- Box(modifier = Modifier.padding(12.dp, 12.dp, 4.dp, 12.dp)) {
+ Box(modifier = Modifier.padding(12.dp, 8.dp, 4.dp, 8.dp)) {
  Row(verticalAlignment = Alignment.CenterVertically) {
  leading()
  Box {
@@ -96,8 +96,8 @@ fun SongCard(
  song.createArtworkImageRequest(context.kordx).build(),
  null,
  modifier = Modifier
- .size(45.dp)
- .clip(RoundedCornerShape(12.dp)),
+ .size(36.dp)
+ .clip(RoundedCornerShape(8.dp)),
  )
  thumbnailLabel?.let { it ->
  val backgroundColor =
@@ -120,8 +120,7 @@ fun SongCard(
  ) {
  ProvideTextStyle(
  MaterialTheme.typography.labelSmall.copy(
- color = contentColor
- )
+ color = contentColor )
  ) { it() }
  }
  }
@@ -194,6 +193,7 @@ fun SongCard(
  }
 }
 
+@Suppress("CyclomaticComplexMethod")
 @Composable
 fun SongDropdownMenu(
  context: ViewContext,
@@ -206,6 +206,32 @@ fun SongDropdownMenu(
  var showInfoDialog by remember { mutableStateOf(false) }
  var showAddToPlaylistDialog by remember { mutableStateOf(false) }
 
+ // Deduplicate: collect unique artist names across artists and albumArtists,
+ // using normalized keys to avoid showing the same person twice.
+ val navigateToArtists = remember(song.artists, song.albumArtists) {
+ val seen = linkedSetOf<String>() // preserves insertion order
+ val result = mutableListOf<Pair<String, String>>() // displayName -> route
+ // Artists first
+ for (name in song.artists) {
+ val norm = Song.normalizeArtistKey(name)
+ if (seen.add(norm)) {
+ result.add(name to "artist")
+ }
+ }
+ // Album artists that aren't already listed
+ for (name in song.albumArtists) {
+ val norm = Song.normalizeArtistKey(name)
+ if (seen.add(norm)) {
+ result.add(name to "albumArtist")
+ }
+ }
+ result
+ }
+ val albumId = remember(song) {
+ context.kordx.groove.album.getIdFromSong(song)
+ }
+ val hasNavigationItems = navigateToArtists.isNotEmpty() || albumId != null
+
  DropdownMenu(
  expanded = expanded,
  onDismissRequest = onDismissRequest,
@@ -214,6 +240,7 @@ fun SongDropdownMenu(
  shadowElevation = 12.dp,
  offset = DpOffset((-4).dp, (-4).dp),
  ) {
+ // --- Song actions ---
  DropdownMenuItem(
  modifier = Modifier.height(48.dp),
  contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -281,13 +308,14 @@ fun SongDropdownMenu(
  showAddToPlaylistDialog = true
  }
  )
- val hasNavigationItems = song.artists.isNotEmpty() ||
- song.albumArtists.isNotEmpty() ||
- context.kordx.groove.album.getIdFromSong(song) != null
+
+ // --- Navigation section (deduplicated) ---
  if (hasNavigationItems) {
  HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
  }
- song.artists.forEach { artistName ->
+
+ // Artists (each as a single row, plain name, no "View Artist:" prefix)
+ navigateToArtists.forEach { (displayName, routeType) ->
  DropdownMenuItem(
  modifier = Modifier.height(48.dp),
  contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -295,31 +323,20 @@ fun SongDropdownMenu(
  Icon(Icons.Filled.Person, null)
  },
  text = {
- Text("${context.kordx.t.ViewArtist}: $artistName")
+ Text(displayName)
  },
  onClick = {
  onDismissRequest()
- context.navController.navigate(ArtistViewRoute(artistName))
+ when (routeType) {
+ "artist" -> context.navController.navigate(ArtistViewRoute(displayName))
+ "albumArtist" -> context.navController.navigate(AlbumArtistViewRoute(displayName))
+ }
  }
  )
  }
- song.albumArtists.forEach { albumArtist ->
- DropdownMenuItem(
- modifier = Modifier.height(48.dp),
- contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
- leadingIcon = {
- Icon(Icons.Filled.Person, null)
- },
- text = {
- Text("${context.kordx.t.ViewAlbumArtist}: $albumArtist")
- },
- onClick = {
- onDismissRequest()
- context.navController.navigate(AlbumArtistViewRoute(albumArtist))
- }
- )
- }
- context.kordx.groove.album.getIdFromSong(song)?.let { albumId ->
+
+ // Album (single row)
+ albumId?.let { id ->
  DropdownMenuItem(
  modifier = Modifier.height(48.dp),
  contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -327,17 +344,20 @@ fun SongDropdownMenu(
  Icon(Icons.Filled.Album, null)
  },
  text = {
- Text(context.kordx.t.ViewAlbum)
+ Text(song.album ?: context.kordx.t.ViewAlbum)
  },
  onClick = {
  onDismissRequest()
- context.navController.navigate(AlbumViewRoute(albumId))
+ context.navController.navigate(AlbumViewRoute(id))
  }
  )
  }
+
  if (hasNavigationItems) {
  HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
  }
+
+ // --- Utility actions ---
  DropdownMenuItem(
  modifier = Modifier.height(48.dp),
  contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),

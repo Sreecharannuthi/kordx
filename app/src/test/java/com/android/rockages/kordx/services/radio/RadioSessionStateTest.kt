@@ -8,7 +8,16 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-/** JVM unit tests for the pure Android Auto / AAOS Now Playing card builders in [RadioSessionState]: queue items and the three custom actions (shuffle / repeat / favorite). The builders are pure data — no `KordX`, no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat` — so the whole surface is testable on the JVM without an emulator. The `RadioSession` consumes the data classes (the resource-name strings, the `action` strings, the `Map<String, Long>` extras) and adapts them to the `MediaSessionCompat` API at the call site. */
+/**
+ * JVM unit tests for the pure Android Auto / AAOS Now Playing card builders
+ * in [RadioSessionState]: queue items and the three custom actions
+ * (shuffle / repeat / favorite). The builders are pure data — no `KordX`,
+ * no `Radio`, no Android `Uri` / `Bundle` / `MediaSessionCompat` — so the
+ * whole surface is testable on the JVM without an emulator. After LG2 the
+ * legacy `MediaSessionCompat` adapter was removed; the
+ * [KordXMediaLibraryService] consumes the data classes and adapts them to
+ * the Media3 `CommandButton` / `MediaItem` APIs.
+ */
 class RadioSessionStateTest {
 
  // ---- Queue item builder.

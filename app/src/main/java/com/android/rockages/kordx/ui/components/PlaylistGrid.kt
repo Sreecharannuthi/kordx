@@ -89,7 +89,7 @@ fun PlaylistGrid(
  else -> ResponsiveGrid(gridColumns) {
  itemsIndexed(
  sortedPlaylistIds,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.PLAYLIST }
  ) { _, playlistId ->
  context.kordx.groove.playlist.get(playlistId)?.let { playlist ->

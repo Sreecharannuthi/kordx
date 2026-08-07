@@ -40,13 +40,10 @@ data class NowPlayingStates(
  val showLyrics: MutableStateFlow<Boolean>,
 )
 
-object NowPlayingDefaults {
- var showLyrics = false
-}
-
 enum class NowPlayingControlsLayout {
  CompactLeft,
  CompactRight,
+ CompactCenter,
  Traditional,
 }
 

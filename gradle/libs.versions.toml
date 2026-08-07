@@ -4,7 +4,7 @@ coil = "2.7.0"
 compose = "1.7.5"
 compose-material = "1.7.5"
 compose-material3 = "1.3.1"
-compose-navigation = "2.8.4"
+compose-navigation = "2.8.9"
 core = "1.15.0"
 core-splashscreen = "1.0.1"
 fuzzywuzzy = "1.4.0"
@@ -15,15 +15,15 @@ kover = "0.8.3"
 lifecycle-runtime = "2.8.7"
 media = "1.7.0"
 okhttp3 = "4.12.0"
-media3 = "1.7.1"
+media3 = "1.10.1"
 room = "2.6.1"
 
-android-gradle-plugin = "8.7.3"
+android-gradle-plugin = "8.10.0"
 kotlin-gradle-plugin = "2.1.0"
 kotlin-serialization-plugin = "2.1.0"
 ksp-plugin = "2.1.0-1.0.29"
 
-compile-sdk = "35"
+compile-sdk = "36"
 min-sdk = "31"
 target-sdk = "35"
 junit = "4.13.2"
@@ -53,6 +53,7 @@ media = { group = "androidx.media", name = "media", version.ref = "media" }
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3" }
 media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 media3-common = { group = "androidx.media3", name = "media3-common", version.ref = "media3" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -63,12 +64,12 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
-android-app = { id = "com.android.application", version = "8.7.3" }
+android-app = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 android-kotlin = { id = "org.jetbrains.kotlin.android", version = "2.1.0" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.1.0" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.1.0" }
 ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
 room = { id = "androidx.room", version = "2.6.1" }
-android-library = { id = "com.android.library", version = "8.7.3" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

@@ -11,8 +11,8 @@
       (matches the Material 3 "error" color family). The fillColor
       is intentionally hard-coded to pink (not the brand cyan) because
       a filled heart reads as "love / favorited" universally, while
-      the cyan #00F0FF would conflict with the "active" semantic
-      (the user expects shuffle / repeat active = cyan, favorite active
+      the brand blue #4285F4 would conflict with the "active" semantic
+      (the user expects shuffle / repeat active = blue, favorite active
       = pink, to maintain a clear color-meaning distinction).
     -->
     <path

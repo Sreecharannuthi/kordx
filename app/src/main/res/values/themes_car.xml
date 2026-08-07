@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+         Car theme used by Android Auto / AAOS for attribution and playback controls.
+         The accent color matches the gold play triangle from icon.svg so the car UI
+         feels like the KordX brand without clashing with the blue primary.
+    -->
+    <style name="KordXCarTheme" parent="Theme.KordX">
+        <item name="colorAccent">#FBBC05</item>
+        <item name="android:colorAccent">#FBBC05</item>
+    </style>
+</resources>

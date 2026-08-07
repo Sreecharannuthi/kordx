@@ -6,7 +6,6 @@ import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -250,14 +249,29 @@ class RadioForwardingPlayerTest {
  }
 
  @Test
- fun getPlaybackState_isIdleWhenNoPlayer() {
- radio.hasPlayer = false
+ fun getPlaybackState_isIdleWhenNoSongStaged() {
+ // The Media3 notification contract: STATE_IDLE means "nothing staged", which
+ // suppresses the media notification. Driven by the queue's currentSongId, not
+ // by hasPlayer (hasPlayer is false while RadioPlayer is still preparing, even
+ // though a song is already staged — the session must report READY then).
+ queue.currentSongId = null
  assertEquals(Player.STATE_IDLE, player.getPlaybackState())
  }
 
  @Test
- fun getPlaybackState_isReadyWhenHasPlayer() {
- radio.hasPlayer = true
+ fun getPlaybackState_isReadyWhenSongStaged() {
+ queue.currentSongId = "song-1"
+ assertEquals(Player.STATE_READY, player.getPlaybackState())
+ }
+
+ @Test
+ fun getPlaybackState_isReadyEvenWhilePlayerPreparing() {
+ // Regression test for the ForegroundServiceDidNotStartInTimeException: with a
+ // staged song but hasPlayer=false (RadioPlayer preparing), the state must stay
+ // READY so Media3's MediaNotificationManager posts the notification and keeps
+ // the service in the foreground.
+ queue.currentSongId = "song-1"
+ radio.hasPlayer = false
  assertEquals(Player.STATE_READY, player.getPlaybackState())
  }
 

@@ -9,7 +9,17 @@ import kotlinx.coroutines.launch
 
 class RecentPlaysRepository(private val kordx: KordX) {
 
- // Note: do NOT capture `kordx.groove.coroutineScope` eagerly in; the constructor — `Groove` is still being constructed when; its `val recentPlays = RecentPlaysRepository(kordx)` line; runs (in `Groove.<init>`), so `kordx.groove.coroutineScope`; is null at this point and eager capture would NPE (caught; by the AVD validation: `Caused by: NullPointerException; ... at RecentPlaysRepository.<init>`). Access lazily through; `kordx.groove.coroutineScope` at call time instead — by then; the `Groove` class has finished construction and the scope; is nonnull. The same pattern is used by; [SongFavoritesRepository], which also defers all; `coroutineScope.launch { ... }` calls into the method bodies; rather than capturing the scope upfront.
+ // Note: do NOT capture `kordx.groove.coroutineScope` eagerly in the
+ // constructor — `Groove` is still being constructed when its
+ // `val recentPlays = RecentPlaysRepository(kordx)` line runs (in
+ // `Groove.<init>`), so `kordx.groove.coroutineScope` is null at this point
+ // and eager capture would NPE (caught by the AVD validation: `Caused by:
+ // NullPointerException ... at RecentPlaysRepository.<init>`). Access lazily
+ // through `kordx.groove.coroutineScope` at call time instead — by then the
+ // `Groove` class has finished construction and the scope is non-null. The
+ // same pattern is used by [SongFavoritesRepository], which also defers all
+ // `coroutineScope.launch { ... }` calls into the method bodies rather than
+ // capturing the scope upfront.
  private val dao get() = kordx.database.recentPlays
  private val cache = RecentPlaysCache(limit = DEFAULT_LIMIT)
 

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Shuffle
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
@@ -55,12 +54,14 @@ import com.android.rockages.kordx.ui.components.AlbumArtistTile
 import com.android.rockages.kordx.ui.components.AlbumTile
 import com.android.rockages.kordx.ui.components.ArtistTile
 import com.android.rockages.kordx.ui.components.IconTextBody
+import com.android.rockages.kordx.ui.components.SongTile
 import com.android.rockages.kordx.ui.helpers.ViewContext
 import com.android.rockages.kordx.core.utils.randomSubList
 import com.android.rockages.kordx.core.utils.runIfOrDefault
 import com.android.rockages.kordx.core.utils.subListNonStrict
 
 enum class ForYou(val label: (context: ViewContext) -> String) {
+ Songs(label = { it.kordx.t.SuggestedSongs }),
  Albums(label = { it.kordx.t.SuggestedAlbums }),
  Artists(label = { it.kordx.t.SuggestedArtists }),
  AlbumArtists(label = { it.kordx.t.SuggestedAlbumArtists })
@@ -118,6 +119,14 @@ fun ForYouView(context: ViewContext) {
  derivedStateOf {
  runIfOrDefault(!albumArtistsIsUpdating, listOf()) {
  albumArtistNames.randomSubList(6)
+ }
+ }
+ }
+ val randomSongs by remember(songsIsUpdating, songIds, recentlyAddedSongs) {
+ derivedStateOf {
+ runIfOrDefault(!songsIsUpdating, listOf()) {
+ val excluded = recentlyAddedSongs.subListNonStrict(5).toSet()
+ (songIds - excluded).toList().randomSubList(6)
  }
  }
  }
@@ -267,8 +276,17 @@ fun ForYouView(context: ViewContext) {
  }
  }
  val contents by context.kordx.settings.forYouContents.flow.collectAsState()
+ // `forYouContents` is now an ordered list, so render sections in the
+ // persisted user order (not enum order).
  contents.forEach {
  when (it) {
+ ForYou.Songs -> SuggestedSongs(
+ context,
+ label = context.kordx.t.SuggestedSongs,
+ isLoading = songsIsUpdating,
+ songIds = randomSongs,
+ )
+
  ForYou.Albums -> SuggestedAlbums(
  context,
  isLoading = albumsIsUpdating,
@@ -441,7 +459,9 @@ private fun SuggestedAlbums(
  Spacer(modifier = Modifier.height(12.dp))
  StatedSixGrid(context, isLoading, albums) { album ->
 
- // use the existing AlbumTile (already renders title +; artist text below the artwork) instead of the inline; `Card { AsyncImage }` that previously had no text at all.
+ // use the existing AlbumTile (already renders title +
+ // artist text below the artwork) instead of the inline
+ // `Card { AsyncImage }` that previously had no text at all.
  AlbumTile(context, album)
  }
 }
@@ -467,7 +487,9 @@ private fun SuggestedArtists(
  Spacer(modifier = Modifier.height(12.dp))
  StatedSixGrid(context, isLoading, artists) { artist ->
 
- // use the existing ArtistTile (already renders name; text below the artwork) instead of the inline; `Card { AsyncImage }` that previously had no text at all.
+ // use the existing ArtistTile (already renders name
+ // text below the artwork) instead of the inline
+ // `Card { AsyncImage }` that previously had no text at all.
  ArtistTile(context, artist)
  }
 }
@@ -493,7 +515,38 @@ private fun SuggestedAlbumArtists(
  Spacer(modifier = Modifier.height(12.dp))
  StatedSixGrid(context, isLoading, albumArtists) { albumArtist ->
 
- // use the existing AlbumArtistTile (already renders; name text below the artwork) instead of the inline; `Card { AsyncImage }` that previously had no text at all.
+ // use the existing AlbumArtistTile (already renders
+ // name text below the artwork) instead of the inline
+ // `Card { AsyncImage }` that previously had no text at all.
  AlbumArtistTile(context, albumArtist)
+ }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SuggestedSongs(
+ context: ViewContext,
+ label: String,
+ isLoading: Boolean,
+ songIds: List<String>,
+) {
+ val songs by remember(songIds) {
+  derivedStateOf {
+   context.kordx.groove.song.get(songIds)
+  }
+ }
+
+ Spacer(modifier = Modifier.height(24.dp))
+ SideHeading {
+  Text(label)
+ }
+ Spacer(modifier = Modifier.height(12.dp))
+ StatedSixGrid(context, isLoading, songs) { song ->
+  SongTile(context, song) {
+   context.kordx.radio.shorty.playQueue(
+    songIds,
+    options = Radio.PlayOptions(index = songIds.indexOf(song.id)),
+   )
+  }
  }
 }

@@ -2,6 +2,9 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
+    <ID>ExplicitItLambdaParameter:AudioMetadataParser.kt$AudioMetadataParser${ _, it -&gt; when (it) { null -&gt; mutableListOf(value) else -&gt; { it.add(value) it } } }</ID>
     <ID>MaxLineLength:AudioMetadataParserTest.kt$AudioMetadataParserTest$// `ORIGINALDATE` is the originalrelease date (e.g. for; rereleases). Taglib maps the `TDOR` (ID3v2.4) and `TORY`; (ID3v2.3) frames to this key.</ID>
+    <ID>ReturnCount:AudioMetadataParser.kt$AudioMetadataParser$private fun parseDateWithFallback(): LocalDate?</ID>
+    <ID>ReturnCount:AudioMetadataParser.kt$AudioMetadataParser.Companion$private fun parseDate(text: String): LocalDate?</ID>
   </CurrentIssues>
 </SmellBaseline>

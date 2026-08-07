@@ -26,11 +26,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        Thread.setDefaultUncaughtExceptionHandler { _, err ->
-            Logger.error("MainActivity", "uncaught exception", err)
-            ErrorActivity.start(this, err)
-            finish()
-        }
+        // Crash handling lives in KordXApplication.onCreate (KordXCrashHandler)
+        // so non-UI crashes are covered too — nothing to register here.
 
         val kordx = KordX.instance
         if (kordx == null) {
@@ -68,7 +65,9 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        // setIntent so any subsequent getIntent() call (e.g. from; a composable that inspects the launch intent) sees the new; intent, not the original coldstart one.
+        // setIntent so any subsequent getIntent() call (e.g. from a
+        // composable that inspects the launch intent) sees the new
+        // intent, not the original cold-start one.
         setIntent(intent)
         forwardMediaSearchIntent(intent)
     }
@@ -119,6 +118,11 @@ class MainActivity : ComponentActivity() {
      * without crashing the activity. The activity is the
      * `singleTask` root, so a crash here would black-hole the
      * framework; the defensive return is intentional.
+     *
+     * LG2 note: the legacy MediaSessionCompat `onPlayFromSearch`
+     * callback was retired; this alias path now converges on the
+     * same [RadioSession.handlePlayFromSearch] logic used by the
+     * Media3 [KordXMediaLibraryService] browse-tree search path.
      */
     private fun forwardMediaSearchIntent(intent: Intent?) {
         if (intent == null) return
@@ -136,7 +140,11 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        // Typedsearch path: a Bundle with the artist / album /; title / genre / playlist fields AAOS resolved from a; "play the album X" voice command. Compose a single; search query from the populated fields; the fuzzy; search in `KordXSearch` ranks by combined text.
+        // Typed-search path: a Bundle with the artist / album /
+        // title / genre / playlist fields AAOS resolved from a
+        // "play the album X" voice command. Compose a single
+        // search query from the populated fields; the fuzzy
+        // search in `KordXSearch` ranks by combined text.
         val focus = intent.getBundleExtra(MediaStore.EXTRA_MEDIA_FOCUS)
         if (focus != null) {
             val typed = buildList {

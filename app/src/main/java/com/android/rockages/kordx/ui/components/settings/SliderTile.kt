@@ -11,7 +11,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,10 +32,11 @@ fun SettingsSliderTile(
  onChange: (Float) -> Unit,
  onReset: (() -> Unit)? = null,
 ) {
- var isOpen by remember { mutableStateOf(false) }
+ var isOpen by rememberDebounceState()
 
  Card(
  colors = SettingsTileDefaults.cardColors(),
+ shape = SettingsTileDefaults.cardShape(),
  onClick = {
  isOpen = !isOpen
  }

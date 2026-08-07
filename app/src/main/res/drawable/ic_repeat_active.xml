@@ -7,10 +7,10 @@
     android:autoMirrored="true">
     <!--
        — repeat (on / active state, "repeat all").
-      The "active" variant uses the KordX brand cyan #00F0FF.
+      The "active" variant uses the KordX brand blue #4285F4.
       Path data is identical to `ic_repeat.xml`.
     -->
     <path
-        android:fillColor="#FF00F0FF"
+        android:fillColor="#FF4285F4"
         android:pathData="M7,7h10v3l4,-4 -4,-4v3L5,6v6h2L7,7zM17,17L7,17v-3l-4,4 4,4v-3h12v-6h-2v4z" />
 </vector>

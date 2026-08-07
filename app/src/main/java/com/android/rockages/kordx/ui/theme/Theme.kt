@@ -90,15 +90,39 @@ fun KordXTheme(
  typography = typography,
  content = {
 
- // the MaterialTheme's [MaterialTheme.colorScheme]; holds the right `onBackground` / `onSurface` tokens, but; [androidx.compose.material3.MaterialTheme] itself does NOT; propagate those into [LocalContentColor]. The framework's; default `LocalContentColor` is the system text color, which; does not track the active colorscheme. That mismatch is the; root cause of the "missing text" bug: every `Text`; composable that doesn't explicitly set a `color` or a; `style` (with a nonUnspecified color) renders with the; system default, which is invisible against the custom; theme's background in many places.
+ // the MaterialTheme's [MaterialTheme.colorScheme] holds the right
+ // `onBackground` / `onSurface` tokens, but
+ // [androidx.compose.material3.MaterialTheme] itself does NOT
+ // propagate those into [LocalContentColor]. The framework's
+ // default `LocalContentColor` is the system text color, which
+ // does not track the active color scheme. That mismatch is the
+ // root cause of the "missing text" bug: every `Text`
+ // composable that doesn't explicitly set a `color` or a
+ // `style` (with a non-Unspecified color) renders with the
+ // system default, which is invisible against the custom
+ // theme's background in many places.
  //
 
- // The fix: wrap the [MaterialTheme] content in a; [CompositionLocalProvider] that pins [LocalContentColor]; to the active scheme's `onBackground`. This is the; lowerrisk of the two candidate fixes (the other; being: rewrite [ThemeColorSchemes] to use fixedcolor; tokens for `onBackground` / `onSurface` / `onSurfaceVariant`).; The CompositionLocalProvider is a single point of fix; and doesn't change the color tokens themselves; downstream; composables that *do* override `LocalContentColor` (e.g.; `Surface` / `Card` / `ListItem`) still take effect; because they sit inside this provider and override it.
+ // The fix: wrap the [MaterialTheme] content in a
+ // [CompositionLocalProvider] that pins [LocalContentColor]
+ // to the active scheme's `onBackground`. This is the
+ // lower-risk of the two candidate fixes (the other
+ // being: rewrite [ThemeColorSchemes] to use fixed-color
+ // tokens for `onBackground` / `onSurface` / `onSurfaceVariant`).
+ // The CompositionLocalProvider is a single point of fix
+ // and doesn't change the color tokens themselves; downstream
+ // composables that *do* override `LocalContentColor` (e.g.
+ // `Surface` / `Card` / `ListItem`) still take effect
+ // because they sit inside this provider and override it.
  CompositionLocalProvider(
  LocalContentColor provides colorScheme.onBackground,
+ // Stop scaling global density so touch targets
+ // remain at 48 dp.  contentScale is folded into the font
+ // scale so only typography grows; layout dimensions stay
+ // fixed in dp.
  LocalDensity provides Density(
- LocalDensity.current.density * contentScale,
- LocalDensity.current.fontScale * fontScale,
+ LocalDensity.current.density,
+ LocalDensity.current.fontScale * fontScale * contentScale,
  )
  ) {
  content()

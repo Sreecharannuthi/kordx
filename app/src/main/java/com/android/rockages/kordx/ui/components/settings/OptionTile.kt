@@ -42,11 +42,12 @@ fun <T> SettingsOptionTile(
  onChange: (T) -> Unit,
 ) {
  val coroutineScope = rememberCoroutineScope()
- var isOpen by remember { mutableStateOf(false) }
+ var isOpen by rememberDebounceState()
 
  Card(
  enabled = enabled,
  colors = SettingsTileDefaults.cardColors(),
+ shape = SettingsTileDefaults.cardShape(),
  onClick = {
  isOpen = !isOpen
  }

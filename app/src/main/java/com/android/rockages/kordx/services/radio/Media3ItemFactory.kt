@@ -13,20 +13,48 @@ import com.android.rockages.kordx.core.groove.Playlist
 import com.android.rockages.kordx.core.groove.Song
 import com.android.rockages.kordx.core.utils.DurationUtils
 
-/** + 26i — Builders for the AndroidX Media3 browse tree of the new [KordXMediaLibraryService]. The 26i cutover inlines the per-entity display-contract data (the `descriptionForSong` / `songSubtitle` / `songExtras` / `albumSubtitle` / etc. helpers) from the deleted legacy `MediaItemFactory` so the new service has a single self-contained Media3 `MediaItem` factory. The `Extras` data class + the constants + the placeholder helper live in the new shared [KordXMediaSessionConstants] file (also a 26i extraction).  Why one factory (not two) Before 26i the codebase had two parallel factories: `MediaItemFactory` (producing the legacy `MediaBrowserCompat.MediaItem` for the -22 `KordXMediaBrowserService`) and `Media3ItemFactory` (producing the Media3 `MediaItem` for the new service). They shared the same data layer (the per-entity display contract is framework-agnostic). After 26i the legacy service is gone, so the legacy factory is gone too — theer-entity data is inlined here, and the new factory produces Media3 `MediaItem` instances directly.  Media3 MediaItem shape A Media3 `MediaItem` carries its display fields (`title` / `subtitle` / `description` / `iconUri` / `extras` / `isBrowsable` / `isPlayable` / `mediaType`) on the inner `MediaMetadata`, not on the `MediaItem` itself. The factory below always sets both: - `MediaItem.Builder().setMediaId(id).setMediaMetadata(metadata)` — thetem-level mediaId is what the framework routes on. - `MediaMetadata.Builder().setTitle(title).setSubtitle(subtitle)… .setIsBrowsable(b).setIsPlayable(p).setMediaType(t).setExtras(b)` — theetadata-level fields are what the framework renders. The `setUri(...)` builder method is intentionally **not** called — the songs are routed through `KordXMediaSessionConstants.mediaIdToSongId` + the live `KordX.groove.song.get(id)` lookup, not through an `ExoPlayer.setMediaItem(uri)` path.  Unstable API Marked `@UnstableApi` because `MediaItem` and `MediaMetadata` are part of Media3's unstable surface (subject to API breakage between minor versions). The plan (26a-26m) commits to the 1.7.1 API; Media3 upgrade (1.10.x requires `compileSdk = 36`) will be handled */
+/** Builders for the AndroidX Media3 browse tree of [KordXMediaLibraryService].
+ *
+ * A Media3 `MediaItem` carries its display fields (`title` / `subtitle` / `description` /
+ * `iconUri` / `extras` / `isBrowsable` / `isPlayable` / `mediaType`) on the inner
+ * `MediaMetadata`, not on the `MediaItem` itself. The factory below always sets both:
+ * - `MediaItem.Builder().setMediaId(id).setMediaMetadata(metadata)` — the item-level
+ *   mediaId is what the framework routes on.
+ * - `MediaMetadata.Builder().setTitle(title).setSubtitle(subtitle)… .setIsBrowsable(b).setIsPlayable(p).setMediaType(t).setExtras(b)` —
+ *   the metadata-level fields are what the framework renders.
+ *
+ * The `setUri(...)` builder method is intentionally **not** called — the songs are routed
+ * through [KordXMediaSessionConstants.mediaIdToSongId] + the live `KordX.groove.song.get(id)`
+ * lookup, not through an `ExoPlayer.setMediaItem(uri)` path.
+ *
+ * Marked `@UnstableApi` because `MediaItem` and `MediaMetadata` are part of Media3's unstable
+ * surface.
+ */
 @UnstableApi
 internal object Media3ItemFactory {
 
 
- // Content style enum mirrored from MediaConstants to keep builders; JVMtestable (no android.media.utils import in the data class).
+ // Content style hints surfaced to Android Auto / AAOS via Media3 MediaMetadata extras.
+ // The DESCRIPTION_* keys live on each MediaItem and tell the car/phone UI how to render
+ // the item (playable) or its children (browsable).
 
- enum class ContentStyle {
- LIST_ITEM,
- GRID_ITEM,
- }
+ private val BROWSABLE_GRID_STYLE_EXTRAS = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ),
+ )
+
+ private val PLAYABLE_LIST_STYLE_EXTRAS = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_PLAYABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ),
+ )
 
 
- // Perentity extras: a pure data class that the service converts to a; real android.os.Bundle via [toBundle] at the call site.
+ // Per-entity extras: a pure data class that the service converts to a
+ // real android.os.Bundle via [toBundle] at the call site.
 
  data class Extras(
  val stringEntries: Map<String, String> = emptyMap(),
@@ -40,23 +68,25 @@ internal object Media3ItemFactory {
  }
 
  /**
- * — additive helper for the recently-played tab. Returns
- * a copy of the receiver with [key] -> [value] appended to the
- * `longEntries` map. Used to layer the `PLAYED_AT` timestamp
- * extra on top of the standard [songExtras] (so the
- * recently-played row carries the per-entity display contract
- * *plus* the play-time hint for the "X minutes ago" style label
- * AAOS can render).
- *
- * 26i — was a top-level extension function
- * `internal fun Extras.withLong(...)` in the legacy
- * `MediaItemFactory.kt`; the 26i inlining promoted it to a
- * member function so the JVM tests can call it as a regular
- * method (`base.withLong(...)` works inside the
- * `Media3ItemFactory` companion).
+ * Additive helper for the recently-played tab. Returns a copy of the receiver with
+ * [key] -> [value] appended to the `longEntries` map. Used to layer the `PLAYED_AT`
+ * timestamp extra on top of the standard [songExtras] so the recently-played row carries
+ * the per-entity display contract *plus* the play-time hint for the "X minutes ago" style
+ * label AAOS can render.
  */
  fun withLong(key: String, value: Long): Extras =
  copy(longEntries = longEntries + (key to value))
+
+ /**
+ * Merge another [Extras] on top of this one. Entries in [overlay] take precedence,
+ * which lets callers override default content-style hints (e.g. a Songs tab overriding
+ * the default grid style with a list style).
+ */
+ fun merge(overlay: Extras): Extras = Extras(
+ stringEntries = stringEntries + overlay.stringEntries,
+ longEntries = longEntries + overlay.longEntries,
+ intEntries = intEntries + overlay.intEntries,
+ )
 
  companion object {
  val EMPTY = Extras()
@@ -64,17 +94,41 @@ internal object Media3ItemFactory {
  }
 
  // ---- Tab-level content-style + searchability hints.
+ //
+ // `DESCRIPTION_EXTRAS_KEY_CONTENT_STYLE_BROWSABLE` tells the car/phone media UI how
+ // to display the *children* of this browsable tab. Songs are long lists → LIST_ITEM;
+ // folders (albums, artists, genres, playlists) render better as GRID_ITEM.
 
- fun songsTabExtras() = Extras()
+ fun songsTabExtras() = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ),
+ )
  fun albumsTabExtras() = Extras(
  intEntries = mapOf(
  MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
  MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
  ),
  )
- fun artistsTabExtras() = Extras()
- fun genresTabExtras() = Extras()
- fun playlistsTabExtras() = Extras()
+ fun artistsTabExtras() = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ),
+ )
+ fun genresTabExtras() = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ),
+ )
+ fun playlistsTabExtras() = Extras(
+ intEntries = mapOf(
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_GRID_ITEM,
+ ),
+ )
  /**
  * — the "Recently played" root tab carries the
  * searchability hint at the description-extras level. The
@@ -88,17 +142,25 @@ internal object Media3ItemFactory {
  * convention is the documented fallback.
  */
  fun recentTabExtras() = Extras(
- intEntries = mapOf("android.media.browse.SEARCH_SUPPORTED" to 1),
+ intEntries = mapOf(
+ "android.media.browse.SEARCH_SUPPORTED" to 1,
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ),
  )
  fun recentEmptyExtras() = Extras(
- intEntries = mapOf("android.media.browse.SEARCH_SUPPORTED" to 1),
+ intEntries = mapOf(
+ "android.media.browse.SEARCH_SUPPORTED" to 1,
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ),
  )
 
  /**
  * Pure helper that produces the per-entity [Extras] for a placeholder /
  * empty-state / error MediaItem. Three reasons are surfaced
  * (per the plan+ the legacy
- * `KordXMediaBrowserService.placeholderItem` contract):
+ * `legacy MediaBrowserServiceCompat.placeholderItem` contract):
  *
  * - [KordXMediaSessionConstants.EMPTY_REASON_NO_SONGS]
  * (`"no_songs"`): the library has zero songs.
@@ -181,11 +243,11 @@ internal object Media3ItemFactory {
  "TRACK_COUNT" to album.numberOfTracks,
  )
  (album.startYear ?: album.endYear)?.let { intEntries["YEAR"] = it }
+ // Album drill-downs contain songs, so render them as a list.
+ intEntries[MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE] =
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM
  return Extras(
- stringEntries = mapOf(
- "ALBUM_ARTIST" to albumArtist,
- "CONTENT_STYLE_GRID_ITEM" to "GRID_ITEM",
- ),
+ stringEntries = mapOf("ALBUM_ARTIST" to albumArtist),
  intEntries = intEntries,
  )
  }
@@ -194,16 +256,24 @@ internal object Media3ItemFactory {
  intEntries = mapOf(
  "ALBUM_COUNT" to albumArtist.numberOfAlbums,
  "SONG_COUNT" to albumArtist.numberOfTracks,
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
  ),
  )
 
  fun genreExtras(genre: Genre): Extras = Extras(
- intEntries = mapOf("SONG_COUNT" to genre.numberOfTracks),
+ intEntries = mapOf(
+ "SONG_COUNT" to genre.numberOfTracks,
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
+ ),
  )
 
  fun playlistExtras(playlist: Playlist, createdAt: Long? = null): Extras {
  val intEntries = mutableMapOf<String, Int>(
  "SONG_COUNT" to playlist.numberOfTracks,
+ MediaConstants.EXTRAS_KEY_CONTENT_STYLE_BROWSABLE to
+ MediaConstants.EXTRAS_VALUE_CONTENT_STYLE_LIST_ITEM,
  )
  val longEntries = mutableMapOf<String, Long>()
  createdAt?.let { longEntries["CREATED_AT"] = it }
@@ -239,11 +309,9 @@ internal object Media3ItemFactory {
  "${playlist.numberOfTracks} songs"
 
  /**
- * Convenience wrapper for [Extras.withLong] used by the
- * recently-played tab to layer the `PLAYED_AT` timestamp
- * extra on top of the standard [songExtras]. Mirrors the
- * legacy `MediaItemFactory.songExtrasWithPlayedAt` helper
- * (26i inlined the legacy `MediaItemFactory` here).
+ * Convenience wrapper for [Extras.withLong] used by the recently-played tab to layer the
+ * `PLAYED_AT` timestamp extra on top of the standard [songExtras]. Mirrors the legacy
+ * `MediaItemFactory.songExtrasWithPlayedAt` helper.
  */
  fun songExtrasWithPlayedAt(
  song: Song,
@@ -278,6 +346,8 @@ internal object Media3ItemFactory {
  mediaType: Int = MediaMetadata.MEDIA_TYPE_FOLDER_MIXED,
  extras: Extras = Extras.EMPTY,
  ): MediaItem {
+ // Browsable items default to grid presentation; callers can override via [extras].
+ val resolvedExtras = BROWSABLE_GRID_STYLE_EXTRAS.merge(extras)
  val metadata = MediaMetadata.Builder()
  .setTitle(title)
  .setIsBrowsable(true)
@@ -287,8 +357,8 @@ internal object Media3ItemFactory {
  subtitle?.let { builder.setSubtitle(it) }
  description?.let { builder.setDescription(it) }
  iconUri?.let { builder.setArtworkUri(it) }
- if (extras != Extras.EMPTY) {
- builder.setExtras(extras.toBundle())
+ if (resolvedExtras != Extras.EMPTY) {
+ builder.setExtras(resolvedExtras.toBundle())
  }
  }
  .build()
@@ -316,6 +386,8 @@ internal object Media3ItemFactory {
  mediaType: Int = MediaMetadata.MEDIA_TYPE_MUSIC,
  extras: Extras = Extras.EMPTY,
  ): MediaItem {
+ // Playable items default to list-row presentation; callers can override via [extras].
+ val resolvedExtras = PLAYABLE_LIST_STYLE_EXTRAS.merge(extras)
  val metadata = MediaMetadata.Builder()
  .setTitle(title)
  .setIsBrowsable(false)
@@ -325,8 +397,8 @@ internal object Media3ItemFactory {
  subtitle?.let { builder.setSubtitle(it) }
  description?.let { builder.setDescription(it) }
  iconUri?.let { builder.setArtworkUri(it) }
- if (extras != Extras.EMPTY) {
- builder.setExtras(extras.toBundle())
+ if (resolvedExtras != Extras.EMPTY) {
+ builder.setExtras(resolvedExtras.toBundle())
  }
  }
  .build()
@@ -373,7 +445,10 @@ internal object Media3ItemFactory {
  }
 
 
- // Perentity adapters: take a live Song/Album/etc. and produce; the corresponding Media3 MediaItem with the full display; contract. These are the entry points the new; KordXMediaLibraryService.MediaLibrarySession.Callback uses; to build the browse tree.
+ // Per-entity adapters: take a live Song/Album/etc. and produce the
+ // corresponding Media3 MediaItem with the full display contract. These are
+ // the entry points the new KordXMediaLibraryService.MediaLibrarySession.Callback
+ // uses to build the browse tree.
 
  /**
  * Browsable tab MediaItem for the 6 root tabs (Songs / Albums /
@@ -421,7 +496,7 @@ internal object Media3ItemFactory {
  /**
  * Browsable MediaItem for a single albumArtist (the "Artists"
  * tab is album-artists, not song-artists — matches the legacy
- * `KordXMediaBrowserService` contract).
+ * `legacy MediaBrowserServiceCompat` contract).
  */
  fun browsableAlbumArtist(
  id: String,

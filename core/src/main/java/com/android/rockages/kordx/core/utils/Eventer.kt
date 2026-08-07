@@ -4,7 +4,10 @@ typealias EventSubscriber<T> = (T) -> Unit
 typealias EventUnsubscribeFn = () -> Unit
 
 class Eventer<T> {
- private val subscribers = mutableListOf<EventSubscriber<T>>()
+ // CopyOnWriteArrayList (via concurrentListOf): subscribe/unsubscribe during
+ // dispatch must not throw ConcurrentModificationException — dispatchers and
+ // subscribers routinely run on different threads (player callbacks vs UI).
+ private val subscribers = concurrentListOf<EventSubscriber<T>>()
 
  fun subscribe(subscriber: EventSubscriber<T>): EventUnsubscribeFn {
  subscribers.add(subscriber)

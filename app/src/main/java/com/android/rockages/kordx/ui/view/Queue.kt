@@ -55,7 +55,7 @@ fun QueueView(context: ViewContext) {
  val coroutineScope = rememberCoroutineScope()
  val queue by context.kordx.radio.observatory.queue.collectAsState()
  val queueIndex by context.kordx.radio.observatory.queueIndex.collectAsState()
- val selectedSongIndices = remember { mutableStateListOf<Int>() }
+ val selectedSongIds = remember { mutableStateListOf<String>() }
  val listState = rememberLazyListState(
  initialFirstVisibleItemIndex = queueIndex,
  )
@@ -90,10 +90,10 @@ fun QueueView(context: ViewContext) {
  },
  actions = {
  when {
- selectedSongIndices.isNotEmpty() -> IconButton(
+ selectedSongIds.isNotEmpty() -> IconButton(
  onClick = {
- context.kordx.radio.queue.remove(selectedSongIndices.toList())
- selectedSongIndices.clear()
+ context.kordx.radio.queue.removeByIds(selectedSongIds.toList())
+ selectedSongIds.clear()
  }
  ) {
  Icon(Icons.Filled.Delete, null)
@@ -111,7 +111,7 @@ fun QueueView(context: ViewContext) {
  IconButton(
  onClick = {
  context.kordx.radio.stop(ended = true)
- selectedSongIndices.clear()
+ selectedSongIds.clear()
  }
  ) {
  Icon(Icons.Filled.ClearAll, null)
@@ -131,7 +131,7 @@ fun QueueView(context: ViewContext) {
  LazyColumn(state = listState) {
  itemsIndexed(
  queue,
- key = { i, id -> "$i-$id" },
+ key = { _, id -> id },
  contentType = { _, _ -> Groove.Kind.SONG },
  ) { i, songId ->
  context.kordx.groove.song.get(songId)?.let { song ->
@@ -143,12 +143,12 @@ fun QueueView(context: ViewContext) {
  highlighted = i == queueIndex,
  leading = {
  Checkbox(
- checked = selectedSongIndices.contains(i),
+ checked = selectedSongIds.contains(songId),
  onCheckedChange = {
- if (selectedSongIndices.contains(i)) {
- selectedSongIndices.remove(i)
+ if (selectedSongIds.contains(songId)) {
+ selectedSongIds.remove(songId)
  } else {
- selectedSongIndices.add(i)
+ selectedSongIds.add(songId)
  }
  },
  modifier = Modifier.offset((-4).dp)

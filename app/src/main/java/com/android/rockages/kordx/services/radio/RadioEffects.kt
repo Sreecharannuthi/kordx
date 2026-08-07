@@ -1,5 +1,6 @@
 package com.android.rockages.kordx.services.radio
 
+import com.android.rockages.kordx.core.utils.Logger
 import java.util.Timer
 import kotlin.math.max
 import kotlin.math.min
@@ -23,13 +24,20 @@ object RadioEffects {
 
  private var timer: Timer? = null
  private var ended = false
+ private val lock = Any()
 
  fun start() {
+ Logger.debug(
+ "RadioEffects",
+ "fader start: from=${options.from} to=${options.to} duration=${options.duration}ms"
+ )
  val increments =
  (options.to - options.from) * (options.interval.toFloat() / options.duration)
  var volume = options.from
  val isReverse = options.to < options.from
  timer = kotlin.concurrent.timer(period = options.interval.toLong()) {
+ synchronized(lock) {
+ if (ended) return@timer
  if (volume != options.to) {
  onUpdate(volume)
  volume = when {
@@ -43,10 +51,17 @@ object RadioEffects {
  }
  }
  }
+ }
 
  fun stop() {
- if (!ended) onFinish(false)
+ synchronized(lock) {
+ if (!ended) {
+ Logger.debug("RadioEffects", "fader stopped before completion")
+ ended = true
+ onFinish(false)
+ }
  destroy()
+ }
  }
 
  private fun destroy() {

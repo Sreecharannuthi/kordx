@@ -9,5 +9,6 @@
     <ID>SpreadOperator:SimplePath.kt$SimplePath$(*subParts)</ID>
     <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$name' already exists")</ID>
     <ID>TooGenericExceptionThrown:SimpleFileSystem.kt$SimpleFileSystem.Folder$throw Exception("Child '$x' is not a folder")</ID>
+    <ID>UnusedPrivateProperty:List.kt$i</ID>
   </CurrentIssues>
 </SmellBaseline>

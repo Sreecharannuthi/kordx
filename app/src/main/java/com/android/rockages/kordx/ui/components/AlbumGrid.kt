@@ -1,5 +1,6 @@
 package com.android.rockages.kordx.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import com.android.rockages.kordx.services.groove.Groove
 import com.android.rockages.kordx.services.groove.repositories.AlbumRepository
 import com.android.rockages.kordx.ui.helpers.ViewContext
@@ -79,11 +81,13 @@ fun AlbumGrid(
  else -> ResponsiveGrid(gridColumns) {
  itemsIndexed(
  sortedAlbumIds,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.ALBUM }
  ) { _, albumId ->
  context.kordx.groove.album.get(albumId)?.let { album ->
+ Box(modifier = Modifier.animateItem()) {
  AlbumTile(context, album)
+ }
  }
  }
  }

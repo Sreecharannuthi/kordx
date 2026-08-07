@@ -16,6 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -42,8 +45,16 @@ fun ScaffoldDialog(
  onDismissRequest: () -> Unit,
 ) {
  val configuration = LocalConfiguration.current
+ val openAt = remember { mutableStateOf(0L) }
+ LaunchedEffect(Unit) { openAt.value = System.currentTimeMillis() }
 
- Dialog(onDismissRequest = onDismissRequest) {
+ val guardedDismiss = {
+  if (System.currentTimeMillis() - openAt.value >= 250L) {
+   onDismissRequest()
+  }
+ }
+
+ Dialog(onDismissRequest = guardedDismiss) {
  Surface(
  shape = RoundedCornerShape(12.dp),
  modifier = Modifier.run {

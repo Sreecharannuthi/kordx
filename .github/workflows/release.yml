@@ -5,10 +5,11 @@
 #   1. Decodes the release keystore from the `KEYSTORE_BASE64` secret
 #      into a .jks file on the ephemeral runner.
 #   2. Writes `app/keystore.properties` from the 3 password/alias secrets.
-#   3. Runs `./gradlew :app:assembleRelease` (produces 5 APKs:
+#   3. Runs JVM unit tests + lintDebug + detekt as a release gate.
+#   4. Runs `./gradlew :app:assembleRelease` (produces 5 APKs:
 #      1 universal + 4 per-ABI splits).
-#   4. Verifies every APK is signed with the release key.
-#   5. Creates the GitHub Release and attaches the 5 APKs.
+#   5. Verifies every APK is signed with the release key.
+#   6. Creates the GitHub Release and attaches the 5 APKs.
 #
 # Required GitHub Secrets (set by the repo owner in
 # Settings → Secrets and variables → Actions):
@@ -17,7 +18,7 @@
 #   - KEY_ALIAS         : the key alias inside the .jks
 #   - KEY_PASSWORD      : the key password
 #
-# See docs/RELEASING.md for the full maintainer runbook (keystore
+# See specs/RELEASING.md for the full maintainer runbook (keystore
 # generation, manual upload fallback, version-bump policy).
 
 name: Release
@@ -50,23 +51,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@d7793b545071e98d581d3bf084a51c3213318a07 # v4
         with:
           distribution: "temurin"
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
 
       - name: Install required SDK packages
         run: |
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3
         with:
           # Full read+write cache for release builds (no PR read-only
           # mode). The cache key is derived from the wrapper + version
@@ -77,6 +78,15 @@ jobs:
         # Defensive: the executable bit can be lost on Windows clones
         # or via git's CRLF normalization. Cheap and idempotent.
         run: chmod +x ./gradlew
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3
+
+      - name: JVM unit tests
+        run: ./gradlew :app:testDebugUnitTest :metaphony:testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Static analysis (lint debug + detekt)
+        run: ./gradlew :app:lintDebug detekt --no-daemon --stacktrace
 
       - name: Decode release keystore
         # Restore the .jks from the base64-encoded GitHub Secret. The

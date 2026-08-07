@@ -160,6 +160,7 @@ fun NowPlayingSettingsView(context: ViewContext) {
 fun NowPlayingControlsLayout.label(context: ViewContext) = when (this) {
  NowPlayingControlsLayout.CompactLeft -> context.kordx.t.CompactLeft
  NowPlayingControlsLayout.CompactRight -> context.kordx.t.CompactRight
+ NowPlayingControlsLayout.CompactCenter -> context.kordx.t.CompactCenter
  NowPlayingControlsLayout.Traditional -> context.kordx.t.Traditional
 }
 

@@ -1,6 +1,7 @@
 package com.android.rockages.kordx.services.groove
 
 import com.android.rockages.kordx.KordX
+import com.android.rockages.kordx.core.utils.Logger
 import com.android.rockages.kordx.services.groove.repositories.AlbumArtistRepository
 import com.android.rockages.kordx.services.groove.repositories.AlbumRepository
 import com.android.rockages.kordx.services.groove.repositories.ArtistRepository
@@ -10,10 +11,13 @@ import com.android.rockages.kordx.services.groove.repositories.RecentPlaysReposi
 import com.android.rockages.kordx.services.groove.repositories.SongFavoritesRepository
 import com.android.rockages.kordx.services.groove.repositories.SongRepository
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class Groove(private val kordx: KordX) : KordX.Hooks {
@@ -26,7 +30,11 @@ class Groove(private val kordx: KordX) : KordX.Hooks {
  PLAYLIST,
  }
 
- val coroutineScope = CoroutineScope(Dispatchers.Default)
+ val coroutineScope = CoroutineScope(
+     SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, throwable ->
+         Logger.error("Groove", "coroutine failed", throwable)
+     }
+ )
  var readyDeferred = CompletableDeferred<Boolean>()
 
  val exposer = MediaExposer(kordx)
@@ -92,5 +100,9 @@ class Groove(private val kordx: KordX) : KordX.Hooks {
  recentPlays.loadFromDatabase()
  readyDeferred.complete(true)
  }
+ }
+
+ override fun onKordXDestroy() {
+ coroutineScope.cancel()
  }
 }

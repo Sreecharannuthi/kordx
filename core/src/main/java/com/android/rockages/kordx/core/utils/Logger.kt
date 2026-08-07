@@ -5,6 +5,7 @@ import android.util.Log
 object Logger {
  private const val TAG = "KordXLogger"
 
+ fun debug(mod: String, text: String) = Log.d(TAG, "$mod: $text")
  fun warn(mod: String, text: String) = Log.w(TAG, "$mod: $text")
  fun warn(mod: String, text: String, throwable: Throwable) =
  warn(mod, joinTextThrowable(text, throwable))

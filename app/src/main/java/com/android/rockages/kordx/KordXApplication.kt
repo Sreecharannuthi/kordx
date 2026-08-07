@@ -16,6 +16,18 @@ class KordXApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Register the crash handler first — before the graph build — so
+        // Application-, service-, and Auto cold-start crashes are covered
+        // (previously registered in MainActivity.onCreate, too late for
+        // anything that crashes without a UI launch). Chains to the
+        // previously installed handler when the error screen can't start.
+        Thread.setDefaultUncaughtExceptionHandler(
+            KordXCrashHandler(
+                context = this,
+                mainThread = mainLooper.thread,
+                previous = Thread.getDefaultUncaughtExceptionHandler(),
+            )
+        )
         Logger.warn(LOG_TAG, "onCreate: building KordX graph")
         val kordx = KordX(this)
         kordx.emitReady()

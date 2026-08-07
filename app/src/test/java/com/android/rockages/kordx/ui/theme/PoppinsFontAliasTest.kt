@@ -91,12 +91,11 @@ class PoppinsFontAliasTest {
 
  // The `KordXTypography.all` map must still include all 5; builtin fonts. If the Poppins entry was accidentally; removed during the fix, this fails.
  val all = KordXTypography.all
- assertEquals(5, all.size, "Expected 5 built-in fonts")
+ assertEquals(4, all.size, "Expected 4 built-in fonts")
  assertTrue(KordXBuiltinFonts.Poppins.fontName in all)
  assertTrue(KordXBuiltinFonts.Roboto.fontName in all)
  assertTrue(KordXBuiltinFonts.Inter.fontName in all)
  assertTrue(KordXBuiltinFonts.DMSans.fontName in all)
- assertTrue(KordXBuiltinFonts.ProductSans.fontName in all)
  }
 
  @Test

@@ -17,259 +17,264 @@ open class _Translation(private val container: _Container) {
     )
 
     @Immutable
-    data class _Keys(
-        val UnknownSymbol: String,
-        val HelloThere: String,
-        val IntroductoryMessage: String,
-        val Songs: String,
-        val Artists: String,
-        val Albums: String,
-        val Settings: String,
-        val Details: String,
-        val Path: String,
-        val Filename: String,
-        val Size: String,
-        val DateAdded: String,
-        val LastModified: String,
-        val Length: String,
-        val Bitrate: String,
-        val TrackName: String,
-        val Artist: String,
-        val Album: String,
-        val AlbumArtist: String,
-        val Composer: String,
-        val NothingIsBeingPlayedRightNow: String,
-        val AddToQueue: String,
-        val Queue: String,
-        val PlayNext: String,
-        val NowPlaying: String,
-        val Language_: String,
-        val MaterialYou: String,
-        val System: String,
-        val Light: String,
-        val Dark: String,
-        val Black: String,
-        val ViewArtist: String,
-        val Title: String,
-        val Duration: String,
-        val Year: String,
-        val ViewAlbum: String,
-        val SearchYourMusic: String,
-        val NoResultsFound: String,
-        val AlbumCount: String,
-        val TrackCount: String,
-        val FilteringResults: String,
-        val Appearance: String,
-        val About: String,
-        val Github: String,
-        val Play: String,
-        val Previous: String,
-        val Next: String,
-        val Pause: String,
-        val Done: String,
-        val Groove: String,
-        val SongsFilterPattern: String,
-        val Reset: String,
-        val Theme: String,
-        val CheckForUpdates: String,
-        val Version: String,
-        val Shuffle: String,
-        val ShufflePlay: String,
-        val ViewAlbumArtist: String,
-        val Stop: String,
-        val All: String,
-        val FadePlaybackInOut: String,
-        val RequireAudioFocus: String,
-        val IgnoreAudioFocusLoss: String,
-        val Player: String,
-        val PlayOnHeadphonesConnect: String,
-        val PauseOnHeadphonesDisconnect: String,
-        val Genre: String,
-        val DamnThisIsSoEmpty: String,
-        val PrimaryColor: String,
-        val PlayAll: String,
-        val ForYou: String,
-        val SuggestedAlbums: String,
-        val SuggestedArtists: String,
-        val RecentlyAddedSongs: String,
-        val CollapseNowPlaying: String,
-        val ClearSongCache: String,
-        val SongCacheCleared: String,
-        val AlbumArtists: String,
-        val Genres: String,
-        val Cancel: String,
-        val HomeTabs: String,
-        val SelectAtleast2orAtmost5Tabs: String,
-        val Folders: String,
-        val Invisible: String,
-        val AlwaysVisible: String,
-        val VisibleWhenActive: String,
-        val BottomBarLabelVisibility: String,
-        val Playlists: String,
-        val NewPlaylist: String,
-        val ImportPlaylist: String,
-        val NoInAppPlaylistsFound: String,
-        val NoLocalPlaylistsFound: String,
-        val Custom: String,
-        val Playlist: String,
-        val AddSongs: String,
-        val AddToPlaylist: String,
-        val IsLocalPlaylist: String,
-        val Yes: String,
-        val No: String,
-        val ManageSongs: String,
-        val Delete: String,
-        val DeletePlaylist: String,
-        val TrackNumber: String,
-        val Tree: String,
-        val Loading: String,
-        val Name: String,
-        val AddFolder: String,
-        val BlacklistFolders: String,
-        val WhitelistFolders: String,
-        val PickFolder: String,
-        val InvalidM3UFile: String,
-        val Discord: String,
-        val Reddit: String,
-        val ReportAnIssue: String,
-        val NoFoldersFound: String,
-        val SleepTimer: String,
-        val Hours: String,
-        val Minutes: String,
-        val QuitAppOnEnd: String,
-        val Favorite: String,
-        val Unfavorite: String,
-        val BitDepth: String,
-        val SamplingRate: String,
-        val ShowAudioInformation: String,
-        val FastRewindDuration: String,
-        val FastForwardDuration: String,
-        val SuggestedAlbumArtists: String,
-        val AreYouSureThatYouWantToDeleteThisPlaylist: String,
-        val RemoveFromPlaylist: String,
-        val Speed: String,
-        val Pitch: String,
-        val PersistUntilQueueEnd: String,
-        val NoLyrics: String,
-        val FDroid: String,
-        val IzzyOnDroid: String,
-        val More: String,
-        val MiniPlayer: String,
-        val ShowTrackControls: String,
-        val ShowSeekControls: String,
-        val Font: String,
-        val Codec: String,
-        val ControlsLayout: String,
-        val CompactLeft: String,
-        val CompactRight: String,
-        val Traditional: String,
-        val Enabled: String,
-        val Disabled: String,
-        val ShowUpdateToast: String,
-        val PlaylistStoreLocation: String,
-        val AppBuiltIn: String,
-        val LocalStorage: String,
-        val PlayingXofY: String,
-        val UnknownArtistX: String,
-        val XSongs: String,
-        val XArtists: String,
-        val XAlbums: String,
-        val MadeByX: String,
-        val NewVersionAvailableX: String,
-        val XKbps: String,
-        val XSecs: String,
-        val UnknownGenreX: String,
-        val XGenres: String,
-        val XFoldersYFiles: String,
-        val XItems: String,
-        val XPlaylists: String,
-        val UnknownPlaylistX: String,
-        val XFolders: String,
-        val XBit: String,
-        val XKHz: String,
-        val SystemLightDark: String,
-        val SystemLightBlack: String,
-        val FontScale: String,
-        val ContentScale: String,
-        val ViewGenre: String,
-        val Interface: String,
-        val Rescan: String,
-        val Updates: String,
-        val Help: String,
-        val ShareSong: String,
-        val ShareFailedX: String,
-        val PauseOnCurrentSongEnd: String,
-        val Export: String,
-        val ExportFailedX: String,
-        val ExportedX: String,
-        val RenamePlaylist: String,
-        val Rename: String,
-        val Equalizer: String,
-        val LaunchingEqualizerFailedX: String,
-        val ConsiderContributing: String,
-        val Lyrics: String,
-        val LyricsLayout: String,
-        val Repeat: String,
-        val ReplaceArtwork: String,
-        val SeparatePage: String,
-        val UnknownAlbumX: String,
-        val CopiedXToClipboard: String,
-        val MiniPlayerTextMarquee: String,
-        val AddItem: String,
-        val ArtistTagValueSeparators: String,
-        val GenreTagValueSeparators: String,
-        val DiscNumber: String,
-        val Browser: String,
-        val Red: String,
-        val Orange: String,
-        val Amber: String,
-        val Yellow: String,
-        val Lime: String,
-        val Green: String,
-        val Emerald: String,
-        val Teal: String,
-        val Cyan: String,
-        val Sky: String,
-        val Blue: String,
-        val Indigo: String,
-        val Violet: String,
-        val Purple: String,
-        val Fuchsia: String,
-        val Pink: String,
-        val Rose: String,
-        val MediaFolders: String,
-        val Id: String,
-        val DiscTotal: String,
-        val Encoder: String,
-        val HintAddMediaFolders: String,
-        val XChannels: String,
-        val VBR: String,
-        val AudioChannels: String,
-        val Variable: String,
-        val MinimumBitrate: String,
-        val MaximumBitrate: String,
-        val Date: String,
-        val TotalSamples: String,
-        val Home: String,
-        val ArtworkQuality: String,
-        val Low: String,
-        val Medium: String,
-        val High: String,
-        val Loseless: String,
-        val UseMetaphonyMetadataDecoder: String,
-        val PlayStore: String,
-        val GaplessPlayback: String,
-        val GridColumns: String,
-        val CaseSensitiveSorting: String,
-        val KeepScreenAwakeOnLyrics: String,
-        val MinSongDurationFilter: String,
-        val RecentlyPlayed: String,
-        val NothingPlayedYet: String,
-        val NothingPlayedYetSubtitle: String,
-        val NoMusicYet: String,
-        val AddMediaFolders: String,
-        val Scanning: String,
-    )
+    @Suppress("UseDataClass")
+    class _Keys(private val values: Map<String, String>) {
+        val UnknownSymbol: String get() = values["UnknownSymbol"] ?: ""
+        val HelloThere: String get() = values["HelloThere"] ?: ""
+        val IntroductoryMessage: String get() = values["IntroductoryMessage"] ?: ""
+        val Songs: String get() = values["Songs"] ?: ""
+        val Artists: String get() = values["Artists"] ?: ""
+        val Albums: String get() = values["Albums"] ?: ""
+        val Settings: String get() = values["Settings"] ?: ""
+        val Details: String get() = values["Details"] ?: ""
+        val Path: String get() = values["Path"] ?: ""
+        val Filename: String get() = values["Filename"] ?: ""
+        val Size: String get() = values["Size"] ?: ""
+        val DateAdded: String get() = values["DateAdded"] ?: ""
+        val LastModified: String get() = values["LastModified"] ?: ""
+        val Length: String get() = values["Length"] ?: ""
+        val Bitrate: String get() = values["Bitrate"] ?: ""
+        val TrackName: String get() = values["TrackName"] ?: ""
+        val Artist: String get() = values["Artist"] ?: ""
+        val Album: String get() = values["Album"] ?: ""
+        val AlbumArtist: String get() = values["AlbumArtist"] ?: ""
+        val Composer: String get() = values["Composer"] ?: ""
+        val NothingIsBeingPlayedRightNow: String get() = values["NothingIsBeingPlayedRightNow"] ?: ""
+        val AddToQueue: String get() = values["AddToQueue"] ?: ""
+        val Queue: String get() = values["Queue"] ?: ""
+        val PlayNext: String get() = values["PlayNext"] ?: ""
+        val NowPlaying: String get() = values["NowPlaying"] ?: ""
+        val Language_: String get() = values["Language_"] ?: ""
+        val MaterialYou: String get() = values["MaterialYou"] ?: ""
+        val System: String get() = values["System"] ?: ""
+        val Light: String get() = values["Light"] ?: ""
+        val Dark: String get() = values["Dark"] ?: ""
+        val Black: String get() = values["Black"] ?: ""
+        val ViewArtist: String get() = values["ViewArtist"] ?: ""
+        val Title: String get() = values["Title"] ?: ""
+        val Duration: String get() = values["Duration"] ?: ""
+        val Year: String get() = values["Year"] ?: ""
+        val ViewAlbum: String get() = values["ViewAlbum"] ?: ""
+        val SearchYourMusic: String get() = values["SearchYourMusic"] ?: ""
+        val NoResultsFound: String get() = values["NoResultsFound"] ?: ""
+        val AlbumCount: String get() = values["AlbumCount"] ?: ""
+        val TrackCount: String get() = values["TrackCount"] ?: ""
+        val FilteringResults: String get() = values["FilteringResults"] ?: ""
+        val Appearance: String get() = values["Appearance"] ?: ""
+        val About: String get() = values["About"] ?: ""
+        val Github: String get() = values["Github"] ?: ""
+        val Play: String get() = values["Play"] ?: ""
+        val Previous: String get() = values["Previous"] ?: ""
+        val Next: String get() = values["Next"] ?: ""
+        val Pause: String get() = values["Pause"] ?: ""
+        val Done: String get() = values["Done"] ?: ""
+        val Groove: String get() = values["Groove"] ?: ""
+        val SongsFilterPattern: String get() = values["SongsFilterPattern"] ?: ""
+        val Reset: String get() = values["Reset"] ?: ""
+        val Theme: String get() = values["Theme"] ?: ""
+        val CheckForUpdates: String get() = values["CheckForUpdates"] ?: ""
+        val Version: String get() = values["Version"] ?: ""
+        val Shuffle: String get() = values["Shuffle"] ?: ""
+        val ShufflePlay: String get() = values["ShufflePlay"] ?: ""
+        val ViewAlbumArtist: String get() = values["ViewAlbumArtist"] ?: ""
+        val Stop: String get() = values["Stop"] ?: ""
+        val All: String get() = values["All"] ?: ""
+        val FadePlaybackInOut: String get() = values["FadePlaybackInOut"] ?: ""
+        val RequireAudioFocus: String get() = values["RequireAudioFocus"] ?: ""
+        val IgnoreAudioFocusLoss: String get() = values["IgnoreAudioFocusLoss"] ?: ""
+        val Player: String get() = values["Player"] ?: ""
+        val PlayOnHeadphonesConnect: String get() = values["PlayOnHeadphonesConnect"] ?: ""
+        val PauseOnHeadphonesDisconnect: String get() = values["PauseOnHeadphonesDisconnect"] ?: ""
+        val Genre: String get() = values["Genre"] ?: ""
+        val DamnThisIsSoEmpty: String get() = values["DamnThisIsSoEmpty"] ?: ""
+        val PrimaryColor: String get() = values["PrimaryColor"] ?: ""
+        val PlayAll: String get() = values["PlayAll"] ?: ""
+        val ForYou: String get() = values["ForYou"] ?: ""
+        val SuggestedAlbums: String get() = values["SuggestedAlbums"] ?: ""
+        val SuggestedArtists: String get() = values["SuggestedArtists"] ?: ""
+        val SuggestedSongs: String get() = values["SuggestedSongs"] ?: ""
+        val RecentlyAddedSongs: String get() = values["RecentlyAddedSongs"] ?: ""
+        val CollapseNowPlaying: String get() = values["CollapseNowPlaying"] ?: ""
+        val ClearSongCache: String get() = values["ClearSongCache"] ?: ""
+        val SongCacheCleared: String get() = values["SongCacheCleared"] ?: ""
+        val AlbumArtists: String get() = values["AlbumArtists"] ?: ""
+        val Genres: String get() = values["Genres"] ?: ""
+        val Cancel: String get() = values["Cancel"] ?: ""
+        val HomeTabs: String get() = values["HomeTabs"] ?: ""
+        val SelectAtleast2orAtmost5Tabs: String get() = values["SelectAtleast2orAtmost5Tabs"] ?: ""
+        val Folders: String get() = values["Folders"] ?: ""
+        val Invisible: String get() = values["Invisible"] ?: ""
+        val AlwaysVisible: String get() = values["AlwaysVisible"] ?: ""
+        val VisibleWhenActive: String get() = values["VisibleWhenActive"] ?: ""
+        val BottomBarLabelVisibility: String get() = values["BottomBarLabelVisibility"] ?: ""
+        val Playlists: String get() = values["Playlists"] ?: ""
+        val NewPlaylist: String get() = values["NewPlaylist"] ?: ""
+        val ImportPlaylist: String get() = values["ImportPlaylist"] ?: ""
+        val NoInAppPlaylistsFound: String get() = values["NoInAppPlaylistsFound"] ?: ""
+        val NoLocalPlaylistsFound: String get() = values["NoLocalPlaylistsFound"] ?: ""
+        val Custom: String get() = values["Custom"] ?: ""
+        val Playlist: String get() = values["Playlist"] ?: ""
+        val AddSongs: String get() = values["AddSongs"] ?: ""
+        val AddToPlaylist: String get() = values["AddToPlaylist"] ?: ""
+        val IsLocalPlaylist: String get() = values["IsLocalPlaylist"] ?: ""
+        val Yes: String get() = values["Yes"] ?: ""
+        val No: String get() = values["No"] ?: ""
+        val ManageSongs: String get() = values["ManageSongs"] ?: ""
+        val Delete: String get() = values["Delete"] ?: ""
+        val DeletePlaylist: String get() = values["DeletePlaylist"] ?: ""
+        val TrackNumber: String get() = values["TrackNumber"] ?: ""
+        val Tree: String get() = values["Tree"] ?: ""
+        val Loading: String get() = values["Loading"] ?: ""
+        val Name: String get() = values["Name"] ?: ""
+        val AddFolder: String get() = values["AddFolder"] ?: ""
+        val BlacklistFolders: String get() = values["BlacklistFolders"] ?: ""
+        val WhitelistFolders: String get() = values["WhitelistFolders"] ?: ""
+        val PickFolder: String get() = values["PickFolder"] ?: ""
+        val InvalidM3UFile: String get() = values["InvalidM3UFile"] ?: ""
+        val Discord: String get() = values["Discord"] ?: ""
+        val Reddit: String get() = values["Reddit"] ?: ""
+        val ReportAnIssue: String get() = values["ReportAnIssue"] ?: ""
+        val NoFoldersFound: String get() = values["NoFoldersFound"] ?: ""
+        val SleepTimer: String get() = values["SleepTimer"] ?: ""
+        val Hours: String get() = values["Hours"] ?: ""
+        val Minutes: String get() = values["Minutes"] ?: ""
+        val QuitAppOnEnd: String get() = values["QuitAppOnEnd"] ?: ""
+        val Favorite: String get() = values["Favorite"] ?: ""
+        val Unfavorite: String get() = values["Unfavorite"] ?: ""
+        val BitDepth: String get() = values["BitDepth"] ?: ""
+        val SamplingRate: String get() = values["SamplingRate"] ?: ""
+        val ShowAudioInformation: String get() = values["ShowAudioInformation"] ?: ""
+        val FastRewind: String get() = values["FastRewind"] ?: ""
+        val FastForward: String get() = values["FastForward"] ?: ""
+        val FastRewindDuration: String get() = values["FastRewindDuration"] ?: ""
+        val FastForwardDuration: String get() = values["FastForwardDuration"] ?: ""
+        val SuggestedAlbumArtists: String get() = values["SuggestedAlbumArtists"] ?: ""
+        val AreYouSureThatYouWantToDeleteThisPlaylist: String get() = values["AreYouSureThatYouWantToDeleteThisPlaylist"] ?: ""
+        val RemoveFromPlaylist: String get() = values["RemoveFromPlaylist"] ?: ""
+        val Speed: String get() = values["Speed"] ?: ""
+        val Pitch: String get() = values["Pitch"] ?: ""
+        val PersistUntilQueueEnd: String get() = values["PersistUntilQueueEnd"] ?: ""
+        val NoLyrics: String get() = values["NoLyrics"] ?: ""
+        val FDroid: String get() = values["FDroid"] ?: ""
+        val IzzyOnDroid: String get() = values["IzzyOnDroid"] ?: ""
+        val More: String get() = values["More"] ?: ""
+        val MiniPlayer: String get() = values["MiniPlayer"] ?: ""
+        val ShowTrackControls: String get() = values["ShowTrackControls"] ?: ""
+        val ShowSeekControls: String get() = values["ShowSeekControls"] ?: ""
+        val Font: String get() = values["Font"] ?: ""
+        val Codec: String get() = values["Codec"] ?: ""
+        val ControlsLayout: String get() = values["ControlsLayout"] ?: ""
+        val CompactLeft: String get() = values["CompactLeft"] ?: ""
+        val CompactRight: String get() = values["CompactRight"] ?: ""
+        val CompactCenter: String get() = values["CompactCenter"] ?: ""
+        val Traditional: String get() = values["Traditional"] ?: ""
+        val Enabled: String get() = values["Enabled"] ?: ""
+        val Disabled: String get() = values["Disabled"] ?: ""
+        val ShowUpdateToast: String get() = values["ShowUpdateToast"] ?: ""
+        val PlaylistStoreLocation: String get() = values["PlaylistStoreLocation"] ?: ""
+        val AppBuiltIn: String get() = values["AppBuiltIn"] ?: ""
+        val LocalStorage: String get() = values["LocalStorage"] ?: ""
+        val PlayingXofY: String get() = values["PlayingXofY"] ?: ""
+        val UnknownArtistX: String get() = values["UnknownArtistX"] ?: ""
+        val XSongs: String get() = values["XSongs"] ?: ""
+        val XArtists: String get() = values["XArtists"] ?: ""
+        val XAlbums: String get() = values["XAlbums"] ?: ""
+        val MadeByX: String get() = values["MadeByX"] ?: ""
+        val NewVersionAvailableX: String get() = values["NewVersionAvailableX"] ?: ""
+        val XKbps: String get() = values["XKbps"] ?: ""
+        val XSecs: String get() = values["XSecs"] ?: ""
+        val UnknownGenreX: String get() = values["UnknownGenreX"] ?: ""
+        val XGenres: String get() = values["XGenres"] ?: ""
+        val XFoldersYFiles: String get() = values["XFoldersYFiles"] ?: ""
+        val XItems: String get() = values["XItems"] ?: ""
+        val XPlaylists: String get() = values["XPlaylists"] ?: ""
+        val UnknownPlaylistX: String get() = values["UnknownPlaylistX"] ?: ""
+        val XFolders: String get() = values["XFolders"] ?: ""
+        val XBit: String get() = values["XBit"] ?: ""
+        val XKHz: String get() = values["XKHz"] ?: ""
+        val SystemLightDark: String get() = values["SystemLightDark"] ?: ""
+        val SystemLightBlack: String get() = values["SystemLightBlack"] ?: ""
+        val FontScale: String get() = values["FontScale"] ?: ""
+        val ContentScale: String get() = values["ContentScale"] ?: ""
+        val ViewGenre: String get() = values["ViewGenre"] ?: ""
+        val Interface: String get() = values["Interface"] ?: ""
+        val Rescan: String get() = values["Rescan"] ?: ""
+        val Updates: String get() = values["Updates"] ?: ""
+        val Help: String get() = values["Help"] ?: ""
+        val ShareSong: String get() = values["ShareSong"] ?: ""
+        val ShareFailedX: String get() = values["ShareFailedX"] ?: ""
+        val PauseOnCurrentSongEnd: String get() = values["PauseOnCurrentSongEnd"] ?: ""
+        val Export: String get() = values["Export"] ?: ""
+        val ExportFailedX: String get() = values["ExportFailedX"] ?: ""
+        val ExportedX: String get() = values["ExportedX"] ?: ""
+        val RenamePlaylist: String get() = values["RenamePlaylist"] ?: ""
+        val Rename: String get() = values["Rename"] ?: ""
+        val Equalizer: String get() = values["Equalizer"] ?: ""
+        val LaunchingEqualizerFailedX: String get() = values["LaunchingEqualizerFailedX"] ?: ""
+        val ConsiderContributing: String get() = values["ConsiderContributing"] ?: ""
+        val Lyrics: String get() = values["Lyrics"] ?: ""
+        val LyricsLayout: String get() = values["LyricsLayout"] ?: ""
+        val Repeat: String get() = values["Repeat"] ?: ""
+        val ReplaceArtwork: String get() = values["ReplaceArtwork"] ?: ""
+        val SeparatePage: String get() = values["SeparatePage"] ?: ""
+        val UnknownAlbumX: String get() = values["UnknownAlbumX"] ?: ""
+        val CopiedXToClipboard: String get() = values["CopiedXToClipboard"] ?: ""
+        val MiniPlayerTextMarquee: String get() = values["MiniPlayerTextMarquee"] ?: ""
+        val AddItem: String get() = values["AddItem"] ?: ""
+        val ArtistTagValueSeparators: String get() = values["ArtistTagValueSeparators"] ?: ""
+        val GenreTagValueSeparators: String get() = values["GenreTagValueSeparators"] ?: ""
+        val DiscNumber: String get() = values["DiscNumber"] ?: ""
+        val Browser: String get() = values["Browser"] ?: ""
+        val Red: String get() = values["Red"] ?: ""
+        val Orange: String get() = values["Orange"] ?: ""
+        val Amber: String get() = values["Amber"] ?: ""
+        val Yellow: String get() = values["Yellow"] ?: ""
+        val Lime: String get() = values["Lime"] ?: ""
+        val Green: String get() = values["Green"] ?: ""
+        val Emerald: String get() = values["Emerald"] ?: ""
+        val Teal: String get() = values["Teal"] ?: ""
+        val Cyan: String get() = values["Cyan"] ?: ""
+        val Sky: String get() = values["Sky"] ?: ""
+        val Blue: String get() = values["Blue"] ?: ""
+        val Indigo: String get() = values["Indigo"] ?: ""
+        val Violet: String get() = values["Violet"] ?: ""
+        val Purple: String get() = values["Purple"] ?: ""
+        val Fuchsia: String get() = values["Fuchsia"] ?: ""
+        val Pink: String get() = values["Pink"] ?: ""
+        val Rose: String get() = values["Rose"] ?: ""
+        val MediaFolders: String get() = values["MediaFolders"] ?: ""
+        val Id: String get() = values["Id"] ?: ""
+        val DiscTotal: String get() = values["DiscTotal"] ?: ""
+        val Encoder: String get() = values["Encoder"] ?: ""
+        val HintAddMediaFolders: String get() = values["HintAddMediaFolders"] ?: ""
+        val XChannels: String get() = values["XChannels"] ?: ""
+        val VBR: String get() = values["VBR"] ?: ""
+        val AudioChannels: String get() = values["AudioChannels"] ?: ""
+        val Variable: String get() = values["Variable"] ?: ""
+        val MinimumBitrate: String get() = values["MinimumBitrate"] ?: ""
+        val MaximumBitrate: String get() = values["MaximumBitrate"] ?: ""
+        val Date: String get() = values["Date"] ?: ""
+        val TotalSamples: String get() = values["TotalSamples"] ?: ""
+        val Home: String get() = values["Home"] ?: ""
+        val ArtworkQuality: String get() = values["ArtworkQuality"] ?: ""
+        val Low: String get() = values["Low"] ?: ""
+        val Medium: String get() = values["Medium"] ?: ""
+        val High: String get() = values["High"] ?: ""
+        val Loseless: String get() = values["Loseless"] ?: ""
+        val UseMetaphonyMetadataDecoder: String get() = values["UseMetaphonyMetadataDecoder"] ?: ""
+        val PlayStore: String get() = values["PlayStore"] ?: ""
+        val AutoResumePlayback: String get() = values["AutoResumePlayback"] ?: ""
+        val GridColumns: String get() = values["GridColumns"] ?: ""
+        val CaseSensitiveSorting: String get() = values["CaseSensitiveSorting"] ?: ""
+        val KeepScreenAwakeOnLyrics: String get() = values["KeepScreenAwakeOnLyrics"] ?: ""
+        val MinSongDurationFilter: String get() = values["MinSongDurationFilter"] ?: ""
+        val RecentlyPlayed: String get() = values["RecentlyPlayed"] ?: ""
+        val NothingPlayedYet: String get() = values["NothingPlayedYet"] ?: ""
+        val NothingPlayedYetSubtitle: String get() = values["NothingPlayedYetSubtitle"] ?: ""
+        val NoMusicYet: String get() = values["NoMusicYet"] ?: ""
+        val AddMediaFolders: String get() = values["AddMediaFolders"] ?: ""
+        val Scanning: String get() = values["Scanning"] ?: ""
+    }
 
     val LocaleDisplayName: String get() = container.locale.display
     val LocaleNativeName: String get() = container.locale.native
@@ -349,6 +354,7 @@ open class _Translation(private val container: _Container) {
     val ForYou: String get() = container.keys.ForYou
     val SuggestedAlbums: String get() = container.keys.SuggestedAlbums
     val SuggestedArtists: String get() = container.keys.SuggestedArtists
+    val SuggestedSongs: String get() = container.keys.SuggestedSongs
     val RecentlyAddedSongs: String get() = container.keys.RecentlyAddedSongs
     val CollapseNowPlaying: String get() = container.keys.CollapseNowPlaying
     val ClearSongCache: String get() = container.keys.ClearSongCache
@@ -400,6 +406,8 @@ open class _Translation(private val container: _Container) {
     val BitDepth: String get() = container.keys.BitDepth
     val SamplingRate: String get() = container.keys.SamplingRate
     val ShowAudioInformation: String get() = container.keys.ShowAudioInformation
+    val FastRewind: String get() = container.keys.FastRewind
+    val FastForward: String get() = container.keys.FastForward
     val FastRewindDuration: String get() = container.keys.FastRewindDuration
     val FastForwardDuration: String get() = container.keys.FastForwardDuration
     val SuggestedAlbumArtists: String get() = container.keys.SuggestedAlbumArtists
@@ -420,6 +428,7 @@ open class _Translation(private val container: _Container) {
     val ControlsLayout: String get() = container.keys.ControlsLayout
     val CompactLeft: String get() = container.keys.CompactLeft
     val CompactRight: String get() = container.keys.CompactRight
+    val CompactCenter: String get() = container.keys.CompactCenter
     val Traditional: String get() = container.keys.Traditional
     val Enabled: String get() = container.keys.Enabled
     val Disabled: String get() = container.keys.Disabled
@@ -491,7 +500,7 @@ open class _Translation(private val container: _Container) {
     val Loseless: String get() = container.keys.Loseless
     val UseMetaphonyMetadataDecoder: String get() = container.keys.UseMetaphonyMetadataDecoder
     val PlayStore: String get() = container.keys.PlayStore
-    val GaplessPlayback: String get() = container.keys.GaplessPlayback
+    val AutoResumePlayback: String get() = container.keys.AutoResumePlayback
     val GridColumns: String get() = container.keys.GridColumns
     val CaseSensitiveSorting: String get() = container.keys.CaseSensitiveSorting
     val KeepScreenAwakeOnLyrics: String get() = container.keys.KeepScreenAwakeOnLyrics

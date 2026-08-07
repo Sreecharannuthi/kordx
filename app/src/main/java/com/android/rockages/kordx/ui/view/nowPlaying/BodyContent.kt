@@ -4,11 +4,9 @@ import com.android.rockages.kordx.services.groove.toSamplingInfoString
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -31,24 +29,26 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.vector.ImageVector
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,7 +80,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  .togetherWith(FadeTransition.exitTransition())
  },
  ) { targetStateSong ->
- Column(modifier = Modifier.padding(defaultHorizontalPadding, 0.dp)) {
+ Column(modifier = Modifier.padding(defaultHorizontalPadding, 12.dp)) {
  Text(
  targetStateSong.title,
  style = MaterialTheme.typography.headlineSmall
@@ -136,7 +136,9 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  isFavorite -> Icon(
  Icons.Filled.Favorite,
 
- // `contentDescription` so; TalkBack / the a11y tree can identify; this favoritetoggle button.
+ // `contentDescription` so
+ // TalkBack / the a11y tree can identify
+ // this favorite-toggle button.
  context.kordx.t.Favorite,
  tint = MaterialTheme.colorScheme.primary,
  )
@@ -144,7 +146,9 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  else -> Icon(
  Icons.Filled.FavoriteBorder,
 
- // `contentDescription` so; TalkBack / the a11y tree can identify; this favoritetoggle button.
+ // `contentDescription` so
+ // TalkBack / the a11y tree can identify
+ // this favorite-toggle button.
  context.kordx.t.Favorite,
  )
  }
@@ -159,7 +163,9 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  Icon(
  Icons.Filled.MoreVert,
 
- // `contentDescription` so; TalkBack / the a11y tree can identify; this overflow menu button.
+ // `contentDescription` so
+ // TalkBack / the a11y tree can identify
+ // this overflow menu button.
  context.kordx.t.More,
  )
  SongDropdownMenu(
@@ -174,7 +180,7 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  }
  }
  }
- Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
+ Spacer(modifier = Modifier.height(4.dp))
  when (controlsLayout) {
  NowPlayingControlsLayout.CompactLeft -> NowPlayingCompactControls(
  context,
@@ -187,14 +193,18 @@ fun NowPlayingBodyContent(context: ViewContext, data: NowPlayingData) {
  modifier = Modifier.align(Alignment.End)
  )
 
+ NowPlayingControlsLayout.CompactCenter -> NowPlayingCompactCenteredControls(
+ context,
+ data = data,
+ )
+
  NowPlayingControlsLayout.Traditional -> NowPlayingTraditionalControls(
  context,
  data = data,
  )
  }
- Spacer(modifier = Modifier.height(defaultHorizontalPadding + 8.dp))
+ Spacer(modifier = Modifier.height(20.dp))
  NowPlayingSeekBar(context)
- Spacer(modifier = Modifier.height(defaultHorizontalPadding))
  }
  }
 }
@@ -246,6 +256,59 @@ fun NowPlayingCompactControls(
  color = NowPlayingControlButtonColor.Surface,
  ),
  )
+ }
+}
+
+@Composable
+fun NowPlayingCompactCenteredControls(context: ViewContext, data: NowPlayingData) {
+ Row(
+ modifier = Modifier
+ .padding(defaultHorizontalPadding, 0.dp)
+ .fillMaxWidth(),
+ horizontalArrangement = Arrangement.Center,
+ verticalAlignment = Alignment.CenterVertically,
+ ) {
+ Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+ NowPlayingSkipPreviousButton(
+ context,
+ data = data,
+ style = NowPlayingControlButtonStyle(
+ color = NowPlayingControlButtonColor.Surface,
+ ),
+ )
+ if (data.enableSeekControls) {
+ NowPlayingFastRewindButton(
+ context,
+ data = data,
+ style = NowPlayingControlButtonStyle(
+ color = NowPlayingControlButtonColor.Surface,
+ ),
+ )
+ }
+ NowPlayingPlayPauseButton(
+ context,
+ data = data,
+ style = NowPlayingControlButtonStyle(
+ color = NowPlayingControlButtonColor.Primary,
+ ),
+ )
+ if (data.enableSeekControls) {
+ NowPlayingFastForwardButton(
+ context,
+ data = data,
+ style = NowPlayingControlButtonStyle(
+ color = NowPlayingControlButtonColor.Surface,
+ ),
+ )
+ }
+ NowPlayingSkipNextButton(
+ context,
+ data = data,
+ style = NowPlayingControlButtonStyle(
+ color = NowPlayingControlButtonColor.Surface,
+ ),
+ )
+ }
  }
 }
 
@@ -329,9 +392,6 @@ fun NowPlayingSeekBar(context: ViewContext) {
  context.kordx.radio.seek((it * playbackPosition.total).toLong())
  seekRatio = null
  },
- onSeekCancel = {
- seekRatio = null
- },
  )
  }
  NowPlayingPlaybackPositionText(
@@ -341,105 +401,65 @@ fun NowPlayingSeekBar(context: ViewContext) {
  }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NowPlayingSeekBar(
  ratio: Float,
  onSeekStart: () -> Unit,
  onSeek: (Float) -> Unit,
  onSeekEnd: (Float) -> Unit,
- onSeekCancel: () -> Unit,
 ) {
- val sliderHeight = 12.dp
- val thumbSize = 12.dp
- val thumbSizeHalf = thumbSize.div(2)
  val trackHeight = 4.dp
+ val thumbSize = 12.dp
+ val trackCorner = trackHeight.div(2)
 
- var dragging by remember { mutableStateOf(false) }
- var dragRatio by remember { mutableFloatStateOf(0f) }
+ // M3 Slider, not a hand-rolled pointerInput bar: TalkBack gets
+ // progressBarRangeInfo + SetProgress for free (announces percent, swipe
+ // up/down adjusts), and the touch target meets 48dp. Custom thumb/track
+ // slots keep the original thin visual.
+ var dragRatio by remember { mutableStateOf<Float?>(null) }
 
- BoxWithConstraints(
- modifier = Modifier
- .fillMaxWidth()
- .height(sliderHeight),
- contentAlignment = Alignment.Center,
- ) {
- val sliderWidth = this@BoxWithConstraints.maxWidth
-
- Box(
- modifier = Modifier
- .height(sliderHeight)
- .fillMaxWidth()
- .pointerInput(Unit) {
- detectTapGestures(
- onTap = { offset ->
- val tapRatio = (offset.x / sliderWidth.toPx()).coerceIn(0f..1f)
- onSeekEnd(tapRatio)
- }
- )
- }
- .pointerInput(Unit) {
- var offsetX = 0f
- detectHorizontalDragGestures(
- onDragStart = { offset ->
- offsetX = offset.x
- dragging = true
- onSeekStart()
+ Slider(
+ value = dragRatio ?: ratio,
+ onValueChange = {
+ if (dragRatio == null) onSeekStart()
+ dragRatio = it
+ onSeek(it)
  },
- onDragEnd = {
- onSeekEnd(dragRatio)
- offsetX = 0f
- dragging = false
- dragRatio = 0f
+ onValueChangeFinished = {
+ dragRatio?.let(onSeekEnd)
+ dragRatio = null
  },
- onDragCancel = {
- onSeekCancel()
- offsetX = 0f
- dragging = false
- dragRatio = 0f
- },
- onHorizontalDrag = { pointer, dragAmount ->
- pointer.consume()
- offsetX += dragAmount
- dragRatio = (offsetX / sliderWidth.toPx()).coerceIn(0f..1f)
- onSeek(dragRatio)
- },
- )
- }
- )
- Box(
- modifier = Modifier
- .padding(thumbSizeHalf, 0.dp)
- .height(trackHeight)
- .fillMaxWidth()
- .background(
- MaterialTheme.colorScheme.surfaceVariant,
- RoundedCornerShape(thumbSizeHalf)
- )
- ) {
- Box(
- modifier = Modifier
- .height(trackHeight)
- .fillMaxWidth(if (dragging) dragRatio else ratio)
- .background(
- MaterialTheme.colorScheme.primary,
- RoundedCornerShape(thumbSizeHalf)
- )
- )
- }
- Box(modifier = Modifier.fillMaxWidth()) {
+ modifier = Modifier.fillMaxWidth(),
+ thumb = {
  Box(
  modifier = Modifier
  .size(thumbSize)
- .offset(
- sliderWidth
- .minus(thumbSizeHalf.times(2))
- .times(if (dragging) dragRatio else ratio),
- 0.dp
- )
  .background(MaterialTheme.colorScheme.primary, CircleShape)
  )
+ },
+ track = { sliderState ->
+ Box(
+ modifier = Modifier
+ .fillMaxWidth()
+ .height(trackHeight)
+ .background(
+ MaterialTheme.colorScheme.surfaceVariant,
+ RoundedCornerShape(trackCorner)
+ )
+ ) {
+ Box(
+ modifier = Modifier
+ .height(trackHeight)
+ .fillMaxWidth(sliderState.value)
+ .background(
+ MaterialTheme.colorScheme.primary,
+ RoundedCornerShape(trackCorner)
+ )
+ )
  }
- }
+ },
+ )
 }
 
 @Composable
@@ -475,6 +495,10 @@ private fun NowPlayingPlayPauseButton(
  !isPlaying -> Icons.Filled.PlayArrow
  else -> Icons.Filled.Pause
  },
+ contentDescription = when {
+ !isPlaying -> context.kordx.t.Play
+ else -> context.kordx.t.Pause
+ },
  onClick = {
  context.kordx.radio.shorty.playPause()
  }
@@ -492,6 +516,7 @@ private fun NowPlayingSkipPreviousButton(
  NowPlayingControlButton(
  style = style,
  icon = Icons.Filled.SkipPrevious,
+ contentDescription = context.kordx.t.Previous,
  onClick = {
  context.kordx.radio.shorty.previous()
  }
@@ -509,6 +534,7 @@ private fun NowPlayingSkipNextButton(
  NowPlayingControlButton(
  style = style,
  icon = Icons.Filled.SkipNext,
+ contentDescription = context.kordx.t.Next,
  onClick = {
  context.kordx.radio.shorty.skip()
  }
@@ -526,6 +552,7 @@ private fun NowPlayingFastRewindButton(
  NowPlayingControlButton(
  style = style,
  icon = Icons.Filled.FastRewind,
+ contentDescription = context.kordx.t.FastRewind,
  onClick = {
  context.kordx.radio.shorty
  .seekFromCurrent(-seekBackDuration)
@@ -544,6 +571,7 @@ private fun NowPlayingFastForwardButton(
  NowPlayingControlButton(
  style = style,
  icon = Icons.Filled.FastForward,
+ contentDescription = context.kordx.t.FastForward,
  onClick = {
  context.kordx.radio.shorty
  .seekFromCurrent(seekForwardDuration)
@@ -572,6 +600,7 @@ private data class NowPlayingControlButtonStyle(
 private fun NowPlayingControlButton(
  style: NowPlayingControlButtonStyle,
  icon: ImageVector,
+ contentDescription: String?,
  onClick: () -> Unit,
 ) {
  val backgroundColor = when (style.color) {
@@ -594,7 +623,7 @@ private fun NowPlayingControlButton(
  ) {
  Icon(
  icon,
- null,
+ contentDescription,
  tint = contentColor,
  modifier = Modifier.size(iconSize),
  )

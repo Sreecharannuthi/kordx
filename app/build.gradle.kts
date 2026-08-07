@@ -18,8 +18,8 @@ android {
         minSdk = libs.versions.min.sdk.get().toInt()
         targetSdk = libs.versions.target.sdk.get().toInt()
 
-        versionCode = 5
-        versionName = "1.1.3"
+        versionCode = 17
+        versionName = "1.6.6"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -156,6 +156,7 @@ dependencies {
     implementation(libs.media)
     implementation(libs.media3.session)
     implementation(libs.media3.common)
+    implementation(libs.media3.exoplayer)
     implementation(libs.okhttp3)
 
     debugImplementation(libs.compose.ui.tooling)

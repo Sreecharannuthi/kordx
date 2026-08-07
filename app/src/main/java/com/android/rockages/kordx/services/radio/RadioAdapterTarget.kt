@@ -2,7 +2,16 @@ package com.android.rockages.kordx.services.radio
 
 import com.android.rockages.kordx.core.utils.EventUnsubscribeFn
 
-/** Narrow adapter surface for [Radio]. Lets the [RadioForwardingPlayer] be JVM-testable with a hand-rolled fake (no `KordX`, no `Application`, no `Room`). The real [Radio] class implements this interface in its class header. Tests provide hand-rolled fakes. Kept in a separate file from [Radio] and [RadioForwardingPlayer] so the compilation order doesn't matter (Kotlin compiles file-by-file; if [RadioAdapterTarget] is in the same file as the consumer, the compiler may not see the interface declaration before the consumer's `override` modifiers). */
+/**
+ * Narrow adapter surface for [Radio]. Lets the [RadioForwardingPlayer] be
+ * JVM-testable with a hand-rolled fake (no `KordX`, no `Application`, no
+ * `Room`). The real [Radio] class implements this interface in its class
+ * header. Tests provide hand-rolled fakes. Kept in a separate file from
+ * [Radio] and [RadioForwardingPlayer] so the compilation order doesn't
+ * matter (Kotlin compiles file-by-file; if [RadioAdapterTarget] is in the
+ * same file as the consumer, the compiler may not see the interface
+ * declaration before the consumer's `override` modifiers).
+ */
 interface RadioAdapterTarget {
  val hasPlayer: Boolean
  val isPlaying: Boolean

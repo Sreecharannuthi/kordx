@@ -8,9 +8,9 @@
     <!--
        — repeat one (active state, "repeat current song").
       The "1" inside the repeat loop indicates the single-song repeat
-      mode. KordX brand cyan #00F0FF for the active state.
+      mode. KordX brand blue #4285F4 for the active state.
     -->
     <path
-        android:fillColor="#FF00F0FF"
+        android:fillColor="#FF4285F4"
         android:pathData="M7,7h10v3l4,-4 -4,-4v3L5,6v6h2L7,7zM17,17L7,17v-3l-4,4 4,4v-3h12v-6h-2v4zM13,8v8h-1.5L11,15h-1l0.5,-2L11,13h0.5L11.5,8L13,8z" />
 </vector>

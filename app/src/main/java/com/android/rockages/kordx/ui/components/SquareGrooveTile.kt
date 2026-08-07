@@ -1,6 +1,5 @@
 package com.android.rockages.kordx.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -20,7 +19,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +49,7 @@ fun SquareGrooveTile(
  colors = CardDefaults.cardColors(containerColor = Color.Transparent),
  onClick = onClick
  ) {
- Box(modifier = Modifier.padding(12.dp)) {
+ Box(modifier = Modifier.padding(4.dp)) {
  Column(horizontalAlignment = Alignment.CenterHorizontally) {
  Box {
  AsyncImage(
@@ -66,13 +64,18 @@ fun SquareGrooveTile(
  Box(
  modifier = Modifier
  .align(Alignment.TopEnd)
- .padding(top = 4.dp)
+ .padding(2.dp)
  ) {
  var showOptionsMenu by remember { mutableStateOf(false) }
  IconButton(
+ modifier = Modifier.size(32.dp),
  onClick = { showOptionsMenu = !showOptionsMenu }
  ) {
- Icon(Icons.Filled.MoreVert, null)
+ Icon(
+ Icons.Filled.MoreVert,
+ null,
+ modifier = Modifier.size(16.dp)
+ )
  options(showOptionsMenu) {
  showOptionsMenu = false
  }
@@ -81,18 +84,18 @@ fun SquareGrooveTile(
  Box(
  modifier = Modifier
  .align(Alignment.BottomStart)
- .padding(8.dp)
+ .padding(2.dp)
  ) {
  IconButton(
- modifier = Modifier
- .background(
- MaterialTheme.colorScheme.surface,
- RoundedCornerShape(12.dp)
- )
- .then(Modifier.size(36.dp)),
+ modifier = Modifier.size(32.dp),
  onClick = onPlay
  ) {
- Icon(Icons.Filled.PlayArrow, null)
+ Icon(
+ Icons.Filled.PlayArrow,
+ null,
+ modifier = Modifier.size(16.dp),
+ tint = Color.White,
+ )
  }
  }
  }

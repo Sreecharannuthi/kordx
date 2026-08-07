@@ -129,7 +129,7 @@ fun GenreGrid(
  else -> ResponsiveGrid(gridColumns) { gridData ->
  itemsIndexed(
  sortedGenreNames,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.GENRE }
  ) { i, genreName ->
  context.kordx.groove.genre.get(genreName)?.let { genre ->

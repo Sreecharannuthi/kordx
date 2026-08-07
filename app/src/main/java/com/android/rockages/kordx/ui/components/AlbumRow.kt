@@ -24,7 +24,7 @@ fun AlbumRow(context: ViewContext, albumIds: List<String>) {
  LazyRow {
  itemsIndexed(
  albumIds,
- key = { i, x -> "$i-$x" },
+ key = { _, x -> x },
  contentType = { _, _ -> Groove.Kind.ALBUM }
  ) { _, albumId ->
  context.kordx.groove.album.get(albumId)?.let { album ->

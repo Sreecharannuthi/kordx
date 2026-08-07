@@ -164,7 +164,11 @@ class MediaExposer(private val kordx: KordX) {
  cycle.lyricsCacheUnused.remove(song.id)
  explorer.addChildFile(path)
 
- // Repositories use ConcurrentHashMap + MutableStateFlow (both threadsafe),; so songs can be emitted on the IO dispatcher without a mainthread hop.; This avoids thousands of mainthread context switches during a scan and; keeps the UI responsive while the library is being indexed.
+ // Repositories use ConcurrentHashMap + MutableStateFlow (both
+ // thread-safe), so songs can be emitted on the IO dispatcher without a
+ // main-thread hop. This avoids thousands of main-thread context switches
+ // during a scan and keeps the UI responsive while the library is being
+ // indexed.
  emitSong(song)
  }
 
@@ -187,22 +191,29 @@ class MediaExposer(private val kordx: KordX) {
  }
 
  private suspend fun trimCache(cycle: ScanCycle) {
- try {
- kordx.database.songCache.delete(cycle.songCacheUnused)
- } catch (err: Exception) {
- Logger.warn("MediaExposer", "trim song cache failed", err)
- }
- for (x in cycle.artworkCacheUnused) {
- try {
- kordx.database.artworkCache.get(x).delete()
- } catch (err: Exception) {
- Logger.warn("MediaExposer", "delete artwork cache file failed", err)
- }
- }
- try {
- kordx.database.lyricsCache.delete(cycle.lyricsCacheUnused)
- } catch (err: Exception) {
- Logger.warn("MediaExposer", "trim lyrics cache failed", err)
+ withContext(Dispatchers.IO) {
+  try {
+   kordx.database.songCache.delete(cycle.songCacheUnused)
+  } catch (err: Exception) {
+   Logger.warn("MediaExposer", "trim song cache failed", err)
+  }
+  for (x in cycle.artworkCacheUnused) {
+   try {
+    kordx.database.artworkCache.get(x).delete()
+   } catch (err: Exception) {
+    Logger.warn("MediaExposer", "delete artwork cache file failed", err)
+   }
+  }
+  try {
+   kordx.database.lyricsCache.delete(cycle.lyricsCacheUnused)
+  } catch (err: Exception) {
+   Logger.warn("MediaExposer", "trim lyrics cache failed", err)
+  }
+  try {
+   kordx.database.artworkCache.evictToTarget()
+  } catch (err: Exception) {
+   Logger.warn("MediaExposer", "evict artwork cache failed", err)
+  }
  }
  }
 

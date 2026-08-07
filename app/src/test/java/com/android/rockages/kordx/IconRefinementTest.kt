@@ -1,7 +1,5 @@
 package com.android.rockages.kordx
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -93,9 +91,11 @@ class IconRefinementTest {
  }
 
  @Test
- fun activeStateIconsUseKordXCyan() {
+ fun activeStateIconsUseKordXBlue() {
 
- // refinement: the "active" state icons (shuffle on,; repeat on / repeat one) use the KordX brand cyan #FF00F0FF; instead of the offstate white #FFFFFFFF. This is the; visual signal for "this toggle is on".
+ // refinement: the "active" state icons (shuffle on,; repeat on / repeat one) use the KordX brand blue #FF4285F4
+ // (matched to icon.svg's vertical bar) instead of the off-state white #FFFFFFFF.
+ // This is the visual signal for "this toggle is on".
  val activeIcons = listOf(
  "ic_shuffle_active",
  "ic_repeat_active",
@@ -104,11 +104,11 @@ class IconRefinementTest {
  for (name in activeIcons) {
  val source = loadDrawable(name)
  assertTrue(
- source.contains("#FF00F0FF") || source.contains("#00F0FF"),
- "$name.xml should use the KordX brand cyan #FF00F0FF for the active state"
+ source.contains("#FF4285F4") || source.contains("#4285F4"),
+ "$name.xml should use the KordX brand blue #FF4285F4 for the active state"
  )
  assertTrue(
- !source.contains("#FFFFFFFF") || source.contains("fillColor=\"#FF00F0FF\""),
+ !source.contains("#FFFFFFFF") || source.contains("fillColor=\"#FF4285F4\""),
  "$name.xml should NOT use white fill (that's the off-state color)"
  )
  }
@@ -145,61 +145,64 @@ class IconRefinementTest {
  }
 
  @Test
- fun launcherForegroundHasRefinedKGeometry() {
+ fun launcherForegroundHasNewIconGeometry() {
 
- // refinement: the launcher foreground K is updated to match
- // the new assets/darklogo.svg design. The K vertical stem is at
- // x=60 (scaled to 60% of the 200px viewport), the upper diagonal
- // goes from (60,100) to (140,50), and the lower diagonal runs from
- // (140,150) back to (60,100) [via close-path]. The old "X" anchor
- // mark is replaced by a small 10×30dp rounded rectangular accent
- // block at (85,85).
+ // The launcher foreground now matches icon.svg: a vertical bar
+ // plus a play triangle. Both are drawn with 12dp strokes and
+ // scaled 70 % around the viewport center (100,100).
  val source = loadDrawable("ic_launcher_foreground")
- // The K vertical line should be at x=60.
+ // Vertical bar at x=60 from y=50 to y=150.
  assertTrue(
- source.contains("M60,50"),
- "ic_launcher_foreground.xml should have the K vertical line at x=60"
+ source.contains("M60,50L60,150"),
+ "ic_launcher_foreground.xml should have the vertical bar (icon.svg geometry)"
  )
- // The rectangular accent block replaces the old X anchor.
+ // Play triangle from (60,100) to (140,50) to (140,150).
  assertTrue(
- source.contains("M90,85") || source.contains("M85,85"),
- "ic_launcher_foreground.xml should have the new rectangular accent block"
+ source.contains("M60,100L140,50L140,150Z"),
+ "ic_launcher_foreground.xml should have the play triangle (icon.svg geometry)"
  )
- // The old "X" anchor mark (M96,96L104,104) is REMOVED.
+ // Old K geometry is removed.
+ assertTrue(
+ !source.contains("M90,85"),
+ "ic_launcher_foreground.xml should NOT have the old K accent block"
+ )
  assertTrue(
  !source.contains("M96,96L104,104"),
- "ic_launcher_foreground.xml should NOT have the old X anchor mark (replaced by rectangular accent)"
- )
- // The legacy "K dot accent" (the 12x12 rounded rect at the K
- // vertex) is still removed.
- assertTrue(
- !source.contains("M92,88L100,88"),
- "ic_launcher_foreground.xml should NOT have the legacy K dot accent"
+ "ic_launcher_foreground.xml should NOT have the old X anchor mark"
  )
  }
 
  @Test
- fun launcherForegroundLightHasWhiteBackground() {
+ fun launcherForegroundLightHasWhiteBackgroundAndBrandColors() {
 
- // The light variant (ic_launcher_foreground_light) is derived from
- // assets/lightlogo.svg and should use a white #FFFFFF background
- // with the same K geometry as the dark variant. It is used in the
- // Settings page and other light-theme contexts.
+ // The light variant (ic_launcher_foreground_light) uses a white
+ // #FFFFFF background with the same icon.svg geometry as the dark
+ // variant. It is used in the Settings page and other light-theme
+ // contexts.
  val source = loadDrawable("ic_launcher_foreground_light")
- // Should have the same K geometry as the dark variant.
+ // Should have the same icon.svg geometry as the dark variant.
  assertTrue(
- source.contains("M60,50"),
- "ic_launcher_foreground_light.xml should have the K vertical line at x=60"
+ source.contains("M60,50L60,150"),
+ "ic_launcher_foreground_light.xml should have the vertical bar (icon.svg geometry)"
+ )
+ assertTrue(
+ source.contains("M60,100L140,50L140,150Z"),
+ "ic_launcher_foreground_light.xml should have the play triangle (icon.svg geometry)"
  )
  // Should have a white background fill.
  assertTrue(
  source.contains("#FFFFFF"),
  "ic_launcher_foreground_light.xml should use white #FFFFFF background"
  )
- // Should still use brand cyan for the K.
+ // Should use the new brand blue for the vertical bar.
  assertTrue(
- source.contains("strokeColor=\"#00F0FF\""),
- "ic_launcher_foreground_light.xml should use brand cyan #00F0FF for the K"
+ source.contains("strokeColor=\"#4285F4\""),
+ "ic_launcher_foreground_light.xml should use brand blue #4285F4 for the vertical bar"
+ )
+ // Should use the new brand gold for the play triangle.
+ assertTrue(
+ source.contains("strokeColor=\"#FBBC05\""),
+ "ic_launcher_foreground_light.xml should use brand gold #FBBC05 for the play triangle"
  )
  }
 

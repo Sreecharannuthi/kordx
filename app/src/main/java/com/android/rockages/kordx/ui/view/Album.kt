@@ -6,23 +6,24 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,15 +34,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.android.rockages.kordx.core.groove.Album
-import com.android.rockages.kordx.ui.components.AlbumDropdownMenu
 import com.android.rockages.kordx.ui.components.AnimatedNowPlayingBottomBar
-import com.android.rockages.kordx.ui.components.GenericGrooveBanner
 import com.android.rockages.kordx.ui.components.IconButtonPlaceholder
 import com.android.rockages.kordx.ui.components.IconTextBody
 import com.android.rockages.kordx.ui.components.SongCardThumbnailLabelStyle
@@ -63,7 +65,7 @@ fun AlbumView(context: ViewContext, route: AlbumViewRoute) {
  derivedStateOf { context.kordx.groove.album.get(route.albumId) }
  }
  val songIds by remember(album, allSongIds) {
- derivedStateOf { album?.getSongIds(context.kordx) ?: listOf() }
+ derivedStateOf { album?.getSongIds(context.kordx) ?: emptyList() }
  }
  val isViable by remember(allAlbumIds) {
  derivedStateOf { allAlbumIds.contains(route.albumId) }
@@ -108,7 +110,9 @@ fun AlbumView(context: ViewContext, route: AlbumViewRoute) {
  type = SongListType.Album,
  leadingContent = {
  item {
- AlbumHero(context, album!!)
+ AlbumCompactHeader(context, album!!)
+ HorizontalDivider()
+ Spacer(modifier = Modifier.height(4.dp))
  }
  },
  cardThumbnailLabel = { _, song ->
@@ -125,43 +129,50 @@ fun AlbumView(context: ViewContext, route: AlbumViewRoute) {
  )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+/**
+ * Compact album header — small square artwork + name + artist + year/duration in a row.
+ * Replaces the full-width [GenericGrooveBanner] to keep the focus on the song list.
+ */
 @Composable
-private fun AlbumHero(context: ViewContext, album: Album) {
- GenericGrooveBanner(
- image = album.createArtworkImageRequest(context.kordx).build(),
- options = { expanded, onDismissRequest ->
- AlbumDropdownMenu(
- context,
- album,
- expanded = expanded,
- onDismissRequest = onDismissRequest,
+private fun AlbumCompactHeader(context: ViewContext, album: Album) {
+ Row(
+ verticalAlignment = Alignment.CenterVertically,
+ modifier = Modifier
+ .fillMaxWidth()
+ .padding(horizontal = 16.dp, vertical = 12.dp),
+ ) {
+ AsyncImage(
+ album.createArtworkImageRequest(context.kordx).build(),
+ null,
+ contentScale = ContentScale.Crop,
+ modifier = Modifier
+ .size(56.dp)
+ .clip(RoundedCornerShape(8.dp)),
  )
- },
- content = {
- Column {
- Text(album.name)
- if (album.artists.isNotEmpty()) {
- ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)) {
- FlowRow {
- album.artists.forEachIndexed { i, it ->
+ Spacer(modifier = Modifier.width(16.dp))
+ Column(modifier = Modifier.weight(1f)) {
  Text(
- it,
- maxLines = 2,
+ album.name,
+ style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+ maxLines = 1,
+ overflow = TextOverflow.Ellipsis,
+ )
+ if (album.artists.isNotEmpty()) {
+ Text(
+ album.artists.joinToString(", "),
+ style = MaterialTheme.typography.bodySmall,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
+ maxLines = 1,
  overflow = TextOverflow.Ellipsis,
  modifier = Modifier.pointerInput(Unit) {
  detectTapGestures { _ ->
+ // Navigate to first artist on tap
+ album.artists.firstOrNull()?.let {
  context.navController.navigate(ArtistViewRoute(it))
+ }
  }
  },
  )
- if (i != album.artists.size - 1) {
- Text(", ")
- }
- }
- }
- }
- Spacer(modifier = Modifier.height(2.dp))
  }
  Row(
  horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -169,23 +180,24 @@ private fun AlbumHero(context: ViewContext, album: Album) {
  ) {
  album.startYear?.let { startYear ->
  val endYear = album.endYear
-
  Text(
  when {
  endYear == null || startYear == endYear -> startYear.toString()
  else -> "$startYear - $endYear"
  },
- style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+ style = MaterialTheme.typography.labelMedium,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
  )
  CircleSeparator()
  }
  Text(
  album.duration.toString(),
- style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+ style = MaterialTheme.typography.labelMedium,
+ color = MaterialTheme.colorScheme.onSurfaceVariant,
  )
  }
  }
- })
+ }
 }
 
 @Composable

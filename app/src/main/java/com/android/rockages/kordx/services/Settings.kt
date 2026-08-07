@@ -120,6 +120,24 @@ class Settings(private val kordx: KordX) {
  }
  }
 
+ inner class EnumListEntry<T : Enum<T>>(
+ key: String,
+ values: EnumEntries<T>,
+ val defaultValue: List<T>,
+ ) : Entry<List<T>>(key) {
+ private val entries = values.associateBy { it.name }
+
+ override fun getValueInternal() = getSharedPreferences().getString(key, null)
+ ?.split(",")
+ ?.mapNotNull { entries[it] }
+ ?.filter { it in entries.values }
+ ?: defaultValue
+
+ override fun setValueInternal(value: List<T>) = getSharedPreferences().edit {
+ putString(key, value.joinToString(",") { it.name })
+ }
+ }
+
  val themeMode = EnumEntry("theme_mode", enumEntries<ThemeMode>(), ThemeMode.SYSTEM)
  val language = NullableStringEntry("language")
  val useMaterialYou = BooleanEntry("material_you", true)
@@ -269,10 +287,10 @@ class Settings(private val kordx: KordX) {
  val pauseOnHeadphonesDisconnect = BooleanEntry("pause_on_headphones_disconnect", true)
  val primaryColor = NullableStringEntry("primary_color")
  val fadePlaybackDuration = FloatEntry("fade_playback_duration", 1f)
- val homeTabs = EnumSetEntry(
+ val homeTabs = EnumListEntry(
  "home_tabs",
  enumEntries<HomePage>(),
- setOf(
+ listOf(
  HomePage.ForYou,
  HomePage.Songs,
  HomePage.Albums,
@@ -285,10 +303,10 @@ class Settings(private val kordx: KordX) {
  enumEntries<HomePageBottomBarLabelVisibility>(),
  HomePageBottomBarLabelVisibility.ALWAYS_VISIBLE,
  )
- val forYouContents = EnumSetEntry(
+ val forYouContents = EnumListEntry(
  "for_you_contents",
  enumEntries<ForYou>(),
- setOf(ForYou.Albums, ForYou.Artists),
+ listOf(ForYou.Albums, ForYou.Artists),
  )
  val blacklistFolders = StringSetEntry("blacklist_folders", emptySet())
  val whitelistFolders = StringSetEntry("whitelist_folders", emptySet())
@@ -296,14 +314,14 @@ class Settings(private val kordx: KordX) {
  val nowPlayingAdditionalInfo = BooleanEntry("show_now_playing_additional_info", true)
  val nowPlayingSeekControls = BooleanEntry("enable_seek_controls", false)
  val seekBackDuration = IntEntry("seek_back_duration", 15)
- val seekForwardDuration = IntEntry("seek_back_duration", 30)
+ val seekForwardDuration = IntEntry("seek_forward_duration", 30)
  val miniPlayerTrackControls = BooleanEntry("mini_player_extended_controls", false)
  val miniPlayerSeekControls = BooleanEntry("mini_player_seek_controls", false)
  val fontFamily = NullableStringEntry("font_family")
  val nowPlayingControlsLayout = EnumEntry(
  "now_playing_controls_layout",
  enumEntries<NowPlayingControlsLayout>(),
- NowPlayingControlsLayout.CompactLeft,
+ NowPlayingControlsLayout.CompactCenter,
  )
  // showUpdateToast removed.
  val fontScale = FloatEntry("font_scale", 1f)
@@ -333,9 +351,10 @@ class Settings(private val kordx: KordX) {
  ImagePreserver.Quality.Medium,
  )
  val useMetaphony = BooleanEntry("use_metaphony", true)
- val gaplessPlayback = BooleanEntry("gapless_playback", true)
+ val autoResumeOnLaunch = BooleanEntry("auto_resume_on_launch", false)
  val caseSensitiveSorting = BooleanEntry("case_sensitive_sorting", false)
  val lyricsKeepScreenAwake = BooleanEntry("lyrics_keep_screen_awake", true)
+ val showLyrics = BooleanEntry("show_lyrics", false)
 
  private fun getSharedPreferences() = kordx.applicationContext
  .getSharedPreferences("settings", Context.MODE_PRIVATE)

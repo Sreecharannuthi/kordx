@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
@@ -15,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.android.rockages.kordx.MainActivity
 import com.android.rockages.kordx.KordX
+import com.android.rockages.kordx.core.utils.Logger
 import com.android.rockages.kordx.ui.helpers.ScaleTransition
 import com.android.rockages.kordx.ui.helpers.SlideTransition
 import com.android.rockages.kordx.ui.helpers.ViewContext
@@ -38,6 +40,27 @@ import kotlinx.serialization.serializer
 @Composable
 fun BaseView(kordx: KordX, activity: MainActivity) {
  val navController = rememberNavController()
+
+ // Self-heal against an over-popped back stack: a rapid double
+ // system-back can pop past the start destination (androidx.navigation
+ // predictive-back race), leaving the back stack EMPTY — NavHost then
+ // composes nothing, the ComposeView measures 0x0, and the window shows
+ // a white screen while the process (and playback) stays alive. Detect
+ // the empty state and restore Home instead of stranding the user.
+ LaunchedEffect(navController) {
+ var sawEntry = false
+ navController.currentBackStackEntryFlow.collect { entry ->
+ if (entry != null) {
+ sawEntry = true
+ } else if (sawEntry) {
+ Logger.warn(
+ "BaseView",
+ "nav back stack empty (over-popped); restoring HomeViewRoute",
+ )
+ navController.navigate(HomeViewRoute)
+ }
+ }
+ }
  val context = remember {
  ViewContext(
  kordx = kordx,
@@ -115,7 +138,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  composable<T>(
  popEnterTransition = {
  when {
- isInitialRoute<SearchViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<NowPlayingViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<QueueViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
  isInitialRoute<LyricsViewRoute>() -> ScaleTransition.scaleUp.enterTransition()
@@ -124,7 +146,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  popExitTransition = {
  when {
- isInitialRoute<SearchViewRoute>() -> SlideTransition.slideUp.exitTransition()
  isInitialRoute<NowPlayingViewRoute>() -> SlideTransition.slideDown.exitTransition()
  isInitialRoute<QueueViewRoute>() -> SlideTransition.slideDown.exitTransition()
  isInitialRoute<LyricsViewRoute>() -> SlideTransition.slideDown.exitTransition()
@@ -133,7 +154,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  enterTransition = {
  when {
- isTargetRoute<SearchViewRoute>() -> SlideTransition.slideDown.enterTransition()
  isTargetRoute<NowPlayingViewRoute>() -> SlideTransition.slideUp.enterTransition()
  isTargetRoute<QueueViewRoute>() -> SlideTransition.slideUp.enterTransition()
  isTargetRoute<LyricsViewRoute>() -> SlideTransition.slideUp.enterTransition()
@@ -142,7 +162,6 @@ private inline fun <reified T : Any> NavGraphBuilder.baseComposable(
  },
  exitTransition = {
  when {
- isTargetRoute<SearchViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<NowPlayingViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<QueueViewRoute>() -> ScaleTransition.scaleDown.exitTransition()
  isTargetRoute<LyricsViewRoute>() -> ScaleTransition.scaleDown.exitTransition()

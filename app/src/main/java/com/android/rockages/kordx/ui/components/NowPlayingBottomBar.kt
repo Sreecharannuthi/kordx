@@ -22,11 +22,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
@@ -125,20 +127,32 @@ fun NowPlayingBottomBar(context: ViewContext, insetPadding: Boolean = true) {
  ) { currentPlayingSongTarget ->
  currentPlayingSongTarget?.let { currentSong ->
  Column {
- Box(
- modifier = Modifier
- .background(MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.25f))
- .height(2.dp)
- .fillMaxWidth()
- ) {
- Box(
- modifier = Modifier
- .align(Alignment.CenterStart)
- .background(MaterialTheme.colorScheme.surfaceTint)
- .fillMaxHeight()
- .fillMaxWidth(playbackPosition.ratio)
- )
- }
+     BoxWithConstraints(
+         modifier = Modifier
+             .fillMaxWidth()
+             .height(4.dp)
+             .padding(horizontal = 12.dp)
+             .clip(RoundedCornerShape(2.dp))
+             .background(MaterialTheme.colorScheme.surfaceVariant)
+     ) {
+         val progressWidth = maxWidth * playbackPosition.ratio.coerceIn(0f, 1f)
+         Box(
+             modifier = Modifier
+                 .width(progressWidth)
+                 .fillMaxHeight()
+                 .background(MaterialTheme.colorScheme.primary)
+         )
+         if (playbackPosition.ratio > 0.01f) {
+             Box(
+                 modifier = Modifier
+                     .offset(x = progressWidth - 4.dp)
+                     .size(8.dp)
+                     .clip(CircleShape)
+                     .background(MaterialTheme.colorScheme.primary)
+                     .align(Alignment.CenterStart)
+             )
+         }
+     }
  ElevatedCard(
  modifier = Modifier
  .fillMaxWidth()

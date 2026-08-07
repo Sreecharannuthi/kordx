@@ -155,6 +155,17 @@ naming:
   InvalidPackageDeclaration:
     active: true
     rootPackage: ""
+  # Translation.g.kt is generated from the i18n pipeline — its PascalCase
+  # keys intentionally violate naming. Exclude it at the rule level instead
+  # of carrying ~490 baseline suppressions (RV4).
+  ConstructorParameterNaming:
+    active: true
+    excludes:
+      - "**/Translation.g.kt"
+  VariableNaming:
+    active: true
+    excludes:
+      - "**/Translation.g.kt"
 
 # Rule sets disabled for now — add when the project is ready
 comments:
