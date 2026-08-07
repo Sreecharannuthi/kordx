@@ -8,14 +8,14 @@ as the usual Android Studio flow.
 | Tool            | Version                       | Notes                                   |
 |-----------------|-------------------------------|-----------------------------------------|
 | JDK             | 17                            | Set `JAVA_HOME` accordingly             |
-| Android SDK     | Platform 35 + build-tools 35  | `compileSdk` / `targetSdk` = 35         |
+| Android SDK     | Platform 36 + build-tools 36  | `compileSdk` = 36, `targetSdk` = 35    |
 | Android NDK     | r27 (`27.0.12077973`)         | Required by the native `metaphony` module |
 | CMake           | 3.22.1                        | Native build backend for `metaphony`    |
 | Gradle          | Wrapper-provided              | Use `./gradlew`; no global install needed |
 | Node.js         | 22                            | Optional — only to regenerate i18n assets locally |
 | Kotlin          | 2.1                           | Enforced by the version catalog         |
 
-`minSdk` is 31 (Android 12).
+`minSdk` is 31 (Android 12), `targetSdk` is 35, and `compileSdk` is 36.
 
 ## 1. Clone
 

@@ -5,6 +5,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Sreecharannuthi/kordx/ci.yml?branch=main&label=CI)](https://github.com/Sreecharannuthi/kordx/actions/workflows/ci.yml)
 [![Min SDK](https://img.shields.io/badge/min%20SDK-31%20(Android%2012)-3DDC84?logo=android&logoColor=white)]()
 [![Target SDK](https://img.shields.io/badge/target%20SDK-35-3DDC84?logo=android&logoColor=white)]()
+[![Compile SDK](https://img.shields.io/badge/compile%20SDK-36-3DDC84?logo=android&logoColor=white)]()
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF?logo=kotlin&logoColor=white)]()
 [![Compose](https://img.shields.io/badge/Jetpack%20Compose-1.7-4285F4?logo=jetpackcompose&logoColor=white)]()
 
@@ -94,14 +95,14 @@ responsibility:
 
 ## Tech Stack
 
-- **Language:** Kotlin 2.1 (official code style)
+- **Language:** Kotlin 2.1 (100% of GitHub-detected source; vendored C++ native code is excluded from language statistics)
 - **UI:** Jetpack Compose 1.7 / Material 3 1.3
 - **Persistence:** Room 2.6 (+ KSP)
-- **Media:** AndroidX Media3 1.7 (session / `ExoPlayer`) and AndroidX Media
+- **Media:** AndroidX Media3 1.10.1 (session / `ExoPlayer`) and AndroidX Media
 - **Metadata:** [taglib](https://taglib.org/) (vendored C++ via JNI in `metaphony`, with utfcpp)
 - **i18n:** TOML-based translation sources compiled to bundled JSON assets
 - **Build:** Gradle with a version catalog, detekt, and kover
-- **Minimum SDK:** 31 (Android 12) · **Target / Compile SDK:** 35
+- **Minimum SDK:** 31 (Android 12) · **Target SDK:** 35 · **Compile SDK:** 36
 
 ---
 
@@ -111,7 +112,7 @@ Prerequisites:
 
 - **Android Studio** (latest stable, Hedgehog or newer)
 - **JDK 17**
-- **Android SDK 35** (platform + build-tools) and the **Android NDK (r27)**
+- **Android SDK 36** (platform + build-tools; the app targets SDK 35) and the **Android NDK (r27)**
 - **CMake 3.22+** (required to build the native `metaphony` module)
 - **Node.js 22** (optional — only to regenerate i18n assets locally)
 
